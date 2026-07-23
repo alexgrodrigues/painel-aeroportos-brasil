@@ -3,168 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>painel-aeroportos-brasil</title>
-  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+  <title>Painel Aeroportos Brasil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root,[data-theme="light"]{--font-body:'General Sans',Inter,sans-serif;--font-display:'General Sans',Inter,sans-serif;--text-xs:clamp(.75rem,.7rem + .25vw,.875rem);--text-sm:clamp(.875rem,.8rem + .35vw,1rem);--text-base:clamp(1rem,.95rem + .25vw,1.125rem);--text-lg:clamp(1.125rem,1rem + .75vw,1.5rem);--text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);--space-2:.5rem;--space-3:.75rem;--space-4:1rem;--space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-12:3rem;--color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;--color-surface-offset:#f3f0ec;--color-border:#d4d1ca;--color-divider:#dcd9d5;--color-text:#28251d;--color-text-muted:#6d6a63;--color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-highlight:#cedcd8;--color-success:#437a22;--color-success-highlight:#d4dfcc;--color-notification:#a13544;--color-notification-highlight:#dececb;--shadow-sm:0 1px 2px rgb(0 0 0 / .06);--shadow-md:0 12px 32px rgb(0 0 0 / .08);--radius-md:.75rem;--radius-lg:1rem;--radius-full:999px;--transition:180ms cubic-bezier(.16,1,.3,1)}
-    [data-theme="dark"]{--color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;--color-surface-offset:#22211f;--color-border:#393836;--color-divider:#2a2826;--color-text:#e2e0dc;--color-text-muted:#aba79f;--color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;--color-success:#6daa45;--color-success-highlight:#3a4435;--color-notification:#dd6974;--color-notification-highlight:#574848;--shadow-sm:0 1px 2px rgb(0 0 0 / .22);--shadow-md:0 12px 32px rgb(0 0 0 / .36)}
-    *,:before,:after{box-sizing:border-box}html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;scroll-behavior:smooth}body{margin:0;min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);line-height:1.6;background:var(--color-bg);color:var(--color-text)}button,input,select{font:inherit;color:inherit}button{cursor:pointer}
-    .wrap{max-width:1340px;margin:0 auto;padding:var(--space-6)}.topbar{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;flex-wrap:wrap;margin-bottom:var(--space-8)}.brand{display:flex;gap:var(--space-4);align-items:flex-start}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--color-primary-highlight),var(--color-surface-offset));display:grid;place-items:center;border:1px solid var(--color-border);flex:0 0 auto}.logo svg{width:28px;height:28px;color:var(--color-primary)}.eyebrow{margin:0 0 .35rem 0;font-size:var(--text-xs);letter-spacing:.12em;text-transform:uppercase;color:var(--color-text-muted)}h1,h2,h3,p,pre{margin:0}h1{font-size:var(--text-xl);line-height:1.08}.subtitle{margin-top:.5rem;color:var(--color-text-muted);max-width:72ch}.toolbar{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}.btn,.theme-toggle{min-height:44px;padding:.85rem 1rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);box-shadow:var(--shadow-sm);transition:background var(--transition),border-color var(--transition),transform var(--transition)}.btn:hover,.theme-toggle:hover{transform:translateY(-1px);background:var(--color-surface-2)}.btn-primary{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.btn-primary:hover{background:var(--color-primary-hover)}
-    .hero,.panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}.hero,.panel{padding:var(--space-6)}.hero{margin-bottom:var(--space-8)}.stats{margin-top:var(--space-6);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-4)}.stat{padding:var(--space-4);border-radius:var(--radius-md);background:var(--color-surface-2);border:1px solid var(--color-border)}.stat dt{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:.25rem}.stat dd{margin:0;font-size:var(--text-lg);font-weight:700}
-    .controls{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr auto;gap:var(--space-4);align-items:end}.field label{display:block;font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:.35rem}.field input,.field select{width:100%;min-height:46px;padding:.8rem .9rem;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2)}.status-line{margin-top:var(--space-4);font-size:var(--text-sm);color:var(--color-text-muted)}
-    .notice{margin-top:var(--space-4);padding:1rem 1.1rem;border-radius:14px;border:1px solid var(--color-border);background:var(--color-surface-2)}.notice strong{display:block;margin-bottom:.25rem}.notice code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
-    .layout{display:grid;grid-template-columns:1.08fr .92fr;gap:var(--space-6);margin-top:var(--space-8)}.panel-head{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-5)}.panel-head p{color:var(--color-text-muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:860px}th,td{text-align:left;padding:1rem;border-bottom:1px solid var(--color-divider);vertical-align:top}th{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)}
-    .pill{display:inline-flex;align-items:center;justify-content:center;padding:.35rem .7rem;border-radius:var(--radius-full);font-weight:700;font-size:var(--text-xs);border:1px solid transparent}.status-good{background:var(--color-success-highlight);color:var(--color-success)}.status-alert{background:var(--color-notification-highlight);color:var(--color-notification)}.status-neutral{background:var(--color-surface-offset);color:var(--color-text-muted);border-color:var(--color-border)}
-    .cards{display:grid;gap:var(--space-4);max-height:1200px;overflow:auto;padding-right:.2rem}.airport-card{padding:var(--space-5);border-radius:var(--radius-md);background:var(--color-surface-2);border:1px solid var(--color-border)}.airport-card header{display:flex;justify-content:space-between;gap:var(--space-4);align-items:flex-start;margin-bottom:var(--space-4)}.airport-card h3{font-size:1.1rem;margin:.1rem 0 0 0}.muted{color:var(--color-text-muted)}.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-3);margin-bottom:var(--space-4)}.mini-grid div{padding:.85rem;border-radius:12px;background:var(--color-surface);border:1px solid var(--color-border)}.mini-grid dt{font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:.2rem}.mini-grid dd{margin:0;font-weight:600}.raw-block{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px solid var(--color-divider)}.raw-block h4{margin:0 0 .35rem 0;font-size:var(--text-xs);letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted)}.raw-block pre{white-space:pre-wrap;word-break:break-word;font-size:.85rem;line-height:1.5;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;padding:1rem;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    .empty,.loading{padding:var(--space-8);text-align:center;color:var(--color-text-muted);border:1px dashed var(--color-border);border-radius:var(--radius-md);background:var(--color-surface-2)}
-    @media (max-width: 1100px){.controls{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}} @media (max-width: 700px){.wrap{padding:var(--space-4)}.hero,.panel{padding:var(--space-4)}.controls,.stats,.mini-grid{grid-template-columns:1fr}table{min-width:720px}}
+    :root, [data-theme="light"] { --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-border:#d4d1ca; --color-divider:#dcd9d5; --color-text:#28251d; --color-text-muted:#6f6d68; --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-success:#437a22; --color-success-soft:#dbe8d3; --color-danger:#a13544; --color-danger-soft:#f0d9dd; --color-warning:#b07a00; --radius:20px; --shadow:0 10px 30px rgba(0,0,0,.08); }
+    [data-theme="dark"] { --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-border:#393836; --color-divider:#262523; --color-text:#e5e2dc; --color-text-muted:#aaa59d; --color-primary:#4f98a3; --color-primary-hover:#66adb8; --color-success:#7fba58; --color-success-soft:rgba(127,186,88,.15); --color-danger:#ef7d8f; --color-danger-soft:rgba(239,125,143,.16); --color-warning:#f0bd58; --shadow:0 10px 30px rgba(0,0,0,.35); }
+    *{box-sizing:border-box} body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.5} .shell{max-width:1240px;margin:0 auto;padding:24px} .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}.brand{display:flex;align-items:flex-start;gap:14px}.logo{width:44px;height:44px;border-radius:14px;background:var(--color-surface);border:1px solid var(--color-border);display:grid;place-items:center}.eyebrow{letter-spacing:.18em;text-transform:uppercase;color:var(--color-text-muted);font-size:.78rem}.brand h1,.section-title{margin:.2rem 0 .5rem}.brand h1{font-size:clamp(1.7rem,2.8vw,3rem);line-height:1.05}.lede,.section-copy,.footer-note{color:var(--color-text-muted)} .hero,.panel,.stat,.airport-card,.diagnostic,.empty,.table-wrap{background:linear-gradient(180deg,var(--color-surface),var(--color-surface-2));border:1px solid var(--color-border);box-shadow:var(--shadow)} .hero,.panel{padding:24px;border-radius:24px;margin-bottom:22px}.actions{display:flex;gap:12px;flex-wrap:wrap}.btn,.field{min-height:46px;border-radius:999px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);font:inherit}.btn{padding:0 18px;cursor:pointer}.btn-primary{background:var(--color-primary);border-color:var(--color-primary);color:#fff}.icon-btn{width:46px;padding:0}.grid{display:grid;gap:16px}.filters{grid-template-columns:2.1fr 1fr 1fr 1fr auto;margin-top:20px}.field{padding:0 14px;width:100%}.cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:18px}.stat{padding:18px;border-radius:18px}.stat-label{font-size:.82rem;text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted);margin-bottom:10px}.stat-value{font-size:2rem;font-weight:800;line-height:1}.stat-sub{margin-top:8px;color:var(--color-text-muted);font-size:.92rem}.diagnostic{margin-top:16px;padding:14px 16px;border-radius:14px}.diagnostic.error{border-color:color-mix(in srgb,var(--color-danger) 50%, var(--color-border));background:var(--color-danger-soft)}.diagnostic.ok{border-color:color-mix(in srgb,var(--color-success) 40%, var(--color-border));background:var(--color-success-soft)}.table-wrap{overflow:auto;border-radius:20px} table{width:100%;border-collapse:collapse;min-width:980px} th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--color-divider);vertical-align:top} th{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-muted);background:var(--color-surface-2)} .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:700;font-size:.84rem}.good{background:var(--color-success-soft);color:var(--color-success)}.bad{background:var(--color-danger-soft);color:var(--color-danger)}.neutral{background:color-mix(in srgb,var(--color-warning) 16%, var(--color-surface));color:var(--color-warning)} .dot{width:8px;height:8px;border-radius:999px;background:currentColor}.airport-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}.airport-card{border-radius:20px;padding:18px}.airport-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.airport-title{font-size:1.15rem;font-weight:800;margin:0}.airport-sub{color:var(--color-text-muted);margin-top:4px}.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px}.mini{padding:12px;border-radius:14px;background:var(--color-surface-2);border:1px solid var(--color-border)}.mini span{display:block;font-size:.76rem;text-transform:uppercase;letter-spacing:.11em;color:var(--color-text-muted);margin-bottom:4px}.code-block{padding:14px;border-radius:16px;background:#111;color:#f5f5f5;font:500 .88rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:auto}.empty{padding:22px;border-radius:18px}.muted{color:var(--color-text-muted)} @media (max-width:1080px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.filters{grid-template-columns:1fr 1fr}.airport-grid{grid-template-columns:1fr}} @media (max-width:700px){.shell{padding:16px}.filters,.cards{grid-template-columns:1fr}.hero,.panel{padding:18px}}
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="shell">
     <header class="topbar">
       <div class="brand">
-        <div class="logo" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 45L32 12L54 45" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 45H42" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><circle cx="32" cy="45" r="5" fill="currentColor"/></svg></div>
-        <div>
-          <p class="eyebrow">Brasil · operação</p>
-          <h1>Todos os aeroportos online do país</h1>
-          <p class="subtitle">Versão com diagnóstico embutido: consulta METAR recente, TAF e stationinfo, filtra ICAOs brasileiros e mostra mensagens mais claras quando a API não responde como esperado.</p>
-        </div>
+        <div class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16L12 5L20 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 16L12 12L16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><div class="eyebrow">Brasil · operação</div><h1>Todos os aeroportos online do país</h1><p class="lede">Consulta METAR, TAF e station info usando apenas ICAOs brasileiros definidos no código, evitando a consulta global inválida rejeitada pela API.</p></div>
       </div>
-      <div class="toolbar">
-        <button class="btn" id="refreshBtn" type="button">Atualizar agora</button>
-        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Alternar tema"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-      </div>
+      <div class="actions"><button class="btn btn-primary" id="refreshBtn">Atualizar agora</button><button class="btn icon-btn" id="themeBtn" aria-label="Alternar tema">◐</button></div>
     </header>
 
     <section class="hero">
-      <div class="panel-head"><div><p class="eyebrow">Filtro e atualização</p><h2>Consulta nacional em tempo real</h2><p>Agora a busca usa uma janela recente explícita para METAR e TAF, o que costuma evitar retorno vazio em consultas abertas.</p></div></div>
-      <div class="controls">
-        <div class="field"><label for="searchInput">Buscar por ICAO, cidade ou trecho do METAR</label><input id="searchInput" type="text" placeholder="Ex.: SBGR, Porto Alegre, BKN" /></div>
-        <div class="field"><label for="categoryFilter">Categoria</label><select id="categoryFilter"><option value="ALL">Todas</option><option value="VFR">VFR</option><option value="MVFR">MVFR</option><option value="IFR">IFR</option><option value="LIFR">LIFR</option></select></div>
-        <div class="field"><label for="statePrefixFilter">Prefixo ICAO</label><select id="statePrefixFilter"><option value="ALL">Todos</option><option value="SB">SB</option><option value="SD">SD</option><option value="SI">SI</option><option value="SJ">SJ</option><option value="SN">SN</option></select></div>
-        <div class="field"><label for="sortFilter">Ordenação</label><select id="sortFilter"><option value="severity">Pior categoria primeiro</option><option value="icao">ICAO</option><option value="city">Cidade</option><option value="time">Mais recente</option></select></div>
-        <button class="btn btn-primary" id="autoRefreshBtn" type="button">Auto-refresh: ligado</button>
+      <div class="eyebrow">Filtro e atualização</div>
+      <h2 class="section-title">Consulta nacional com ICAOs definidos</h2>
+      <p class="section-copy">A API do Aviation Weather Center documenta consultas JSON por `ids` para METAR e o painel agora aplica essa abordagem para todos os datasets relevantes. [web:658][web:661]</p>
+      <div class="grid filters">
+        <input id="searchInput" class="field" type="text" placeholder="Ex.: SBGR, Porto Alegre, BKN" />
+        <select id="categoryFilter" class="field"><option value="all">Todas</option><option value="VFR">VFR</option><option value="MVFR">MVFR</option><option value="IFR">IFR</option><option value="LIFR">LIFR</option></select>
+        <select id="prefixFilter" class="field"><option value="all">Todos prefixos</option><option value="SB">SB</option><option value="SD">SD</option><option value="SI">SI</option><option value="SJ">SJ</option><option value="SN">SN</option></select>
+        <select id="sortSelect" class="field"><option value="worst">Pior categoria primeiro</option><option value="icao">ICAO</option><option value="city">Cidade</option><option value="updated">Mais recente</option></select>
+        <button class="btn" id="autoRefreshBtn">Auto-refresh: ligado</button>
       </div>
-      <p class="status-line" id="statusLine">Pronto para carregar.</p>
-      <div id="diagnosticBox" class="notice" hidden></div>
-      <div class="stats">
-        <dl class="stat"><dt>Aeroportos online</dt><dd id="onlineCount">0</dd></dl>
-        <dl class="stat"><dt>Com TAF</dt><dd id="tafCount">0</dd></dl>
-        <dl class="stat"><dt>IFR/LIFR</dt><dd id="criticalCount">0</dd></dl>
-        <dl class="stat"><dt>Última atualização</dt><dd id="lastUpdated">--</dd></dl>
+      <div id="diagnosticBox" class="diagnostic">Preparando consulta.</div>
+      <div class="grid cards">
+        <article class="stat"><div class="stat-label">Aeroportos online</div><div class="stat-value" id="onlineCount">0</div><div class="stat-sub">Com METAR válido</div></article>
+        <article class="stat"><div class="stat-label">Com TAF</div><div class="stat-value" id="tafCount">0</div><div class="stat-sub">Tendência disponível</div></article>
+        <article class="stat"><div class="stat-label">IFR/LIFR</div><div class="stat-value" id="ifrCount">0</div><div class="stat-sub">Operação mais crítica</div></article>
+        <article class="stat"><div class="stat-label">Última atualização</div><div class="stat-value" id="lastUpdated">--</div><div class="stat-sub" id="nextRefresh">Próxima: --</div></article>
       </div>
     </section>
 
-    <section class="layout">
-      <section class="panel">
-        <div class="panel-head"><div><p class="eyebrow">Visão geral</p><h2>Tabela operacional</h2><p>Lista compacta para triagem rápida de todos os aeroportos online encontrados.</p></div></div>
-        <div class="table-wrap"><table><thead><tr><th>ICAO</th><th>Cidade</th><th>Categoria</th><th>Vento</th><th>Visibilidade</th><th>Teto</th><th>Obs.</th></tr></thead><tbody id="tableBody"></tbody></table></div>
-      </section>
-      <section class="panel">
-        <div class="panel-head"><div><p class="eyebrow">Detalhe</p><h2>Cards por aeroporto</h2><p>METAR interpretado, bruto e tendência resumida do TAF.</p></div></div>
-        <div id="cards" class="cards"></div>
-      </section>
+    <section class="panel">
+      <div class="eyebrow">Leitura rápida</div>
+      <h2 class="section-title">Tabela operacional</h2>
+      <div class="table-wrap"><table><thead><tr><th>ICAO</th><th>Cidade</th><th>Categoria</th><th>Vento</th><th>Visibilidade</th><th>Teto</th><th>Temperatura</th><th>Obs.</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+    </section>
+
+    <section class="panel">
+      <div class="eyebrow">Detalhamento</div>
+      <h2 class="section-title">METAR e tendência</h2>
+      <div id="airportGrid" class="airport-grid"></div>
+      <div id="emptyState" class="empty" hidden>Nenhum aeroporto corresponde aos filtros atuais.</div>
+      <p class="footer-note">ICAOs monitorados: SBCO, SBPA, SBSM, SBFL, SBPE, SBCH, SBCT, SBKP, SBSP, SBGR, SBGL, SBRJ, SBBR, SBCF, SBSV, SBRF e SBJP.</p>
     </section>
   </div>
 
   <script>
-    const BRAZIL_PREFIXES = ['SB','SD','SI','SJ','SN'];
-    const METAR_URL = 'https://aviationweather.gov/api/data/metar?format=json&hours=3';
-    const TAF_URL = 'https://aviationweather.gov/api/data/taf?format=json&hours=12';
-    const STATION_URL = 'https://aviationweather.gov/api/data/stationinfo?format=json';
-
-    const state = { metars: [], tafMap: new Map(), stationMap: new Map(), filtered: [], autoRefresh: true, timer: null, diag: {} };
-    const els = { searchInput: searchInput, categoryFilter: categoryFilter, statePrefixFilter: statePrefixFilter, sortFilter: sortFilter, refreshBtn: refreshBtn, autoRefreshBtn: autoRefreshBtn, statusLine: statusLine, onlineCount: onlineCount, tafCount: tafCount, criticalCount: criticalCount, lastUpdated: lastUpdated, tableBody: tableBody, cards: cards, diagnosticBox: diagnosticBox };
-
-    (function(){const t=document.querySelector('[data-theme-toggle]'),r=document.documentElement;let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';r.setAttribute('data-theme',d);function icon(){t.innerHTML=d==='dark'?'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'}icon();t.addEventListener('click',()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);icon()})})();
-
-    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const isBrazilIcao = icao => BRAZIL_PREFIXES.some(prefix => String(icao || '').startsWith(prefix));
-    const categoryRank = cat => ({LIFR:4, IFR:3, MVFR:2, VFR:1}[cat] || 0);
-    const categoryClass = cat => (cat === 'IFR' || cat === 'LIFR') ? 'status-alert' : ((cat === 'VFR' || cat === 'MVFR') ? 'status-good' : 'status-neutral');
-
-    function showDiagnostic(title, details) {
-      els.diagnosticBox.hidden = false;
-      els.diagnosticBox.innerHTML = `<strong>${escapeHtml(title)}</strong><span>${details}</span>`;
-    }
-    function clearDiagnostic(){ els.diagnosticBox.hidden = true; els.diagnosticBox.innerHTML = ''; }
-
-    function getFlightCategory(rawMetar) {
-      if (!rawMetar) return 'N/D';
-      let visKm = null;
-      if (/\b9999\b/.test(rawMetar)) visKm = 10;
-      else { const vis = rawMetar.match(/\b(\d{4})\b/); if (vis) visKm = Math.round((Number(vis[1]) / 1000) * 10) / 10; }
-      let ceiling = null;
-      [...rawMetar.matchAll(/\b(BKN|OVC|VV)(\d{3})\b/g)].forEach(match => { const base = Number(match[2]) * 100; if (ceiling === null || base < ceiling) ceiling = base; });
-      if ((ceiling !== null && ceiling < 500) || (visKm !== null && visKm < 1.6)) return 'LIFR';
-      if ((ceiling !== null && ceiling < 1000) || (visKm !== null && visKm < 4.8)) return 'IFR';
-      if ((ceiling !== null && ceiling <= 3000) || (visKm !== null && visKm <= 8.0)) return 'MVFR';
-      return 'VFR';
-    }
-    function parseWind(rawMetar){ if(!rawMetar) return 'N/D'; const varWind=rawMetar.match(/\b(\d{3}V\d{3})\b/)?.[1]||''; const wind=rawMetar.match(/\b((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT)\b/)?.[1]; if(!wind) return 'N/D'; if(wind==='00000KT') return 'Vento calmo'; let text=wind; let m=wind.match(/^(VRB)(\d{2,3})(G(\d{2,3}))?KT$/); if(m) text=`Vento variável a ${Number(m[2])} kt${m[4]?`, rajadas ${Number(m[4])} kt`:''}`; m=wind.match(/^(\d{3})(\d{2,3})(G(\d{2,3}))?KT$/); if(m) text=`Vento ${Number(m[1])}° a ${Number(m[2])} kt${m[4]?`, rajadas ${Number(m[4])} kt`:''}`; if(varWind){const r=varWind.match(/(\d{3})V(\d{3})/); if(r) text += `, variável entre ${Number(r[1])}° e ${Number(r[2])}°`; } return text; }
-    function parseVisibility(rawMetar){ if(!rawMetar) return 'N/D'; if(/\bCAVOK\b/.test(rawMetar)) return 'CAVOK'; if(/\b9999\b/.test(rawMetar)) return '10 km ou mais'; const vis=rawMetar.match(/\b(\d{4})\b/); if(!vis) return 'N/D'; const meters=Number(vis[1]); return meters>=1000?`${(meters/1000).toFixed(1).replace('.0','')} km`:`${meters} m`; }
-    function parseCeiling(rawMetar){ if(!rawMetar) return 'Sem teto'; let ceiling=null; [...rawMetar.matchAll(/\b(BKN|OVC|VV)(\d{3})\b/g)].forEach(match=>{const base=Number(match[2])*100; if(ceiling===null||base<ceiling) ceiling=base;}); return ceiling===null?'Sem teto significativo':`${ceiling} ft`; }
-    function parseTemp(rawMetar){ if(!rawMetar) return 'N/D'; const m=rawMetar.match(/\b(M?\d{2})\/(M?\d{2})\b/); if(!m) return 'N/D'; return `${m[1].replace('M','-')} °C / ${m[2].replace('M','-')} °C`; }
-    function interpretMetar(icao, city, rawMetar){ const category=getFlightCategory(rawMetar); const parts=[`ICAO ${icao}`,`cidade ${city || 'não definida'}`,`categoria ${category}`]; const wind=parseWind(rawMetar); if(wind!=='N/D') parts.push(wind); const vis=parseVisibility(rawMetar); if(vis!=='N/D') parts.push(`visibilidade ${vis}`); const ceil=parseCeiling(rawMetar); if(ceil) parts.push(`teto ${ceil}`); const temp=parseTemp(rawMetar); if(temp!=='N/D') parts.push(`temperatura/orvalho ${temp}`); return parts.join(' | '); }
-    function summarizeTaf(rawTaf){ if(!rawTaf) return 'TAF indisponível.'; let lowestCeiling=null; [...rawTaf.matchAll(/\b(BKN|OVC|VV)(\d{3})\b/g)].forEach(match=>{const base=Number(match[2])*100; if(lowestCeiling===null||base<lowestCeiling) lowestCeiling=base;}); let lowestVis=null; [...rawTaf.matchAll(/\b(9999|\d{4})\b/g)].forEach(match=>{const value=match[1]==='9999'?10:Math.round((Number(match[1])/1000)*10)/10; if(lowestVis===null||value<lowestVis) lowestVis=value;}); let category='VFR'; if((lowestCeiling!==null&&lowestCeiling<500)||(lowestVis!==null&&lowestVis<1.6)) category='LIFR'; else if((lowestCeiling!==null&&lowestCeiling<1000)||(lowestVis!==null&&lowestVis<4.8)) category='IFR'; else if((lowestCeiling!==null&&lowestCeiling<=3000)||(lowestVis!==null&&lowestVis<=8)) category='MVFR'; const phenomena=['TS','RA','DZ','FG','BR','HZ','SQ','GR','GS','SHRA','SHDZ','VCTS','RETS'].filter(code=>rawTaf.includes(code)); return `Pior condição prevista: ${category}. Menor visibilidade estimada: ${lowestVis ?? 'n/d'} km. Menor teto estimado: ${lowestCeiling ?? 'n/d'} ft. ${phenomena.length ? `Fenômenos: ${[...new Set(phenomena)].join(', ')}.` : 'Sem fenômenos relevantes destacados.'}`; }
-    function normalizeStationMap(stations){ const map=new Map(); stations.forEach(station=>{const icao=station.icaoId||station.icao||station.id||station.stationId; if(!icao||!isBrazilIcao(icao)) return; map.set(String(icao), station);}); return map; }
-    function cityFor(icao){ const station=state.stationMap.get(icao); return station?.site || station?.name || station?.stationName || station?.city || 'Cidade não informada'; }
-    async function fetchJson(url){ const response=await fetch(url,{headers:{Accept:'application/json'}}); if(!response.ok) throw new Error(`Falha em ${url} (${response.status})`); return response.json(); }
-
+    const ICAOS = ["SBCO","SBPA","SBSM","SBFL","SBPE","SBCH","SBCT","SBKP","SBSP","SBGR","SBGL","SBRJ","SBBR","SBCF","SBSV","SBRF","SBJP"];
+    const CITY_FALLBACK = {SBCO:"Canoas",SBPA:"Porto Alegre",SBSM:"Santa Maria",SBFL:"Florianópolis",SBPE:"Pelotas",SBCH:"Chapecó",SBCT:"Curitiba",SBKP:"Campinas",SBSP:"São Paulo - Congonhas",SBGR:"São Paulo - Guarulhos",SBGL:"Rio de Janeiro - Galeão",SBRJ:"Rio de Janeiro - Santos Dumont",SBBR:"Brasília",SBCF:"Belo Horizonte - Confins",SBSV:"Salvador",SBRF:"Recife",SBJP:"João Pessoa"};
+    const API = {metar:`https://aviationweather.gov/api/data/metar?ids=${ICAOS.join(',')}&format=json`,taf:`https://aviationweather.gov/api/data/taf?ids=${ICAOS.join(',')}&format=json`,station:`https://aviationweather.gov/api/data/stationinfo?ids=${ICAOS.join(',')}&format=json`};
+    const state = {theme:matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',autoRefresh:true,rows:[],timer:null,refreshMinutes:15};
+    document.documentElement.setAttribute('data-theme', state.theme);
+    const el = id => document.getElementById(id);
+    const diagnosticBox = el('diagnosticBox'), tableBody = el('tableBody'), airportGrid = el('airportGrid'), emptyState = el('emptyState');
+    const searchInput = el('searchInput'), categoryFilter = el('categoryFilter'), prefixFilter = el('prefixFilter'), sortSelect = el('sortSelect');
+    function setDiagnostic(message, type='ok'){ diagnosticBox.className = `diagnostic ${type}`; diagnosticBox.textContent = message; }
+    function esc(s=''){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+    function categoryRank(cat){ return ({LIFR:4,IFR:3,MVFR:2,VFR:1})[cat] || 0; }
+    function categoryClass(cat){ if(cat==='IFR'||cat==='LIFR') return 'bad'; if(cat==='VFR'||cat==='MVFR') return 'good'; return 'neutral'; }
+    function extractRaw(item){ return item?.rawOb || item?.rawTAF || item?.raw_text || item?.text || ''; }
+    function parseVisibility(raw){ if(!raw) return '—'; if(/\bCAVOK\b/.test(raw)) return '10 km ou mais'; const m=raw.match(/\b(\d{4})\b/); if(!m) return '—'; if(m[1]==='9999') return '10 km ou mais'; const n=Number(m[1]); return n>=1000 ? `${(n/1000).toFixed(1).replace('.0','')} km` : `${n} m`; }
+    function parseWind(raw){ const m=raw?.match(/\b((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT)\b/); return m?m[1]:'—'; }
+    function parseTemp(raw){ const m=raw?.match(/\b(M?\d{2})\/(M?\d{2})\b/); return m?`${m[1].replace('M','-')} / ${m[2].replace('M','-')} °C`:'—'; }
+    function parseCeiling(raw){ if(!raw) return {text:'—',feet:null}; if(/\bCAVOK\b/.test(raw)) return {text:'CAVOK',feet:99999}; const arr=[...raw.matchAll(/\b(?:BKN|OVC|VV)(\d{3})\b/g)].map(m=>Number(m[1])*100); if(!arr.length) return {text:'Sem teto',feet:99999}; const min=Math.min(...arr); return {text:`${min} ft`,feet:min}; }
+    function classify(raw){ if(!raw) return 'N/D'; const vis=/\b9999\b|\bCAVOK\b/.test(raw)?10:((raw.match(/\b(\d{4})\b/)||[])[1]?Number(raw.match(/\b(\d{4})\b/)[1])/1000:null); const ceiling=parseCeiling(raw).feet; if((ceiling!==null&&ceiling<500)||(vis!==null&&vis<1.6)) return 'LIFR'; if((ceiling!==null&&ceiling<1000)||(vis!==null&&vis<4.8)) return 'IFR'; if((ceiling!==null&&ceiling<=3000)||(vis!==null&&vis<=8.0)) return 'MVFR'; return 'VFR'; }
+    function formatTime(item){ const raw=item?.obsTime||item?.issueTime||item?.reportTime||item?.fcstTimeFrom; if(!raw) return '—'; const d=new Date(raw); return isNaN(d)?'—':d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}); }
+    function tafSummary(raw){ if(!raw) return 'Sem TAF disponível.'; const c=raw.replace(/\s+/g,' ').trim(); return c.length>220?c.slice(0,220)+'…':c; }
+    async function fetchJson(url){ const res=await fetch(url,{headers:{Accept:'application/json'}}); if(!res.ok) throw new Error(`HTTP ${res.status}`); const data=await res.json(); if(data?.status==='error') throw new Error(data.error||'Erro da API'); return Array.isArray(data)?data:[]; }
+    function cityOf(icao, stationMap){ const st=stationMap.get(icao); return st?.site || st?.name || st?.city || CITY_FALLBACK[icao] || 'Cidade não definida'; }
     async function loadData(){
-      clearDiagnostic();
-      els.statusLine.textContent = 'Carregando METAR, TAF e stationinfo...';
-      els.cards.innerHTML = '<div class="loading">Buscando dados online do Brasil...</div>';
-      els.tableBody.innerHTML = '';
+      setDiagnostic('Consultando METAR, TAF e station info pelos ICAOs definidos.', 'ok');
       try {
-        const [metarsRaw, tafsRaw, stationsRaw] = await Promise.all([fetchJson(METAR_URL), fetchJson(TAF_URL), fetchJson(STATION_URL)]);
-        const metarList = Array.isArray(metarsRaw) ? metarsRaw : [];
-        const tafList = Array.isArray(tafsRaw) ? tafsRaw : [];
-        const stationList = Array.isArray(stationsRaw) ? stationsRaw : [];
-
-        state.diag = {
-          metarsReturned: metarList.length,
-          tafsReturned: tafList.length,
-          stationsReturned: stationList.length
-        };
-
-        state.stationMap = normalizeStationMap(stationList);
-        state.tafMap = new Map(tafList.map(item => [String(item.icaoId), item]));
-
-        state.metars = metarList
-          .filter(item => item && isBrazilIcao(item.icaoId) && item.rawOb)
-          .map(item => {
-            const icao = String(item.icaoId);
-            const rawMetar = String(item.rawOb || '');
-            const rawTaf = String(state.tafMap.get(icao)?.rawOb || '');
-            const city = cityFor(icao);
-            return {
-              icao, city, prefix: icao.slice(0,2), category: getFlightCategory(rawMetar), wind: parseWind(rawMetar), visibility: parseVisibility(rawMetar), ceiling: parseCeiling(rawMetar), temperature: parseTemp(rawMetar), rawMetar, rawTaf, obsTime: item.obsTime || item.reportTime || 'N/D', metarInterpretado: interpretMetar(icao, city, rawMetar), tafTendencia: summarizeTaf(rawTaf), tafAvailable: Boolean(rawTaf)
-            };
-          });
-
-        if (!metarList.length) {
-          showDiagnostic('A API respondeu sem METARs na consulta aberta.', `Teste direto no navegador: <code>${escapeHtml(METAR_URL)}</code>`);
-        } else if (!state.metars.length) {
-          showDiagnostic('A API retornou dados, mas nenhum ICAO brasileiro foi encontrado nesta janela.', `METARs recebidos: <code>${metarList.length}</code>. TAFs recebidos: <code>${tafList.length}</code>. Esta situação pode variar conforme a janela de consulta e o conteúdo entregue pela API.`);
-        }
-
-        applyFilters();
-        els.lastUpdated.textContent = new Date().toLocaleTimeString('pt-BR');
-        els.statusLine.textContent = `Consulta concluída. METARs globais recebidos: ${metarList.length}. Aeroportos brasileiros online encontrados: ${state.metars.length}.`;
-      } catch (error) {
-        console.error(error);
-        els.statusLine.textContent = `Erro ao carregar dados: ${error.message}`;
-        showDiagnostic('Falha ao buscar os dados.', `Isso normalmente indica bloqueio de rede, CORS ou mudança de resposta da API. Teste abrir estes links diretamente: <code>${escapeHtml(METAR_URL)}</code> e <code>${escapeHtml(STATION_URL)}</code>.`);
-        els.cards.innerHTML = '<div class="empty">Não foi possível carregar os dados online.</div>';
+        const [metars, tafs, stations] = await Promise.all([fetchJson(API.metar), fetchJson(API.taf), fetchJson(API.station)]);
+        const metarMap = new Map(metars.map(x => [x.icaoId || x.icao || x.stationId, x]));
+        const tafMap = new Map(tafs.map(x => [x.icaoId || x.icao || x.stationId, x]));
+        const stationMap = new Map(stations.map(x => [x.icaoId || x.icao || x.stationId || x.station, x]));
+        state.rows = ICAOS.map(icao => {
+          const metar = metarMap.get(icao); const taf = tafMap.get(icao); const rawMetar = extractRaw(metar); const rawTaf = extractRaw(taf); const ceiling = parseCeiling(rawMetar);
+          return {icao, city:cityOf(icao, stationMap), category:classify(rawMetar), wind:parseWind(rawMetar), visibility:parseVisibility(rawMetar), ceiling:ceiling.text, ceilingFeet:ceiling.feet ?? -1, temperature:parseTemp(rawMetar), observed:formatTime(metar), rawMetar:rawMetar || 'Sem METAR disponível.', tafSummary:tafSummary(rawTaf), hasTaf:Boolean(rawTaf), metarObj:metar};
+        }).filter(r => r.rawMetar !== 'Sem METAR disponível.');
+        const online = state.rows.length;
+        const tafCount = state.rows.filter(r => r.hasTaf).length;
+        const ifr = state.rows.filter(r => ['IFR','LIFR'].includes(r.category)).length;
+        el('onlineCount').textContent = online; el('tafCount').textContent = tafCount; el('ifrCount').textContent = ifr;
+        const now = new Date(); el('lastUpdated').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        const next = new Date(now.getTime() + state.refreshMinutes*60000); el('nextRefresh').textContent = `Próxima: ${next.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+        setDiagnostic(`Consulta concluída: ${online} aeroportos com METAR, ${tafCount} com TAF.`, 'ok');
+        render();
+      } catch(err) {
+        state.rows = []; render();
+        setDiagnostic(`Erro ao carregar dados: ${err.message}`, 'error');
+        el('onlineCount').textContent='0'; el('tafCount').textContent='0'; el('ifrCount').textContent='0';
       }
+      scheduleRefresh();
     }
-
-    function sortItems(items){ const mode=els.sortFilter.value; return [...items].sort((a,b)=>{ if(mode==='icao') return a.icao.localeCompare(b.icao); if(mode==='city') return a.city.localeCompare(b.city,'pt-BR'); if(mode==='time') return String(b.obsTime).localeCompare(String(a.obsTime)); return categoryRank(b.category)-categoryRank(a.category)||a.icao.localeCompare(b.icao); }); }
-    function applyFilters(){ const text=els.searchInput.value.trim().toLowerCase(); const category=els.categoryFilter.value; const prefix=els.statePrefixFilter.value; let items=state.metars.filter(item=>{ const haystack=`${item.icao} ${item.city} ${item.rawMetar}`.toLowerCase(); return (!text || haystack.includes(text)) && (category==='ALL' || item.category===category) && (prefix==='ALL' || item.prefix===prefix);}); items=sortItems(items); state.filtered=items; render(items); }
-    function render(items){ els.onlineCount.textContent=items.length; els.tafCount.textContent=items.filter(item=>item.tafAvailable).length; els.criticalCount.textContent=items.filter(item=>item.category==='IFR'||item.category==='LIFR').length; if(!items.length){ els.tableBody.innerHTML='<tr><td colspan="7"><div class="empty">Nenhum aeroporto corresponde aos filtros atuais ou a API não retornou estações brasileiras na consulta.</div></td></tr>'; els.cards.innerHTML='<div class="empty">Nenhum card para exibir.</div>'; return; } els.tableBody.innerHTML=items.map(item=>`<tr><td>${escapeHtml(item.icao)}</td><td>${escapeHtml(item.city)}</td><td><span class="pill ${categoryClass(item.category)}">${escapeHtml(item.category)}</span></td><td>${escapeHtml(item.wind)}</td><td>${escapeHtml(item.visibility)}</td><td>${escapeHtml(item.ceiling)}</td><td>${escapeHtml(String(item.obsTime))}</td></tr>`).join(''); els.cards.innerHTML=items.map(item=>`<article class="airport-card"><header><div><p class="eyebrow">${escapeHtml(item.icao)}</p><h3>${escapeHtml(item.city)}</h3><p class="muted">Observação: ${escapeHtml(String(item.obsTime))}</p></div><span class="pill ${categoryClass(item.category)}">${escapeHtml(item.category)}</span></header><dl class="mini-grid"><div><dt>Vento</dt><dd>${escapeHtml(item.wind)}</dd></div><div><dt>Visibilidade</dt><dd>${escapeHtml(item.visibility)}</dd></div><div><dt>Teto</dt><dd>${escapeHtml(item.ceiling)}</dd></div><div><dt>Temp./Orvalho</dt><dd>${escapeHtml(item.temperature)}</dd></div></dl><div class="raw-block"><h4>METAR interpretado</h4><p>${escapeHtml(item.metarInterpretado)}</p></div><div class="raw-block"><h4>Tendência do TAF</h4><p>${escapeHtml(item.tafTendencia)}</p></div><div class="raw-block"><h4>METAR RAW</h4><pre>${escapeHtml(item.rawMetar)}</pre></div><div class="raw-block"><h4>TAF RAW</h4><pre>${escapeHtml(item.rawTaf || 'TAF indisponível')}</pre></div></article>`).join(''); }
-    [els.searchInput, els.categoryFilter, els.statePrefixFilter, els.sortFilter].forEach(el=>{el.addEventListener('input',applyFilters);el.addEventListener('change',applyFilters)}); els.refreshBtn.addEventListener('click',loadData); els.autoRefreshBtn.addEventListener('click',()=>{state.autoRefresh=!state.autoRefresh; els.autoRefreshBtn.textContent=`Auto-refresh: ${state.autoRefresh?'ligado':'desligado'}`; if(state.timer) clearInterval(state.timer); if(state.autoRefresh) state.timer=setInterval(loadData,15*60*1000);}); state.timer=setInterval(loadData,15*60*1000); loadData();
+    function filteredRows(){
+      const q = searchInput.value.trim().toLowerCase();
+      let rows = [...state.rows];
+      if (q) rows = rows.filter(r => [r.icao,r.city,r.rawMetar,r.tafSummary].join(' ').toLowerCase().includes(q));
+      if (categoryFilter.value !== 'all') rows = rows.filter(r => r.category === categoryFilter.value);
+      if (prefixFilter.value !== 'all') rows = rows.filter(r => r.icao.startsWith(prefixFilter.value));
+      rows.sort((a,b) => {
+        if (sortSelect.value === 'icao') return a.icao.localeCompare(b.icao);
+        if (sortSelect.value === 'city') return a.city.localeCompare(b.city);
+        if (sortSelect.value === 'updated') return b.observed.localeCompare(a.observed);
+        return categoryRank(b.category) - categoryRank(a.category) || a.icao.localeCompare(b.icao);
+      });
+      return rows;
+    }
+    function render(){
+      const rows = filteredRows();
+      tableBody.innerHTML = rows.map(r => `<tr><td><strong>${esc(r.icao)}</strong></td><td>${esc(r.city)}</td><td><span class="badge ${categoryClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></td><td>${esc(r.wind)}</td><td>${esc(r.visibility)}</td><td>${esc(r.ceiling)}</td><td>${esc(r.temperature)}</td><td class="muted">${esc(r.observed)}</td></tr>`).join('');
+      airportGrid.innerHTML = rows.map(r => `<article class="airport-card"><div class="airport-head"><div><h3 class="airport-title">${esc(r.icao)}</h3><div class="airport-sub">${esc(r.city)}</div></div><span class="badge ${categoryClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></div><div class="mini-grid"><div class="mini"><span>Vento</span>${esc(r.wind)}</div><div class="mini"><span>Visibilidade</span>${esc(r.visibility)}</div><div class="mini"><span>Teto</span>${esc(r.ceiling)}</div><div class="mini"><span>Temperatura</span>${esc(r.temperature)}</div></div><div class="muted" style="margin-bottom:8px"><strong>Observação:</strong> ${esc(r.observed)}</div><div class="muted" style="margin-bottom:8px"><strong>Tendência:</strong> ${esc(r.tafSummary)}</div><div class="code-block">${esc(r.rawMetar)}</div></article>`).join('');
+      emptyState.hidden = rows.length !== 0;
+    }
+    function scheduleRefresh(){ clearTimeout(state.timer); if(!state.autoRefresh) return; state.timer = setTimeout(loadData, state.refreshMinutes * 60 * 1000); }
+    el('themeBtn').addEventListener('click',()=>{ state.theme = state.theme==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme', state.theme); });
+    el('refreshBtn').addEventListener('click', loadData);
+    el('autoRefreshBtn').addEventListener('click',()=>{ state.autoRefresh=!state.autoRefresh; el('autoRefreshBtn').textContent=`Auto-refresh: ${state.autoRefresh?'ligado':'desligado'}`; scheduleRefresh(); });
+    [searchInput, categoryFilter, prefixFilter, sortSelect].forEach(x=>x.addEventListener('input', render));
+    [categoryFilter, prefixFilter, sortSelect].forEach(x=>x.addEventListener('change', render));
+    loadData();
   </script>
 </body>
 </html>
