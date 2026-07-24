@@ -1,4 +1,4 @@
-# README v27
+# README v28
 
 ## Objetivo
 
@@ -9,12 +9,12 @@ Esta versão corrige a leitura real do retorno da Aviation Weather e atualiza o 
 - Worker atualizado para ler `icaoId`, `rawOb`, `rawTAF` e `fltCat`.
 - Worker agora retorna `rows` com dados prontos para o frontend.
 - Frontend atualizado para consumir a URL correta do Worker.
-- Interface marcada como versão `v27`.
+- Interface marcada como versão `v28`.
 
 ## Arquivos
 
-- `worker_v27.js`.
-- `frontend_v27.html`.
+- `worker_v28.js`.
+- `frontend_v28.html`.
 
 ## Campos usados pelo Worker
 
@@ -44,8 +44,8 @@ Esta versão corrige a leitura real do retorno da Aviation Weather e atualiza o 
 
 ## Como aplicar
 
-1. Substitua o Worker pelo conteúdo de `worker_v27.js`.
-2. Substitua o frontend pelo conteúdo de `frontend_v27.html`.
+1. Substitua o Worker pelo conteúdo de `worker_v28.js`.
+2. Substitua o frontend pelo conteúdo de `frontend_v28.html`.
 3. Publique os dois.
 4. Recarregue a página.
 
