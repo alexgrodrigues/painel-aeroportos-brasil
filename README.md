@@ -49,10 +49,10 @@ Cada item de `metar` pode conter:
 
 
 ## Versão
-- Esta edição é a v17.
+- Esta edição é a v18.
 
 
 ## Nova versão da página
 - Não existe atualização automática da própria versão do HTML no navegador.
-- Para a página mudar de v17 para v17, o novo arquivo precisa ser publicado no GitHub Pages.
+- Para a página mudar de v18 para v18, o novo arquivo precisa ser publicado no GitHub Pages.
 - O que é automático é somente a consulta dos dados do Worker.
