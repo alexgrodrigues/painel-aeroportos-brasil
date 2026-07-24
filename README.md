@@ -1,9 +1,9 @@
-# README v32.1
+# README v33
 
-## Atualização de versão
+Regiões ajustadas:
+- Sul: SBPA, SBSM, SBFL, SBCT, SBBG, SBNF, SBPK, SBUG, SBPF, SBCX
+- Sudeste: SBSP, SBJP, SBKP, SBRF, SBGR, SBGL, SBRJ, SBCF
+- Centro-Oeste, Nordeste e Norte seguem no agrupamento.
 
-O frontend agora exibe `v32.1` no topo da página e no cartão de versão.
-
-## Arquivo atualizado
-
-- `frontend_v32_1_versioned.html`
+## Arquivo
+- `frontend_v33_region_updated.html`
