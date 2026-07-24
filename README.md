@@ -1,22 +1,9 @@
-# README v36
+# README v36.1
 
-## O que foi alterado
-- O Worker mantém os aeroportos anteriores e adiciona:
-  - SAEZ
-  - SABE
-  - SUMU
-  - SGAS
-  - SAWH
-- O frontend agora também inclui esses aeroportos.
-- Os aeroportos novos são separados por país.
-- O painel segue com os aeroportos já existentes.
+## Correção
+- O frontend saiu do estado preso em "Carregando...".
+- Agora ele usa um `load()` com `try/catch` e valida `res.ok`.
+- A listagem continua separada por país.
 
-## Países no frontend
-- Argentina
-- Uruguai
-- Paraguai
-- Brasil
-
-## Arquivos
-- `worker_v36.js`
-- `frontend_v36_mercosul.html`
+## Arquivo
+- `frontend_v36_mercosul_fixed.html`
