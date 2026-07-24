@@ -1,27 +1,13 @@
-# README v31
+# README v32.1
 
-## Objetivo
+## Correção do frontend
 
-Esta versão consolida o painel com pressão atmosférica, vento separado em direção e intensidade, e cabeçalho atualizado para v31.
+O card de temperatura agora mostra exatamente:
 
-## O que o Worker faz
+- `Temperatura Atual: XXºC`
+- `Ponto de Orvalho: YYºC`
 
-- Lê o `METAR raw`.
-- Extrai o vento com regex.
-- Extrai o QNH (`Qxxxx`) do METAR.
-- Gera alerta se a pressão estiver fora da faixa esperada.
+## Arquivos atualizados
 
-## O que o frontend mostra
-
-- Direção.
-- Intensidade.
-- Pressão Atmosférica.
-- Visibilidade.
-- Teto.
-- Temperatura.
-
-## Arquivos finais
-
-- `worker_v31.js`
-- `frontend_v31.html`
-- `README_v31.md`
+- `worker_v32_temp_split_fix.js`
+- `frontend_v32_temp_split_fix.html`
