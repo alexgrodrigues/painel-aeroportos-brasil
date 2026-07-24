@@ -1,24 +1,39 @@
-# Painel Aeroportos Brasil
+# Painel METAR Brasil
 
-Este repositório contém a versão documentada do painel estático para GitHub Pages.
+Este projeto é um painel responsivo em HTML puro para GitHub Pages.
+
+## O que ele faz
+- Mostra um mapa clicável do Brasil.
+- Exibe aeroportos com METAR disponível.
+- Cada marcador leva ao card do aeroporto.
+- Mostra METAR, TAF, vento, visibilidade, teto e temperatura.
+- Funciona em celular, tablet e desktop.
 
 ## Arquivo principal
-- `index.html`: página completa com mapa, marcadores clicáveis, tabela de METAR/TAF, filtros e tema claro/escuro.
+- `index.html`
 
-## Dependências externas
-- O painel consulta um Worker da Cloudflare definido em `WORKER_URL` dentro do HTML.
-- Não há dependência obrigatória de bibliotecas JavaScript adicionais.
+## Fonte dos dados
+- O painel consulta o Worker da Cloudflare definido em `WORKER_URL` dentro do HTML.
+- O Worker deve devolver JSON com `metar` e, se disponível, `taf`.
 
-## Como publicar
-1. Suba o `index.html` para a raiz do repositório.
-2. Mantenha o GitHub Pages apontando para esse branch/pasta.
-3. O browser carregará o painel direto do `index.html`.
+## Como publicar no GitHub Pages
+1. Coloque `index.html` na raiz do repositório.
+2. Ative o GitHub Pages no branch/pasta publicada.
+3. Acesse a URL do site e verifique se o Worker responde.
 
-## Como funciona
-- O painel busca `metar` e `taf` no Worker.
-- Cada aeroporto vira um card com link de ancoragem.
-- Os marcadores no mapa levam até o card correspondente.
+## Estrutura de dados esperada
+Cada item de `metar` pode conter campos como:
+- `icaoId`
+- `name`
+- `rawOb`
+- `fltCat`
+- `temp`
+- `dewp`
+- `visib`
+- `clouds`
+- `reportTime` ou `receiptTime`
 
-## Arquivos opcionais
-- `index.html.meta.json`: metadados do arquivo.
-- Não é necessário publicar CSV para o site funcionar; coordenadas já estão embutidas no HTML.
+## Observações
+- Não é obrigatório publicar CSV.
+- As coordenadas dos aeroportos já estão embutidas no HTML.
+- O painel mostra apenas aeroportos com METAR disponível no retorno do Worker.
