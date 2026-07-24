@@ -58,7 +58,7 @@ Cada item de `metar` pode conter:
 - O que é automático é somente a consulta dos dados do Worker.
 
 
-## Versão v21
-- Esta publicação corresponde à v21.
+## Versão v22
+- Esta publicação corresponde à v22.
 - Mudança principal: reforço na exibição do vento, com fallback `Vento raw` para mostrar o valor extraído diretamente do METAR.
-- O bloco de atualização também identifica a v21.
+- O bloco de atualização também identifica a v22.
