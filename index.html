@@ -70,10 +70,10 @@ function renderCard(r){
       <div><div class="label">Pressão Atmosférica</div><div><strong>${esc(r.pressure||'—')}</strong></div></div>
       <div><div class="label">Visibilidade</div><div><strong>${esc(r.visibility||'—')}</strong></div></div>
       <div><div class="label">Teto</div><div><strong>${esc(r.ceiling||'—')}</strong></div></div>
-      <div><div class="label">Temperatura</div><div><strong>${esc(r.temperature||'—')}</strong></div></div>
+      <div><div class="label">Temperatura Atual</div><div><strong>${esc((r.temperature?.current ?? '—'))}ºC</strong></div></div><div><div class="label">Ponto de Orvalho</div><div><strong>${esc((r.temperature?.dewpoint ?? '—'))}ºC</strong></div></div>
     </div>
     ${r.pressureAlert ? `<div class="small"><strong>${esc(r.pressureAlert)}</strong></div>` : ''}
-    <div class="small"><strong>METAR interpretado:</strong> direção ${esc(r.windDirection||'—')} · intensidade ${esc(r.windIntensity||'—')} KT · pressão ${esc(r.pressure||'—')} · vis ${esc(r.visibility||'—')} · teto ${esc(r.ceiling||'—')} · temp ${esc(r.temperature||'—')}</div>
+    <div class="small"><strong>METAR interpretado:</strong> direção ${esc(r.windDirection||'—')} · intensidade ${esc(r.windIntensity||'—')} KT · pressão ${esc(r.pressure||'—')} · vis ${esc(r.visibility||'—')} · teto ${esc(r.ceiling||'—')} · temp ${esc((r.temperature?.current ?? '—'))}ºC / orvalho ${esc((r.temperature?.dewpoint ?? '—'))}ºC</div>
     <div class="small"><strong>TAF interpretado:</strong> ${esc(r.tafInterpret||'Sem TAF disponível.')}</div>
     <div class="small"><strong>TEND.:</strong> ${esc(r.tafTrend||'sem grupos de tendência relevantes')}</div>
     <div class="small"><strong>Alerta TAF:</strong> ${esc(r.tafAlert||'sem indicação forte de piora')}</div>
