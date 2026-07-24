@@ -1,12 +1,27 @@
-# README v30.1
+# README v31
 
-A versão do frontend no topo da página foi corrigida para `v30`.
+## Objetivo
 
-## O que foi ajustado
+Esta versão consolida o painel com pressão atmosférica, vento separado em direção e intensidade, e cabeçalho atualizado para v31.
 
-- O cabeçalho principal agora mostra `BRASIL · METAR EM TEMPO REAL v30`.
-- O cartão de versão também exibe `v30`.
+## O que o Worker faz
 
-## Arquivo atualizado
+- Lê o `METAR raw`.
+- Extrai o vento com regex.
+- Extrai o QNH (`Qxxxx`) do METAR.
+- Gera alerta se a pressão estiver fora da faixa esperada.
 
-- `frontend_v30_fixed_header.html`
+## O que o frontend mostra
+
+- Direção.
+- Intensidade.
+- Pressão Atmosférica.
+- Visibilidade.
+- Teto.
+- Temperatura.
+
+## Arquivos finais
+
+- `worker_v31.js`
+- `frontend_v31.html`
+- `README_v31.md`
