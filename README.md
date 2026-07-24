@@ -1,28 +1,32 @@
 # Painel METAR Brasil
 
-Este projeto é um painel responsivo em HTML puro para GitHub Pages.
+Este projeto mostra os aeroportos disponíveis no momento, separados por região geográfica do país.
 
-## O que ele faz
-- Mostra um mapa clicável do Brasil.
-- Exibe aeroportos com METAR disponível.
-- Cada marcador leva ao card do aeroporto.
-- Mostra METAR, TAF, vento, visibilidade, teto e temperatura.
-- Funciona em celular, tablet e desktop.
+## Arquivos
+- `index.html`: interface responsiva com lista por região, filtros e blocos detalhados.
+- `README.md`: documentação do projeto.
 
-## Arquivo principal
-- `index.html`
+## O que a página mostra
+- Lista de aeroportos disponíveis no instante da consulta.
+- Separação por região: Norte, Nordeste, Centro-Oeste, Sudeste, Sul e Outras.
+- Bloco de detalhes com METAR interpretado, TAF interpretado e raw.
+- Navegação por âncoras a partir da lista.
 
 ## Fonte dos dados
 - O painel consulta o Worker da Cloudflare definido em `WORKER_URL` dentro do HTML.
-- O Worker deve devolver JSON com `metar` e, se disponível, `taf`.
+- O Worker deve devolver JSON com `metar` e, se existir, `taf`.
+
+## Atualização automática
+- A lista é recarregada a cada 15 minutos.
+- Há botão de atualização manual.
 
 ## Como publicar no GitHub Pages
-1. Coloque `index.html` na raiz do repositório.
+1. Coloque `index.html` e `README.md` na raiz do repositório.
 2. Ative o GitHub Pages no branch/pasta publicada.
-3. Acesse a URL do site e verifique se o Worker responde.
+3. Verifique se o Worker responde corretamente.
 
-## Estrutura de dados esperada
-Cada item de `metar` pode conter campos como:
+## Estrutura esperada do retorno
+Cada item de `metar` pode conter:
 - `icaoId`
 - `name`
 - `rawOb`
@@ -33,7 +37,5 @@ Cada item de `metar` pode conter campos como:
 - `clouds`
 - `reportTime` ou `receiptTime`
 
-## Observações
-- Não é obrigatório publicar CSV.
-- As coordenadas dos aeroportos já estão embutidas no HTML.
-- O painel mostra apenas aeroportos com METAR disponível no retorno do Worker.
+## Observação
+- O painel exibe apenas os aeroportos com METAR disponível no retorno do Worker.
