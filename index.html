@@ -80,6 +80,19 @@ function temp(r,it){if(it?.temp!=null&&it?.dewp!=null)return `${it.temp}/${it.de
 function cat(r,it){if(it?.fltCat)return it.fltCat; const c=ceil(r,it),v=it?.visib!=null?Number(String(it.visib).replace('6+','6')):(/9999|CAVOK/.test(r)?10:(r.match(/(\d{4})/)?Number(r.match(/(\d{4})/)[1])/1000:null)); const f=parseInt(c); if((!isNaN(f)&&f<500)||(v!=null&&v<1.6))return 'LIFR'; if((!isNaN(f)&&f<1000)||(v!=null&&v<4.8))return 'IFR'; if((!isNaN(f)&&f<=3000)||(v!=null&&v<=8.0))return 'MVFR'; return 'VFR'}
 function time(it){const d=new Date(it?.reportTime||it?.receiptTime||it?.obsTime||Date.now()); return isNaN(d)?'—':d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
 function tafsum(r){if(!r)return 'Sem TAF disponível.'; const s=r.replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s}
+function tafInterpret(rawtaf){
+  if(!rawtaf) return 'Sem TAF disponível.';
+  const txt=rawtaf.replace(/\s+/g,' ').trim();
+  const parts=[];
+  const vis=txt.match(/(P6SM|\d{4})/);
+  const wind=txt.match(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT/);
+  const groups=[...txt.matchAll(/(TEMPO|BECMG|FM\d{6}|PROB\d{2})[^A-Z0-9]*(.*?)(?=(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})|$)/g)];
+  if(wind) parts.push(`Vento ${wind[0]}`);
+  if(vis) parts.push(`Visibilidade ${vis[0]}`);
+  if(groups.length) parts.push(groups.map(g=>`${g[1]} ${g[2].trim()}`.trim()).join(' | '));
+  if(/CAVOK/.test(txt)) parts.push('CAVOK');
+  return parts.length?parts.join(' · '):txt;
+}
 async function load(){
   $('refreshBtn').disabled=true; $('autoBtn').disabled=true; $('diag').textContent='Consultando o Worker...';
   try{
@@ -98,7 +111,7 @@ async function load(){
 }
 function filtered(){const q=$('search').value.trim().toLowerCase(); let rows=[...state.rows]; if(q) rows=rows.filter(r=>[r.icao,r.city,r.region,r.rawMetar,r.tafSummary].join(' ').toLowerCase().includes(q)); if($('cat').value!=='all') rows=rows.filter(r=>r.category===$('cat').value); if($('prefix').value!=='all') rows=rows.filter(r=>r.icao.startsWith($('prefix').value)); rows.sort((a,b)=>$('sort').value==='icao'?a.icao.localeCompare(b.icao):$('sort').value==='city'?a.city.localeCompare(b.city):rank(b.category)-rank(a.category)||a.icao.localeCompare(b.icao)); return rows}
 function render(){const rows=filtered(); $('empty').classList.toggle('hidden',rows.length!==0); const groups=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul','Outras']; $('list').innerHTML=groups.map(region=>{const items=rows.filter(r=>r.region===region); if(!items.length) return ''; return `<div class="region stat"><h3>${region}</h3><div style="display:grid;gap:10px">${items.map(r=>`<a class="link" href="#airport-${r.icao}"><strong>${esc(r.icao)}</strong> — ${esc(r.city)} · ${esc(r.category)}</a>`).join('')}</div></div>`}).join(''); $('cards').innerHTML=rows.map(r=>`<article class="airport" id="airport-${r.icao}"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3 style="margin:0">${esc(r.icao)}</h3><div class="muted">${esc(r.city)} · ${esc(r.region)}</div></div><span class="badge ${badge(r.category)}">${esc(r.category)}</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px"><div class="stat"><div class="muted">Vento</div>${esc(r.wind)}</div><div class="stat"><div class="muted">Visibilidade</div>${esc(r.visibility)}</div><div class="stat"><div class="muted">Teto</div>${esc(r.ceiling)}</div><div class="stat"><div class="muted">Temperatura</div>${esc(r.temperature)}</div></div><div class="muted" style="margin:10px 0 6px"><strong>METAR interpretado:</strong> ${esc(r.wind)} · ${esc(r.visibility)} · ${esc(r.ceiling)} · ${esc(r.temperature)}</div><div class="code"><strong>METAR raw:</strong>
-${esc(r.rawMetar)}</div><div class="muted" style="margin:10px 0 6px"><strong>TAF interpretado:</strong> ${esc(r.tafSummary)}</div><a class="link" href="#top">Voltar à lista</a></article>`).join(''); }
+${esc(r.rawMetar)}</div><div class="muted" style="margin:10px 0 6px"><strong>TAF interpretado:</strong> ${esc(tafInterpret(r.tafSummary))}</div><a class="link" href="#top">Voltar à lista</a></article>`).join(''); }
 function schedule(){clearTimeout(state.timer); if(!state.auto) return; state.timer=setTimeout(load,15*60*1000)}
 $('refreshBtn').addEventListener('click',load); $('themeBtn').addEventListener('click',()=>{document.body.classList.toggle('light'); state.theme=document.body.classList.contains('light')?'light':'dark'}); $('autoBtn').addEventListener('click',()=>{state.auto=!state.auto; $('autoBtn').textContent=`Auto: ${state.auto?'ligado':'desligado'}`; schedule()}); ['search','cat','prefix','sort'].forEach(id=>$(id).addEventListener('input',render)); ['cat','prefix','sort'].forEach(id=>$(id).addEventListener('change',render)); load();
 </script>
