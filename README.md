@@ -1,13 +1,9 @@
 # README v32.1
 
-## Correção do frontend
+## Atualização de versão
 
-O card de temperatura agora mostra exatamente:
+O frontend agora exibe `v32.1` no topo da página e no cartão de versão.
 
-- `Temperatura Atual: XXºC`
-- `Ponto de Orvalho: YYºC`
+## Arquivo atualizado
 
-## Arquivos atualizados
-
-- `worker_v32_temp_split_fix.js`
-- `frontend_v32_temp_split_fix.html`
+- `frontend_v32_1_versioned.html`
