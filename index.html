@@ -1,113 +1,215 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Painel Aeroportos Brasil v32.1</title>
-  <style>
-    body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:#16120f;color:#f2ece5}
-    .wrap{max-width:1200px;margin:0 auto;padding:20px}
-    .hero,.panel,.card{background:#221d18;border:1px solid #3d342a;border-radius:18px}
-    .hero{padding:20px;margin-bottom:16px}
-    h1{margin:8px 0 10px;font-size:clamp(1.8rem,4vw,3rem)}
-    .muted{color:#c8bfb1}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
-    input,button,select{background:#1a1612;color:#f2ece5;border:1px solid #3d342a;border-radius:999px;padding:12px 16px;font:inherit}
-    button{cursor:pointer}
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;padding:16px}
-    .stat{background:#1a1612;border:1px solid #3d342a;border-radius:16px;padding:14px}
-    .value{font-size:1.3rem;font-weight:800;margin-top:4px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;padding:16px}
-    .card{padding:16px}
-    .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .icao{font-size:1.2rem;font-weight:900}
-    .badge{padding:6px 10px;border-radius:999px;background:#2a3a1f;color:#b8df9a;font-weight:700;font-size:.9rem}
-    .badge.ifr{background:#3b2024;color:#f2a2a6}
-    .mini{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
-    .mini div{background:#1a1612;border:1px solid #3d342a;border-radius:14px;padding:10px}
-    .label{color:#c8bfb1;font-size:.9rem}
-    .raw{background:#1a1612;border:1px solid #3d342a;border-radius:14px;padding:10px;white-space:pre-wrap;overflow:auto;font-size:.92rem}
-    .small{font-size:.92rem}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Aeroportos Brasil v32.1</title>
+    <style>
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1a1a1e;
+            --text-color: #e1e1e6;
+            --text-secondary: #a8a8b3;
+            --accent-color: #00b37e;
+            --border-color: #29292e;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .grid-aeroportos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-header h2 {
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .card-header span {
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background-color: #004835;
+            color: #00b37e;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric-box {
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .metric-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .raw-data {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="hero">
-    <div class="muted">BRASIL · METAR EM TEMPO REAL v32.1</div>
-    <h1>Lista responsiva de aeroportos</h1>
-    <div class="muted">Mostra dados do Worker com METAR e TAF interpretados.</div>
-    <div class="toolbar">
-      <input id="q" placeholder="Ex.: SBSP, Recife, IFR">
-      <select id="sort"><option value="cat">Pior categoria primeiro</option><option value="icao">ICAO</option></select>
-      <button id="refresh">Atualizar</button>
-      <button id="theme">Tema</button>
+
+    <div class="container">
+        <header>
+            <h1>Painel Aeroportos Brasil</h1>
+            <p>Mostra dados interpretados do METAR e TAF</p>
+        </header>
+
+        <div class="grid-aeroportos" id="aeroportos-container">
+            <!-- Exemplo de Card SBKP -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>SBKP <small style="font-size:0.9rem; color:var(--text-secondary);">Campinas/Viracopos</small></h2>
+                    <span>IFR</span>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <span class="metric-label">Vento</span>
+                        <span class="metric-value">190° / 09 KT</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Pressão Atmosférica</span>
+                        <span class="metric-value">Q1020 hPa</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Temperatura Atual</span>
+                        <span class="metric-value">17 °C</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Ponto de Orvalho</span>
+                        <span class="metric-value">16 °C</span>
+                    </div>
+                </div>
+
+                <div class="raw-data">
+                    <strong>METAR raw:</strong> METAR SBKP 241900Z 00000KT 3500 -DZ BR BKN005 OVC013 17/16 Q1020
+                </div>
+            </div>
+
+            <!-- Exemplo de Card SBSP -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>SBSP <small style="font-size:0.9rem; color:var(--text-secondary);">Sao Paulo/Congonhas</small></h2>
+                    <span style="background-color: #003322; color: #00f099;">VFR</span>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <span class="metric-label">Vento</span>
+                        <span class="metric-value">160° / 06 KT</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Pressão Atmosférica</span>
+                        <span class="metric-value">Q1021 hPa</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Temperatura Atual</span>
+                        <span class="metric-value">15 °C</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Ponto de Orvalho</span>
+                        <span class="metric-value">14 °C</span>
+                    </div>
+                </div>
+
+                <div class="raw-data">
+                    <strong>METAR raw:</strong> METAR SBSP 241900Z 16006KT 6000 OVC009 15/14 Q1021
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="status" class="muted">Carregando...</div>
-  </div>
-  <div class="panel">
-    <div class="stats">
-      <div class="stat"><div class="label">Aeroportos online</div><div class="value" id="nOnline">0</div></div>
-      <div class="stat"><div class="label">Com TAF</div><div class="value" id="nTaf">0</div></div>
-      <div class="stat"><div class="label">IFR/LIFR</div><div class="value" id="nIfr">0</div></div>
-      <div class="stat"><div class="label">Versão</div><div class="value">v32.1</div></div>
-    </div>
-    <div id="list" class="grid"></div>
-  </div>
-</div>
-<script>
-const WORKER_URL = 'https://weathered-grass-f181.alexgrodrigues.workers.dev/';
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const sortRank = c => ({LIFR:0,IFR:1,MVFR:2,VFR:3}[String(c||'').toUpperCase()] ?? 9);
-function renderCard(r){
-  const cat = String(r.category||'N/A').toUpperCase();
-  const ifr = cat==='IFR'||cat==='LIFR';
-  return `<article class="card">
-    <div class="top"><div><div class="icao">${esc(r.icao)}</div><div class="muted small">${esc(r.name||'')}</div></div><div class="badge ${ifr?'ifr':''}">${esc(cat)}</div></div>
-    <div class="mini">
-      <div><div class="label">Direção</div><div><strong>${esc(r.windDirection||'—')}</strong></div></div>
-      <div><div class="label">Intensidade</div><div><strong>${esc(r.windIntensity||'—')} KT</strong></div></div>
-      <div><div class="label">Pressão Atmosférica</div><div><strong>${esc(r.pressure||'—')}</strong></div></div>
-      <div><div class="label">Visibilidade</div><div><strong>${esc(r.visibility||'—')}</strong></div></div>
-      <div><div class="label">Teto</div><div><strong>${esc(r.ceiling||'—')}</strong></div></div>
-      <div><div class="label">Temperatura Atual</div><div><strong>${esc((r.temperature?.current ?? '—'))}ºC</strong></div></div><div><div class="label">Ponto de Orvalho</div><div><strong>${esc((r.temperature?.dewpoint ?? '—'))}ºC</strong></div></div>
-    </div>
-    ${r.pressureAlert ? `<div class="small"><strong>${esc(r.pressureAlert)}</strong></div>` : ''}
-    <div class="small"><strong>METAR interpretado:</strong> direção ${esc(r.windDirection||'—')} · intensidade ${esc(r.windIntensity||'—')} KT · pressão ${esc(r.pressure||'—')} · vis ${esc(r.visibility||'—')} · teto ${esc(r.ceiling||'—')} · temp ${esc((r.temperature?.current ?? '—'))}ºC / orvalho ${esc((r.temperature?.dewpoint ?? '—'))}ºC</div>
-    <div class="small"><strong>TAF interpretado:</strong> ${esc(r.tafInterpret||'Sem TAF disponível.')}</div>
-    <div class="small"><strong>TEND.:</strong> ${esc(r.tafTrend||'sem grupos de tendência relevantes')}</div>
-    <div class="small"><strong>Alerta TAF:</strong> ${esc(r.tafAlert||'sem indicação forte de piora')}</div>
-    <div class="raw small" style="margin-top:10px"><strong>METAR raw:</strong>
-${esc(r.metar||'—')}</div>
-    ${r.taf ? `<div class="raw small" style="margin-top:10px"><strong>TAF raw:</strong>
-${esc(r.taf)}</div>` : ''}
-  </article>`;
-}
-async function load(){
-  try{
-    $('status').textContent='Carregando dados...';
-    const res = await fetch(WORKER_URL, { cache:'no-store' });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const rows = Array.isArray(data.rows) ? data.rows : [];
-    const q = $('q').value.trim().toLowerCase();
-    let filtered = rows.filter(r => !q || `${r.icao} ${r.name} ${r.city} ${r.state} ${r.category}`.toLowerCase().includes(q));
-    filtered.sort((a,b)=> $('sort').value==='icao' ? String(a.icao).localeCompare(String(b.icao)) : sortRank(a.category)-sortRank(b.category));
-    $('list').innerHTML = filtered.map(renderCard).join('');
-    $('nOnline').textContent = rows.length;
-    $('nTaf').textContent = rows.filter(r => r.taf).length;
-    $('nIfr').textContent = rows.filter(r => ['IFR','LIFR'].includes(String(r.category||'').toUpperCase())).length;
-    $('status').textContent = rows.length ? `Atualizado com ${rows.length} aeroportos` : 'Nenhum aeroporto retornado pela API';
-  } catch (e) {
-    $('status').textContent = 'Erro ao carregar dados: ' + e.message;
-    $('list').innerHTML = '';
-  }
-}
-$('refresh').onclick = load;
-$('theme').onclick = () => document.body.classList.toggle('light');
-$('q').oninput = load;
-$('sort').onchange = load;
-load();
-</script>
+
+    <script>
+        // Exemplo de função JavaScript para aplicar os parsers se você processar no Front-end:
+        function parseMetarDados(metarRaw) {
+            // Vento
+            const matchVento = metarRaw.match(/\b([0-9]{3}|VRB)([0-9]{2,3})(G[0-9]{2,3})?KT\b/);
+            let vento = "—";
+            if (matchVento) {
+                vento = matchVento[1] === 'VRB' ? `Variável / ${matchVento[2]} kt` : `${matchVento[1]}° / ${matchVento[2]} kt`;
+            }
+
+            // Pressão
+            const matchPressao = metarRaw.match(/\bQ([0-9]{4})\b/);
+            const pressao = matchPressao ? `${matchPressao[1]} hPa` : "—";
+
+            // Temperatura e Orvalho
+            const matchTemp = metarRaw.match(/\b(M?[0-9]{2})\/(M?[0-9]{2})\b/);
+            let temp = "—", orvalho = "—";
+            if (matchTemp) {
+                temp = `${matchTemp[1].replace('M', '-')} °C`;
+                orvalho = `${matchTemp[2].replace('M', '-')} °C`;
+            }
+
+            return { vento, pressao, temp, orvalho };
+        }
+    </script>
 </body>
 </html>
