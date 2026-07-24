@@ -41,3 +41,7 @@ Cada item de `metar` pode conter:
 
 ## Observação
 - O painel exibe apenas os aeroportos com METAR disponível no retorno do Worker.
+
+
+## TAF interpretado
+- O resumo agora tenta mostrar vento, visibilidade, nuvens e grupos de mudança do TAF antes do raw.
