@@ -1,9 +1,6 @@
-# README v36.1
+# v36.3 final
 
-## Correção
-- O frontend saiu do estado preso em "Carregando...".
-- Agora ele usa um `load()` com `try/catch` e valida `res.ok`.
-- A listagem continua separada por país.
+Removida a caixa de prévia do frontend final.
 
 ## Arquivo
-- `frontend_v36_mercosul_fixed.html`
+- `frontend_v36_final_nopreview.html`
