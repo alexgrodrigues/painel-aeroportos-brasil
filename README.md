@@ -45,3 +45,7 @@ Cada item de `metar` pode conter:
 
 ## TAF interpretado
 - O resumo agora tenta mostrar vento, visibilidade, nuvens e grupos de mudança do TAF antes do raw.
+
+
+## Versão
+- Esta edição é a v15.

@@ -26,7 +26,7 @@ body.light{--bg:#f5f3ef;--surface:#fcfbf8;--surface2:#f2efe8;--border:#d8d3c9;--
     <div>
       <p class="muted" style="letter-spacing:.18em;text-transform:uppercase;margin:0">Brasil · METAR em tempo real</p>
       <h1 class="title">Lista responsiva de aeroportos</h1>
-      <p class="muted">Somente aeroportos disponíveis no momento, com bloco interpretado e raw. <span style="font-size:.9rem;opacity:.85">Versão: v13</span></p>
+      <p class="muted">Somente aeroportos disponíveis no momento, com bloco interpretado e raw. <span style="font-size:.9rem;opacity:.85">Versão: v15</span></p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn" id="refreshBtn" type="button">Atualizar</button>
@@ -48,7 +48,7 @@ body.light{--bg:#f5f3ef;--surface:#fcfbf8;--surface2:#f2efe8;--border:#d8d3c9;--
       <div class="stat"><div class="muted">Aeroportos online</div><div style="font-size:2rem;font-weight:800" id="online">0</div></div>
       <div class="stat"><div class="muted">Com TAF</div><div style="font-size:2rem;font-weight:800" id="tafcount">0</div></div>
       <div class="stat"><div class="muted">IFR/LIFR</div><div style="font-size:2rem;font-weight:800" id="ifr">0</div></div>
-      <div class="stat"><div class="muted">Última atualização</div><div style="font-size:2rem;font-weight:800" id="updated">--</div><div class="muted" style="margin-top:6px">Versão exibida: v13</div></div>
+      <div class="stat"><div class="muted">Última atualização</div><div style="font-size:2rem;font-weight:800" id="updated">--</div><div class="muted" style="margin-top:6px">Versão exibida: v15</div></div>
     </div>
   </section>
   <section class="panel section" style="padding:18px">
@@ -79,18 +79,22 @@ function ceil(r,it){if(it?.clouds?.length){const b=it.clouds.filter(c=>['BKN','O
 function temp(r,it){if(it?.temp!=null&&it?.dewp!=null)return `${it.temp}/${it.dewp} °C`;const m=r.match(/(M?\d{2})\/(M?\d{2})/);return m?`${m[1].replace('M','-')}/${m[2].replace('M','-')} °C`:'—'}
 function cat(r,it){if(it?.fltCat)return it.fltCat; const c=ceil(r,it),v=it?.visib!=null?Number(String(it.visib).replace('6+','6')):(/9999|CAVOK/.test(r)?10:(r.match(/(\d{4})/)?Number(r.match(/(\d{4})/)[1])/1000:null)); const f=parseInt(c); if((!isNaN(f)&&f<500)||(v!=null&&v<1.6))return 'LIFR'; if((!isNaN(f)&&f<1000)||(v!=null&&v<4.8))return 'IFR'; if((!isNaN(f)&&f<=3000)||(v!=null&&v<=8.0))return 'MVFR'; return 'VFR'}
 function time(it){const d=new Date(it?.reportTime||it?.receiptTime||it?.obsTime||Date.now()); return isNaN(d)?'—':d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
-function tafsum(r){if(!r)return 'Sem TAF disponível.'; const s=r.replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s}
+function tafsum(r){if(!r)return 'Sem TAF disponível.'; const s=String(r).replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s}
 function tafInterpret(rawtaf){
   if(!rawtaf) return 'Sem TAF disponível.';
-  const txt=rawtaf.replace(/\s+/g,' ').trim();
+  const txt=String(rawtaf).replace(/\s+/g,' ').trim();
   const parts=[];
-  const vis=txt.match(/(P6SM|\d{4})/);
-  const wind=txt.match(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT/);
-  const groups=[...txt.matchAll(/(TEMPO|BECMG|FM\d{6}|PROB\d{2})[^A-Z0-9]*(.*?)(?=(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})|$)/g)];
+  const wind=txt.match(/\b(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT\b/);
+  const vis=txt.match(/\b(P6SM|\d{4})\b/);
+  const clouds=txt.match(/\b(?:FEW|SCT|BKN|OVC)\d{3}\b/g);
   if(wind) parts.push(`Vento ${wind[0]}`);
   if(vis) parts.push(`Visibilidade ${vis[0]}`);
-  if(groups.length) parts.push(groups.map(g=>`${g[1]} ${g[2].trim()}`.trim()).join(' | '));
-  if(/CAVOK/.test(txt)) parts.push('CAVOK');
+  if(clouds && clouds.length) parts.push(`Nuvens ${clouds.slice(0,3).join(', ')}`);
+  const groups=[];
+  const re=/(TEMPO|BECMG|FM\d{6}|PROB\d{2})([\s\S]*?)(?=\b(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})\b|$)/g;
+  let m; while((m=re.exec(txt))!==null){groups.push(`${m[1]} ${m[2].replace(/\s+/g,' ').trim()}`.trim())}
+  if(groups.length) parts.push(groups.join(' | '));
+  if(/\bCAVOK\b/.test(txt)) parts.push('CAVOK');
   return parts.length?parts.join(' · '):txt;
 }
 async function load(){
