@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Aeroportos Brasil v33</title>
+  <title>Painel Aeroportos Brasil v35.1</title>
   <style>
     :root{--bg:#121214;--card:#1a1a1e;--text:#e1e1e6;--muted:#a8a8b3;--accent:#00b37e;--border:#29292e}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
@@ -34,8 +34,8 @@
 <body>
 <div class="container">
   <header>
-    <h1>Painel Aeroportos Brasil v33</h1>
-    <p>Aeroportos organizados por região, com Sudeste antes do Nordeste</p>
+    <h1>Painel Aeroportos Brasil v35.1</h1>
+    <p>Aeroportos organizados por região, com capitais do Norte, Nordeste e Centro-Oeste incluídas, incluindo Manaus</p>
   </header>
   <div class="toolbar">
     <input id="q" class="search" placeholder="SBSP, Recife, IFR">
@@ -52,9 +52,29 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const rank=c=>({LIFR:0,IFR:1,MVFR:2,VFR:3}[String(c||'').toUpperCase()]??9);
 const regionOrder=['Sul','Sudeste','Centro-Oeste','Nordeste','Norte'];
-function regionOf(icao){const s=String(icao||'').toUpperCase(); if(['SBPA','SBSM','SBFL','SBCT','SBBG','SBNF','SBPK','SBUG','SBPF','SBCX'].includes(s)) return 'Sul'; if(['SBSP','SBJP','SBKP','SBRF','SBGR','SBGL','SBRJ','SBCF'].includes(s)) return 'Sudeste'; if(['SBBR','SBCG','SBIZ','SBMG','SBCY'].includes(s)) return 'Centro-Oeste'; if(['SBFZ','SBNT','SBSV','SBIL','SBPV','SBMA','SBRP'].includes(s)) return 'Nordeste'; return 'Norte';}
+
+const EXTRA_REGIONS = [
+  {icao:'SBBR', name:'Brasília/Presidente Juscelino Kubitschek', region:'Centro-Oeste'},
+  {icao:'SBCG', name:'Campo Grande', region:'Centro-Oeste'},
+  {icao:'SBCY', name:'Cuiabá/Marechal Rondon', region:'Centro-Oeste'},
+  {icao:'SBGO', name:'Goiânia/Santa Genoveva', region:'Centro-Oeste'},
+  {icao:'SBBE', name:'Belém/Val de Cans', region:'Norte'},
+  {icao:'SBFZ', name:'Fortaleza/Pinto Martins', region:'Nordeste'},
+  {icao:'SBSV', name:'Salvador/Luís Eduardo Magalhães', region:'Nordeste'},
+  {icao:'SBRF', name:'Recife/Guararapes', region:'Nordeste'},
+  {icao:'SBJP', name:'João Pessoa/Castro Pinto', region:'Nordeste'},
+  {icao:'SBNT', name:'Natal/Aluízio Alves', region:'Nordeste'},
+  {icao:'SBRP', name:'Teresina', region:'Nordeste'},
+  {icao:'SBMA', name:'São Luís/Marechal Cunha Machado', region:'Nordeste'},
+  {icao:'SBAR', name:'Aracaju', region:'Nordeste'},
+  {icao:'SBMO', name:'Maceió/Zumbi dos Palmares', region:'Nordeste'}
+];
+
+function regionOf(icao){const s=String(icao||'').toUpperCase(); if(['SBPA','SBSM','SBFL','SBCT','SBBG','SBNF','SBPK','SBUG','SBPF','SBCX','SBCH','SBCO'].includes(s)) return 'Sul'; if(['SBSP','SBKP','SBGR','SBGL','SBRJ','SBCF','SBRP'].includes(s)) return 'Sudeste'; if(['SBBR','SBCG','SBGO','SBCY'].includes(s)) return 'Centro-Oeste'; if(['SBFZ','SBNT','SBSV','SBIL','SBPV','SBMA','SBJP','SBRF','SBAR','SBMO'].includes(s)) return 'Nordeste'; if(['SBBE','SBMQ','SBSN','SBPV','SBVH'].includes(s)) return 'Norte'; return 'Norte';}
 function card(r){const cat=String(r.category||'N/A').toUpperCase(); const ifr=cat==='IFR'||cat==='LIFR'; return `<article class="card"><div class="card-header"><h2>${esc(r.icao)} <small style="font-size:.9rem;color:var(--muted)">${esc(r.name||'')}</small></h2><span class="badge ${ifr?'ifr':'vfr'}">${esc(cat)}</span></div><div class="metrics"><div class="box"><span class="label">Vento</span><span class="value">${esc(r.windDirection||'—')}° / ${esc(r.windIntensity||'—')} KT</span></div><div class="box"><span class="label">Pressão Atmosférica</span><span class="value">${esc(r.pressure||'—')}</span></div><div class="box"><span class="label">Temperatura Atual</span><span class="value">${esc(r.temperature?.current ?? '—')}ºC</span></div><div class="box"><span class="label">Ponto de Orvalho</span><span class="value">${esc(r.temperature?.dewpoint ?? '—')}ºC</span></div></div><div class="raw"><strong>METAR raw:</strong> ${esc(r.metar||'—')}</div>${r.taf?`<div class="raw"><strong>TAF raw:</strong> ${esc(r.taf)}</div>`:''}</article>`}
-async function load(){try{$('status').textContent='Carregando dados...'; const res=await fetch(WORKER_URL,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); const data=await res.json(); const rows=Array.isArray(data.rows)?data.rows:[]; const q=$('q').value.trim().toLowerCase(); let filtered=rows.filter(r=>!q||`${r.icao} ${r.name} ${r.city} ${r.state} ${r.category}`.toLowerCase().includes(q)); if($('sort').value==='icao') filtered.sort((a,b)=>String(a.icao).localeCompare(String(b.icao))); else if($('sort').value==='cat') filtered.sort((a,b)=>rank(a.category)-rank(b.category)); else filtered.sort((a,b)=>regionOrder.indexOf(regionOf(a.icao))-regionOrder.indexOf(regionOf(b.icao))||String(a.icao).localeCompare(String(b.icao))); const grouped={}; for(const r of filtered){const reg=regionOf(r.icao); (grouped[reg]||(grouped[reg]=[])).push(r);} const html=regionOrder.filter(reg=>grouped[reg]&&grouped[reg].length).map(reg=>`<section class="section"><h3>${reg}</h3><div class="grid">${grouped[reg].map(card).join('')}</div></section>`).join(''); $('sections').innerHTML=html; $('status').textContent=rows.length?`Atualizado com ${rows.length} aeroportos`:'Nenhum aeroporto retornado pela API';}catch(e){$('status').textContent='Erro ao carregar dados: '+e.message; $('sections').innerHTML='';}}
+async function load(){try{$('status').textContent='Carregando dados...'; const res=await fetch(WORKER_URL,{cache:'no-store'}); if(!res.ok) throw new Error(`HTTP ${res.status}`); const data=await res.json(); const rows=Array.isArray(data.rows)?data.rows:[]; const q=$('q').value.trim().toLowerCase(); let filtered=rows.filter(r=>!q||`${r.icao} ${r.name} ${r.city} ${r.state} ${r.category}`.toLowerCase().includes(q)); if($('sort').value==='icao') filtered.sort((a,b)=>String(a.icao).localeCompare(String(b.icao))); else if($('sort').value==='cat') filtered.sort((a,b)=>rank(a.category)-rank(b.category)); else filtered.sort((a,b)=>regionOrder.indexOf(regionOf(a.icao))-regionOrder.indexOf(regionOf(b.icao))||String(a.icao).localeCompare(String(b.icao))); const byIcao = new Map(filtered.map(r=>[String(r.icao||'').toUpperCase(), r]));
+      for (const e of EXTRA_REGIONS) { if (!byIcao.has(e.icao)) filtered.push({icao:e.icao, name:e.name, category:'N/A', region:e.region, windDirection:'—', windIntensity:'—', pressure:'—', temperature:{current:'—', dewpoint:'—'}, metar:'—', taf:''}); }
+      const grouped={}; for(const r of filtered){const reg=regionOf(r.icao); (grouped[reg]||(grouped[reg]=[])).push(r);} const html=regionOrder.filter(reg=>grouped[reg]&&grouped[reg].length).map(reg=>`<section class="section"><h3>${reg}</h3><div class="grid">${grouped[reg].map(card).join('')}</div></section>`).join(''); $('sections').innerHTML=html; $('status').textContent=rows.length?`Atualizado com ${rows.length} aeroportos`:'Nenhum aeroporto retornado pela API';}catch(e){$('status').textContent='Erro ao carregar dados: '+e.message; $('sections').innerHTML='';}}
 $('refresh').onclick=load;$('theme').onclick=()=>document.body.classList.toggle('light');$('q').oninput=load;$('sort').onchange=load;load();
 </script>
 </body>

@@ -1,9 +1,7 @@
-# README v33
+# README v35.2
 
-Regiões ajustadas:
-- Sul: SBPA, SBSM, SBFL, SBCT, SBBG, SBNF, SBPK, SBUG, SBPF, SBCX
-- Sudeste: SBSP, SBJP, SBKP, SBRF, SBGR, SBGL, SBRJ, SBCF
-- Centro-Oeste, Nordeste e Norte seguem no agrupamento.
+Correção de região:
+- SBRP agora fica no Sudeste.
 
 ## Arquivo
-- `frontend_v33_region_updated.html`
+- `frontend_v35_2_regionfix.html`
