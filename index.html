@@ -122,7 +122,7 @@
         </header>
 
         <div class="grid-aeroportos" id="aeroportos-container">
-            <!-- Exemplo de Card SBKP -->
+            <!-- Card SBKP -->
             <div class="card">
                 <div class="card-header">
                     <h2>SBKP <small style="font-size:0.9rem; color:var(--text-secondary);">Campinas/Viracopos</small></h2>
@@ -153,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- Exemplo de Card SBSP -->
+            <!-- Card SBSP -->
             <div class="card">
                 <div class="card-header">
                     <h2>SBSP <small style="font-size:0.9rem; color:var(--text-secondary);">Sao Paulo/Congonhas</small></h2>
@@ -187,20 +187,17 @@
     </div>
 
     <script>
-        // Exemplo de função JavaScript para aplicar os parsers se você processar no Front-end:
+        // Função de parser para extrair dinamicamente caso receba o METAR cru do Worker
         function parseMetarDados(metarRaw) {
-            // Vento
             const matchVento = metarRaw.match(/\b([0-9]{3}|VRB)([0-9]{2,3})(G[0-9]{2,3})?KT\b/);
             let vento = "—";
             if (matchVento) {
                 vento = matchVento[1] === 'VRB' ? `Variável / ${matchVento[2]} kt` : `${matchVento[1]}° / ${matchVento[2]} kt`;
             }
 
-            // Pressão
             const matchPressao = metarRaw.match(/\bQ([0-9]{4})\b/);
             const pressao = matchPressao ? `${matchPressao[1]} hPa` : "—";
 
-            // Temperatura e Orvalho
             const matchTemp = metarRaw.match(/\b(M?[0-9]{2})\/(M?[0-9]{2})\b/);
             let temp = "—", orvalho = "—";
             if (matchTemp) {
