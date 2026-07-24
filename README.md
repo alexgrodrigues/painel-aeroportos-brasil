@@ -11,6 +11,7 @@ Este projeto mostra os aeroportos disponíveis no momento, separados por região
 - Separação por região: Norte, Nordeste, Centro-Oeste, Sudeste, Sul e Outras.
 - Bloco de detalhes com METAR interpretado, TAF interpretado e raw.
 - Navegação por âncoras a partir da lista.
+- O bloco de cada aeroporto mostra um resumo interpretado do METAR antes do raw.
 
 ## Fonte dos dados
 - O painel consulta o Worker da Cloudflare definido em `WORKER_URL` dentro do HTML.
@@ -19,6 +20,7 @@ Este projeto mostra os aeroportos disponíveis no momento, separados por região
 ## Atualização automática
 - A lista é recarregada a cada 15 minutos.
 - Há botão de atualização manual.
+- Os botões ficam desabilitados durante a consulta e são reativados ao terminar.
 
 ## Como publicar no GitHub Pages
 1. Coloque `index.html` e `README.md` na raiz do repositório.
