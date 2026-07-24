@@ -8,109 +8,53 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root, [data-theme="light"] {
-      --bg:#f6f4ef; --surface:#fcfbf8; --surface2:#f4f2ed; --border:#d8d4cb; --divider:#e3dfd8; --text:#27241d; --muted:#726d63;
-      --primary:#006f75; --primary2:#0b5960; --success:#3f7d22; --successSoft:#dbebd4; --danger:#a33b49; --dangerSoft:#f4dde2; --warn:#b57d00;
-      --shadow:0 12px 30px rgba(0,0,0,.08); --radius:20px;
-    }
-    [data-theme="dark"] {
-      --bg:#171614; --surface:#1d1c1a; --surface2:#22211f; --border:#373531; --divider:#2b2a27; --text:#e8e4dc; --muted:#aaa59b;
-      --primary:#5ca9b2; --primary2:#86c0c7; --success:#88c65e; --successSoft:rgba(136,198,94,.15); --danger:#ef8697; --dangerSoft:rgba(239,134,151,.15); --warn:#f0c45a;
-      --shadow:0 12px 30px rgba(0,0,0,.35);
-    }
+    :root,[data-theme="light"]{--bg:#f5f3ef;--surface:#fcfbf8;--surface2:#f2efe8;--border:#d8d3c9;--divider:#e5e0d8;--text:#27241e;--muted:#6f695f;--primary:#0f7178;--primary2:#0b5d63;--success:#3e7a22;--successSoft:#d9ead0;--danger:#a33b49;--dangerSoft:#f4dde2;--warn:#b88400;--shadow:0 12px 30px rgba(0,0,0,.08)}
+    [data-theme="dark"]{--bg:#161512;--surface:#1d1b18;--surface2:#22201d;--border:#37332e;--divider:#2c2824;--text:#e9e4dc;--muted:#aaa59c;--primary:#63aeb5;--primary2:#8ac7ce;--success:#86c55b;--successSoft:rgba(134,197,91,.14);--danger:#ee8395;--dangerSoft:rgba(238,131,149,.15);--warn:#f0c55c;--shadow:0 12px 30px rgba(0,0,0,.35)}
     *{box-sizing:border-box} html{scroll-behavior:smooth}
     body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-    .shell{max-width:1280px;margin:0 auto;padding:24px}
-    .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-    .brand{display:flex;gap:14px;align-items:flex-start}
-    .logo{width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow)}
-    .eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:.78rem;color:var(--muted)}
-    h1,h2,h3,p{margin:0} h1{font-size:clamp(1.6rem,2.6vw,2.9rem);line-height:1.05;margin:.2rem 0 .55rem}
+    .shell{max-width:1360px;margin:0 auto;padding:24px}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+    .brand{display:flex;gap:14px;align-items:flex-start}.logo{width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow)}
+    .eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:.78rem;color:var(--muted)} h1,h2,h3,p{margin:0} h1{font-size:clamp(1.7rem,2.7vw,3rem);line-height:1.05;margin:.2rem 0 .55rem}
     .lede,.muted,.footer-note{color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{min-height:46px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 16px;cursor:pointer;transition:.18s ease}
-    .btn:hover{border-color:var(--primary);color:var(--primary)}
-    .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary2);color:#fff}
-    .icon-btn{width:46px;padding:0}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{min-height:46px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 16px;cursor:pointer}.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn-icon{width:46px;padding:0}
     .panel{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);padding:22px;margin-bottom:22px}
-    .section-title{font-size:clamp(1.35rem,2vw,2.15rem);margin:4px 0 8px}
-    .grid{display:grid;gap:14px}
-    .filters{grid-template-columns:2.1fr 1fr 1fr 1fr auto; margin-top:18px}
-    .field{min-height:46px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 14px;width:100%}
-    .diagnostic{margin-top:14px;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}
-    .diagnostic.ok{border-color:color-mix(in srgb,var(--success) 40%, var(--border));background:var(--successSoft)}
-    .diagnostic.error{border-color:color-mix(in srgb,var(--danger) 40%, var(--border));background:var(--dangerSoft)}
-    .cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}
-    .stat{padding:18px;border-radius:18px;background:var(--surface);border:1px solid var(--border)}
-    .stat-label{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-    .stat-value{font-size:2rem;font-weight:800;line-height:1}
-    .stat-sub{margin-top:8px;color:var(--muted);font-size:.92rem}
-    .map-panel{position:relative;overflow:hidden}
-    .map-wrap{position:relative;min-height:440px;border-radius:22px;overflow:hidden;border:1px solid var(--border);background:
-      radial-gradient(circle at 20% 20%, rgba(255,255,255,.18), transparent 24%),
-      radial-gradient(circle at 80% 20%, rgba(255,255,255,.12), transparent 24%),
-      linear-gradient(180deg, color-mix(in srgb,var(--primary) 12%, var(--surface)), var(--surface2));}
-    .map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;filter:grayscale(1) contrast(1.05)}
-    .map-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.02))}
+    .section-title{font-size:clamp(1.35rem,2vw,2.1rem);margin:4px 0 8px}
+    .map-wrap{position:relative;min-height:620px;border-radius:22px;overflow:hidden;border:1px solid var(--border);background:radial-gradient(circle at 30% 22%, rgba(255,255,255,.16), transparent 22%),radial-gradient(circle at 76% 18%, rgba(255,255,255,.12), transparent 20%),linear-gradient(180deg,color-mix(in srgb,var(--primary) 12%, var(--surface)),var(--surface2))}
+    .map-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.20;filter:grayscale(1) contrast(1.05)}
+    .map-overlay{position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.02))}
     .map-markers{position:absolute;inset:0}
-    .marker{position:absolute;transform:translate(-50%,-50%);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
-    .marker-dot{width:14px;height:14px;border-radius:999px;background:var(--primary);border:2px solid #fff;box-shadow:0 0 0 5px rgba(0,0,0,.12)}
-    .marker-label{font-size:12px;font-weight:800;background:rgba(0,0,0,.64);color:#fff;padding:4px 8px;border-radius:999px;white-space:nowrap}
-    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:.85rem}
-    .dot{width:9px;height:9px;border-radius:999px;background:currentColor}
-    .good{color:var(--success)} .bad{color:var(--danger)} .neutral{color:var(--warn)}
-    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:20px;background:var(--surface)}
-    table{width:100%;min-width:1080px;border-collapse:collapse}
-    th,td{padding:14px 16px;border-bottom:1px solid var(--divider);vertical-align:top;text-align:left}
-    th{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--surface2)}
-    tbody tr:hover{background:color-mix(in srgb,var(--primary) 4%, var(--surface))}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:700;font-size:.84rem}
-    .badge.good{background:var(--successSoft);color:var(--success)} .badge.bad{background:var(--dangerSoft);color:var(--danger)} .badge.neutral{background:color-mix(in srgb,var(--warn) 14%, var(--surface));color:var(--warn)}
-    .airport-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}
-    .airport-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:18px;scroll-margin-top:18px}
-    .airport-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
-    .airport-title{font-size:1.12rem;font-weight:800}
-    .airport-sub{margin-top:4px;color:var(--muted)}
-    .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px}
-    .mini{padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2)}
-    .mini span{display:block;font-size:.75rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-    .code-block{padding:14px;border-radius:16px;background:#111;color:#f5f5f5;font:500 .88rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;word-break:break-word}
-    .empty{padding:22px;border:1px dashed var(--border);border-radius:18px;color:var(--muted);background:var(--surface)}
+    .marker{position:absolute;transform:translate(-50%,-50%);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:6px;white-space:nowrap}
+    .marker-dot{width:14px;height:14px;border-radius:999px;border:2px solid #fff;box-shadow:0 0 0 5px rgba(0,0,0,.12)}
+    .marker-label{font-size:12px;font-weight:800;background:rgba(0,0,0,.70);color:#fff;padding:4px 8px;border-radius:999px}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface)}.dot{width:9px;height:9px;border-radius:999px;background:currentColor}.good{color:var(--success)} .bad{color:var(--danger)} .neutral{color:var(--warn)}
+    .grid{display:grid;gap:14px}.filters{grid-template-columns:2.1fr 1fr 1fr 1fr auto;margin-top:18px}.field{min-height:46px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:0 14px;width:100%}
+    .diagnostic{margin-top:14px;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--surface)}.diagnostic.ok{border-color:color-mix(in srgb,var(--success) 40%, var(--border));background:var(--successSoft)}.diagnostic.error{border-color:color-mix(in srgb,var(--danger) 40%, var(--border));background:var(--dangerSoft)}
+    .cards{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px}.stat{padding:18px;border-radius:18px;background:var(--surface);border:1px solid var(--border)}.stat-label{font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}.stat-value{font-size:2rem;font-weight:800;line-height:1}.stat-sub{margin-top:8px;color:var(--muted);font-size:.92rem}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:20px;background:var(--surface)} table{width:100%;min-width:1080px;border-collapse:collapse} th,td{padding:14px 16px;border-bottom:1px solid var(--divider);vertical-align:top;text-align:left} th{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--surface2)} tbody tr:hover{background:color-mix(in srgb,var(--primary) 4%, var(--surface))}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-weight:700;font-size:.84rem}.badge.good{background:var(--successSoft);color:var(--success)}.badge.bad{background:var(--dangerSoft);color:var(--danger)}.badge.neutral{background:color-mix(in srgb,var(--warn) 14%, var(--surface));color:var(--warn)}
+    .airport-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:18px}.airport-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:18px;scroll-margin-top:18px}.airport-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.airport-title{font-size:1.12rem;font-weight:800}.airport-sub{margin-top:4px;color:var(--muted)}.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px}.mini{padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2)}.mini span{display:block;font-size:.75rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.code-block{padding:14px;border-radius:16px;background:#111;color:#f5f5f5;font:500 .88rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;word-break:break-word}.empty{padding:22px;border:1px dashed var(--border);border-radius:18px;color:var(--muted);background:var(--surface)}
     @media (max-width:1080px){.filters,.cards{grid-template-columns:1fr 1fr}.airport-grid{grid-template-columns:1fr}}
-    @media (max-width:720px){.shell{padding:16px}.filters,.cards,.mini-grid{grid-template-columns:1fr}.map-wrap{min-height:360px}}
+    @media (max-width:720px){.shell{padding:16px}.filters,.cards,.mini-grid{grid-template-columns:1fr}.map-wrap{min-height:420px}}
   </style>
 </head>
 <body>
   <div class="shell">
     <header class="topbar">
-      <div class="brand">
-        <div class="logo" aria-hidden="true">✈</div>
-        <div>
-          <div class="eyebrow">Brasil · operação</div>
-          <h1>Painel Aeroportos Brasil</h1>
-          <p class="lede">Mapa com marcadores clicáveis e detalhes de METAR/TAF carregados via Worker da Cloudflare.</p>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn btn-primary" id="refreshBtn">Atualizar agora</button>
-        <button class="btn icon-btn" id="themeBtn" aria-label="Alternar tema">◐</button>
-      </div>
+      <div class="brand"><div class="logo">✈</div><div><div class="eyebrow">Brasil · operação</div><h1>Painel Aeroportos Brasil</h1><p class="lede">Mapa com marcadores clicáveis e detalhes de METAR/TAF via Worker da Cloudflare.</p></div></div>
+      <div class="actions"><button class="btn btn-primary" id="refreshBtn">Atualizar agora</button><button class="btn btn-icon" id="themeBtn">◐</button></div>
     </header>
 
-    <section class="panel map-panel" id="mapa-brasil">
+    <section class="panel">
       <div class="eyebrow">Mapa do Brasil</div>
       <h2 class="section-title">Clique no aeroporto para ir ao METAR/TAF</h2>
       <p class="muted">Os marcadores usam coordenadas aproximadas e levam você direto ao card do aeroporto.</p>
       <div class="map-wrap">
+        <svg class="map-bg" viewBox="0 0 1200 800" aria-hidden="true"><path d="M340 120 L450 90 L560 120 L650 95 L720 130 L820 175 L890 260 L930 340 L900 410 L860 475 L790 545 L690 620 L590 660 L480 640 L395 580 L340 490 L300 400 L285 310 L300 220 Z" fill="#6f8f80"/></svg>
         <div class="map-overlay"></div>
         <div id="airportMarkers" class="map-markers"></div>
       </div>
-      <div class="legend">
-        <span class="pill"><span class="dot good"></span>VFR / MVFR</span>
-        <span class="pill"><span class="dot bad"></span>IFR / LIFR</span>
-        <span class="pill"><span class="dot neutral"></span>Marcador clicável</span>
-      </div>
+      <div class="legend"><span class="pill"><span class="dot good"></span>VFR / MVFR</span><span class="pill"><span class="dot bad"></span>IFR / LIFR</span><span class="pill"><span class="dot neutral"></span>Marcador clicável</span></div>
     </section>
 
     <section class="panel">
@@ -146,107 +90,33 @@
       <div id="emptyState" class="empty" hidden>Nenhum aeroporto corresponde aos filtros atuais.</div>
     </section>
   </div>
-
-  <script>
-    const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
-    const ICAOS = ["SBCO","SBPA","SBSM","SBFL","SBPE","SBCH","SBCT","SBKP","SBSP","SBGR","SBGL","SBRJ","SBBR","SBCF","SBSV","SBRF","SBJP"];
-    const coords = {
-      SBCO:[-29.945928,-51.144413], SBPA:[-29.994712,-51.166592], SBSM:[-29.711399,-53.688202], SBFL:[-27.670279,-48.552502],
-      SBPE:[-31.718333,-52.324722], SBCH:[-27.134199,-52.656601], SBCT:[-25.5285,-49.1758], SBKP:[-23.007404,-47.134502],
-      SBSP:[-23.627657,-46.654601], SBGR:[-23.431944,-46.467778], SBGL:[-22.809999,-43.250557], SBRJ:[-22.9105,-43.163101],
-      SBBR:[-15.869167,-47.920834], SBCF:[-19.63571,-43.966928], SBSV:[-12.908611,-38.322498], SBRF:[-8.125984,-34.923316], SBJP:[-7.148691,-34.950554]
-    };
-    const CITY_FALLBACK = {SBCO:"Canoas",SBPA:"Porto Alegre",SBSM:"Santa Maria",SBFL:"Florianópolis",SBPE:"Pelotas",SBCH:"Chapecó",SBCT:"Curitiba",SBKP:"Campinas",SBSP:"São Paulo - Congonhas",SBGR:"São Paulo - Guarulhos",SBGL:"Rio de Janeiro - Galeão",SBRJ:"Rio de Janeiro - Santos Dumont",SBBR:"Brasília",SBCF:"Belo Horizonte - Confins",SBSV:"Salvador",SBRF:"Recife",SBJP:"João Pessoa"};
-    const state = {theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light', autoRefresh:true, rows:[], timer:null, refreshMinutes:15};
-    document.documentElement.setAttribute('data-theme', state.theme);
-    const el = id => document.getElementById(id);
-    function setDiagnostic(m,t='ok'){el('diagnosticBox').className=`diagnostic ${t}`;el('diagnosticBox').textContent=m}
-    function esc(s=''){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
-    function rank(c){return ({LIFR:4,IFR:3,MVFR:2,VFR:1})[c]||0}
-    function badgeClass(c){return (c==='IFR'||c==='LIFR')?'bad':((c==='VFR'||c==='MVFR')?'good':'neutral')}
-    function project(lat,lon){const x=((lon+74)/41)*100; const y=((34-lat)/39)*100; return {left:Math.max(4,Math.min(96,x)), top:Math.max(6,Math.min(94,y))}}
-    function extractRaw(x){return x?.rawOb || x?.rawTAF || x?.raw || x?.text || ''}
-    function parseTemp(raw,item){if(item?.temp!==undefined && item?.dewp!==undefined) return `${item.temp} / ${item.dewp} °C`; const m=raw.match(/\b(M?\d{2})\/(M?\d{2})\b/); return m?`${m[1].replace('M','-')} / ${m[2].replace('M','-')} °C`:'—'}
-    function parseWind(raw){const m=raw.match(/\b((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT)\b/); return m?m[1]:'—'}
-    function parseVisibility(raw,item){ if(item?.visib!==undefined && item?.visib!==null) return String(item.visib); if(/\bCAVOK\b/.test(raw)) return '10 km+'; const m=raw.match(/\b(\d{4})\b/); return m ? (m[1]==='9999'?'10 km+':`${(Number(m[1])/1000).toFixed(1).replace('.0','')} km`) : '—'; }
-    function parseCeiling(raw,item){ if(item?.clouds?.length){const bases=item.clouds.filter(c=>['BKN','OVC','VV'].includes(c.cover)&&typeof c.base==='number').map(c=>c.base); if(bases.length) return {text:`${Math.min(...bases)} ft`,feet:Math.min(...bases)}} const m=[...raw.matchAll(/\b(?:BKN|OVC|VV)(\d{3})\b/g)].map(x=>Number(x[1])*100); if(!m.length) return {text:'Sem teto',feet:99999}; return {text:`${Math.min(...m)} ft`,feet:Math.min(...m)} }
-    function classify(raw,item){ if(item?.fltCat) return item.fltCat; const vis = item?.visib!==undefined && item?.visib!==null ? Number(String(item.visib).replace('6+','6')) : (/\b9999\b|\bCAVOK\b/.test(raw)?10:(raw.match(/\b(\d{4})\b/)?Number(raw.match(/\b(\d{4})\b/)[1])/1000:null)); const ceil=parseCeiling(raw,item).feet; if((ceil!==null && ceil<500)||(vis!==null && vis<1.6)) return 'LIFR'; if((ceil!==null && ceil<1000)||(vis!==null && vis<4.8)) return 'IFR'; if((ceil!==null && ceil<=3000)||(vis!==null && vis<=8.0)) return 'MVFR'; return 'VFR'; }
-    function formatTime(item){ const raw = item?.reportTime || item?.receiptTime || item?.obsTime || item?.issueTime; if(!raw) return '—'; const d = new Date(raw); return isNaN(d)?'—':d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) }
-    function tafSummary(raw){ if(!raw) return 'Sem TAF disponível.'; const s=raw.replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s }
-    function cityOf(icao,item){ return item?.name || CITY_FALLBACK[icao] || 'Cidade não definida' }
-
-    async function loadData(){
-      setDiagnostic('Consultando dados pelo Worker da Cloudflare.', 'ok');
-      try {
-        const res = await fetch(WORKER_URL, {headers:{Accept:'application/json'}});
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        const payload = await res.json();
-        const metars = Array.isArray(payload.metar) ? payload.metar : [];
-        const tafs = Array.isArray(payload.taf) ? payload.taf : [];
-        const tafMap = new Map(tafs.map(x => [x.icaoId || x.icao || x.stationId, x]));
-        const metarMap = new Map(metars.map(x => [x.icaoId || x.icao || x.stationId, x]));
-
-        state.rows = ICAOS.map(icao => {
-          const m = metarMap.get(icao);
-          if(!m) return null;
-          const raw = extractRaw(m);
-          const taf = tafMap.get(icao);
-          const [lat, lon] = coords[icao] || [null, null];
-          const p = (lat != null && lon != null) ? project(lat, lon) : {left:50, top:50};
-          return { icao, lat, lon, left:p.left, top:p.top, city:cityOf(icao,m), category:classify(raw,m), wind:parseWind(raw), visibility:parseVisibility(raw,m), ceiling:parseCeiling(raw,m).text, ceilingFeet:parseCeiling(raw,m).feet, temperature:parseTemp(raw,m), observed:formatTime(m), rawMetar:raw || 'Sem METAR disponível.', tafSummary:tafSummary(extractRaw(taf)), hasTaf:Boolean(taf) };
-        }).filter(Boolean);
-
-        el('onlineCount').textContent = state.rows.length;
-        el('tafCount').textContent = state.rows.filter(r => r.hasTaf).length;
-        el('ifrCount').textContent = state.rows.filter(r => ['IFR','LIFR'].includes(r.category)).length;
-        const now = new Date();
-        el('lastUpdated').textContent = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-        const next = new Date(now.getTime() + state.refreshMinutes*60000);
-        el('nextRefresh').textContent = `Próxima: ${next.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
-        setDiagnostic(`Consulta concluída: ${state.rows.length} aeroportos com METAR, ${state.rows.filter(r=>r.hasTaf).length} com TAF.`, 'ok');
-        render();
-      } catch(err) {
-        state.rows = [];
-        render();
-        setDiagnostic(`Erro ao carregar dados: ${err.message}`, 'error');
-        el('onlineCount').textContent = '0'; el('tafCount').textContent='0'; el('ifrCount').textContent='0';
-      }
-      scheduleRefresh();
-    }
-
-    function filteredRows(){
-      const q = el('searchInput').value.trim().toLowerCase();
-      let rows = [...state.rows];
-      if(q) rows = rows.filter(r => [r.icao, r.city, r.rawMetar, r.tafSummary].join(' ').toLowerCase().includes(q));
-      if(el('categoryFilter').value !== 'all') rows = rows.filter(r => r.category === el('categoryFilter').value);
-      if(el('prefixFilter').value !== 'all') rows = rows.filter(r => r.icao.startsWith(el('prefixFilter').value));
-      rows.sort((a,b)=>{ const s=el('sortSelect').value; if(s==='icao') return a.icao.localeCompare(b.icao); if(s==='city') return a.city.localeCompare(b.city); if(s==='updated') return b.observed.localeCompare(a.observed); return rank(b.category)-rank(a.category) || a.icao.localeCompare(b.icao); });
-      return rows;
-    }
-
-    function renderMarkers(){
-      const container = el('airportMarkers');
-      container.innerHTML = state.rows.map(r => {
-        const cls = badgeClass(r.category);
-        return `<a class="marker" href="#airport-${r.icao}" style="left:${r.left}%; top:${r.top}%" title="${esc(r.icao)} - ${esc(r.city)}"><div class="marker-dot" style="background:var(${cls==='bad'?'--danger':cls==='good'?'--success':'--primary'})"></div><div class="marker-label">${esc(r.icao)}</div></a>`;
-      }).join('');
-    }
-
-    function render(){
-      const rows = filteredRows();
-      el('tableBody').innerHTML = rows.map(r => `<tr><td><strong>${esc(r.icao)}</strong></td><td>${esc(r.city)}</td><td><span class="badge ${badgeClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></td><td>${esc(r.wind)}</td><td>${esc(r.visibility)}</td><td>${esc(r.ceiling)}</td><td>${esc(r.temperature)}</td><td class="muted">${esc(r.observed)}</td></tr>`).join('');
-      el('airportGrid').innerHTML = rows.map(r => `<article class="airport-card" id="airport-${r.icao}"><div class="airport-head"><div><h3 class="airport-title">${esc(r.icao)}</h3><div class="airport-sub">${esc(r.city)}</div></div><span class="badge ${badgeClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></div><div class="mini-grid"><div class="mini"><span>Vento</span>${esc(r.wind)}</div><div class="mini"><span>Visibilidade</span>${esc(r.visibility)}</div><div class="mini"><span>Teto</span>${esc(r.ceiling)}</div><div class="mini"><span>Temperatura</span>${esc(r.temperature)}</div></div><div class="muted" style="margin-bottom:8px"><strong>Obs.:</strong> ${esc(r.observed)}</div><div class="muted" style="margin-bottom:8px"><strong>TAF:</strong> ${esc(r.tafSummary)}</div><div class="code-block">${esc(r.rawMetar)}</div></article>`).join('');
-      el('emptyState').hidden = rows.length !== 0;
-      renderMarkers();
-    }
-
-    function scheduleRefresh(){ clearTimeout(state.timer); if(!state.autoRefresh) return; state.timer = setTimeout(loadData, state.refreshMinutes*60*1000); }
-    el('themeBtn').addEventListener('click', ()=>{ state.theme = state.theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', state.theme); });
-    el('refreshBtn').addEventListener('click', loadData);
-    el('autoRefreshBtn').addEventListener('click', ()=>{ state.autoRefresh = !state.autoRefresh; el('autoRefreshBtn').textContent = `Auto-refresh: ${state.autoRefresh ? 'ligado' : 'desligado'}`; scheduleRefresh(); });
-    ['searchInput','categoryFilter','prefixFilter','sortSelect'].forEach(id => el(id).addEventListener('input', render));
-    ['categoryFilter','prefixFilter','sortSelect'].forEach(id => el(id).addEventListener('change', render));
-    loadData();
-  </script>
+<script>
+const WORKER_URL='https://weathered-grass-f181.alexgrodrigues.workers.dev';
+const ICAOS=['SBCO','SBPA','SBSM','SBFL','SBPE','SBCH','SBCT','SBKP','SBSP','SBGR','SBGL','SBRJ','SBBR','SBCF','SBSV','SBRF','SBJP'];
+const coords={SBCO:[-29.95,-51.14],SBPA:[-29.99,-51.17],SBSM:[-29.71,-53.69],SBFL:[-27.67,-48.55],SBPE:[-31.72,-52.32],SBCH:[-27.13,-52.66],SBCT:[-25.53,-49.18],SBKP:[-23.01,-47.13],SBSP:[-23.63,-46.65],SBGR:[-23.43,-46.47],SBGL:[-22.81,-43.25],SBRJ:[-22.91,-43.16],SBBR:[-15.87,-47.92],SBCF:[-19.64,-43.97],SBSV:[-12.91,-38.32],SBRF:[-8.13,-34.92],SBJP:[-7.15,-34.95]};
+const CITY={SBCO:'Canoas',SBPA:'Porto Alegre',SBSM:'Santa Maria',SBFL:'Florianópolis',SBPE:'Pelotas',SBCH:'Chapecó',SBCT:'Curitiba',SBKP:'Campinas',SBSP:'São Paulo - Congonhas',SBGR:'São Paulo - Guarulhos',SBGL:'Rio de Janeiro - Galeão',SBRJ:'Rio de Janeiro - Santos Dumont',SBBR:'Brasília',SBCF:'Belo Horizonte - Confins',SBSV:'Salvador',SBRF:'Recife',SBJP:'João Pessoa'};
+const state={theme:matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',autoRefresh:true,rows:[],timer:null,refreshMinutes:15};document.documentElement.setAttribute('data-theme',state.theme);
+const el=id=>document.getElementById(id);
+function setDiagnostic(m,t='ok'){el('diagnosticBox').className=`diagnostic ${t}`;el('diagnosticBox').textContent=m}
+function esc(s=''){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
+function rank(c){return ({LIFR:4,IFR:3,MVFR:2,VFR:1})[c]||0}
+function badgeClass(c){return (c==='IFR'||c==='LIFR')?'bad':((c==='VFR'||c==='MVFR')?'good':'neutral')}
+function project(lat,lon){const x=((lon+74)/41)*100; const y=((34-lat)/39)*100; return {left:Math.max(5,Math.min(95,x)), top:Math.max(8,Math.min(92,y))}}
+function extractRaw(x){return x?.rawOb||x?.rawTAF||x?.raw||x?.text||''}
+function parseTemp(raw,item){if(item?.temp!==undefined&&item?.dewp!==undefined)return `${item.temp} / ${item.dewp} °C`; const m=raw.match(/\b(M?\d{2})\/(M?\d{2})\b/); return m?`${m[1].replace('M','-')} / ${m[2].replace('M','-')} °C`:'—'}
+function parseWind(raw){const m=raw.match(/\b((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT)\b/); return m?m[1]:'—'}
+function parseVisibility(raw,item){if(item?.visib!==undefined&&item?.visib!==null)return String(item.visib); if(/\bCAVOK\b/.test(raw))return '10 km+'; const m=raw.match(/\b(\d{4})\b/); return m?(m[1]==='9999'?'10 km+':`${(Number(m[1])/1000).toFixed(1).replace('.0','')} km`):'—'}
+function parseCeiling(raw,item){if(item?.clouds?.length){const bases=item.clouds.filter(c=>['BKN','OVC','VV'].includes(c.cover)&&typeof c.base==='number').map(c=>c.base); if(bases.length)return {text:`${Math.min(...bases)} ft`,feet:Math.min(...bases)}} const m=[...raw.matchAll(/\b(?:BKN|OVC|VV)(\d{3})\b/g)].map(x=>Number(x[1])*100); if(!m.length)return {text:'Sem teto',feet:99999}; return {text:`${Math.min(...m)} ft`,feet:Math.min(...m)}}
+function classify(raw,item){if(item?.fltCat)return item.fltCat; const vis=item?.visib!==undefined&&item?.visib!==null?Number(String(item.visib).replace('6+','6')):(/\b9999\b|\bCAVOK\b/.test(raw)?10:(raw.match(/\b(\d{4})\b/)?Number(raw.match(/\b(\d{4})\b/)[1])/1000:null)); const ceil=parseCeiling(raw,item).feet; if((ceil!==null&&ceil<500)||(vis!==null&&vis<1.6))return 'LIFR'; if((ceil!==null&&ceil<1000)||(vis!==null&&vis<4.8))return 'IFR'; if((ceil!==null&&ceil<=3000)||(vis!==null&&vis<=8.0))return 'MVFR'; return 'VFR'}
+function formatTime(item){const raw=item?.reportTime||item?.receiptTime||item?.obsTime||item?.issueTime; if(!raw)return '—'; const d=new Date(raw); return isNaN(d)?'—':d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
+function tafSummary(raw){if(!raw)return 'Sem TAF disponível.'; const s=raw.replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s}
+function cityOf(icao,item){return item?.name||CITY[icao]||'Cidade não definida'}
+async function loadData(){setDiagnostic('Consultando dados pelo Worker da Cloudflare.','ok'); try{const res=await fetch(WORKER_URL,{headers:{Accept:'application/json'}}); if(!res.ok)throw new Error(`HTTP ${res.status}`); const payload=await res.json(); const metars=Array.isArray(payload.metar)?payload.metar:[]; const tafs=Array.isArray(payload.taf)?payload.taf:[]; const tafMap=new Map(tafs.map(x=>[x.icaoId||x.icao||x.stationId,x])); const metarMap=new Map(metars.map(x=>[x.icaoId||x.icao||x.stationId,x])); state.rows=ICAOS.map(icao=>{const m=metarMap.get(icao); if(!m)return null; const raw=extractRaw(m); const taf=tafMap.get(icao); const [lat,lon]=coords[icao]||[null,null]; const p=(lat!=null&&lon!=null)?project(lat,lon):{left:50,top:50}; return {icao,lat,lon,left:p.left,top:p.top,city:cityOf(icao,m),category:classify(raw,m),wind:parseWind(raw),visibility:parseVisibility(raw,m),ceiling:parseCeiling(raw,m).text,temperature:parseTemp(raw,m),observed:formatTime(m),rawMetar:raw||'Sem METAR disponível.',tafSummary:tafSummary(extractRaw(taf)),hasTaf:Boolean(taf)};}).filter(Boolean); el('onlineCount').textContent=state.rows.length; el('tafCount').textContent=state.rows.filter(r=>r.hasTaf).length; el('ifrCount').textContent=state.rows.filter(r=>['IFR','LIFR'].includes(r.category)).length; const now=new Date(); el('lastUpdated').textContent=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); const next=new Date(now.getTime()+state.refreshMinutes*60000); el('nextRefresh').textContent=`Próxima: ${next.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`; setDiagnostic(`Consulta concluída: ${state.rows.length} aeroportos com METAR, ${state.rows.filter(r=>r.hasTaf).length} com TAF.`,'ok'); render()}catch(err){state.rows=[]; render(); setDiagnostic(`Erro ao carregar dados: ${err.message}`,'error'); el('onlineCount').textContent='0';el('tafCount').textContent='0';el('ifrCount').textContent='0'} scheduleRefresh()}
+function filteredRows(){const q=el('searchInput').value.trim().toLowerCase(); let rows=[...state.rows]; if(q)rows=rows.filter(r=>[r.icao,r.city,r.rawMetar,r.tafSummary].join(' ').toLowerCase().includes(q)); if(el('categoryFilter').value!=='all')rows=rows.filter(r=>r.category===el('categoryFilter').value); if(el('prefixFilter').value!=='all')rows=rows.filter(r=>r.icao.startsWith(el('prefixFilter').value)); rows.sort((a,b)=>{const s=el('sortSelect').value; if(s==='icao')return a.icao.localeCompare(b.icao); if(s==='city')return a.city.localeCompare(b.city); if(s==='updated')return b.observed.localeCompare(a.observed); return rank(b.category)-rank(a.category)||a.icao.localeCompare(b.icao)}); return rows}
+function renderMarkers(){el('airportMarkers').innerHTML=state.rows.map(r=>`<a class="marker" href="#airport-${r.icao}" style="left:${r.left}%; top:${r.top}%" title="${esc(r.icao)} - ${esc(r.city)}"><div class="marker-dot" style="background:${r.category==='IFR'||r.category==='LIFR'?'var(--danger)':(r.category==='VFR'||r.category==='MVFR'?'var(--success)':'var(--primary)')} "></div><div class="marker-label">${esc(r.icao)}</div></a>`).join('')}
+function render(){const rows=filteredRows(); el('tableBody').innerHTML=rows.map(r=>`<tr><td><strong>${esc(r.icao)}</strong></td><td>${esc(r.city)}</td><td><span class="badge ${badgeClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></td><td>${esc(r.wind)}</td><td>${esc(r.visibility)}</td><td>${esc(r.ceiling)}</td><td>${esc(r.temperature)}</td><td class="muted">${esc(r.observed)}</td></tr>`).join(''); el('airportGrid').innerHTML=rows.map(r=>`<article class="airport-card" id="airport-${r.icao}"><div class="airport-head"><div><h3 class="airport-title">${esc(r.icao)}</h3><div class="airport-sub">${esc(r.city)}</div></div><span class="badge ${badgeClass(r.category)}"><span class="dot"></span>${esc(r.category)}</span></div><div class="mini-grid"><div class="mini"><span>Vento</span>${esc(r.wind)}</div><div class="mini"><span>Visibilidade</span>${esc(r.visibility)}</div><div class="mini"><span>Teto</span>${esc(r.ceiling)}</div><div class="mini"><span>Temperatura</span>${esc(r.temperature)}</div></div><div class="muted" style="margin-bottom:8px"><strong>Obs.:</strong> ${esc(r.observed)}</div><div class="muted" style="margin-bottom:8px"><strong>TAF:</strong> ${esc(r.tafSummary)}</div><div class="code-block">${esc(r.rawMetar)}</div></article>`).join(''); el('emptyState').hidden=rows.length!==0; renderMarkers()}
+function scheduleRefresh(){clearTimeout(state.timer); if(!state.autoRefresh)return; state.timer=setTimeout(loadData,state.refreshMinutes*60*1000)}
+el('themeBtn').addEventListener('click',()=>{state.theme=state.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',state.theme)}); el('refreshBtn').addEventListener('click',loadData); el('autoRefreshBtn').addEventListener('click',()=>{state.autoRefresh=!state.autoRefresh;el('autoRefreshBtn').textContent=`Auto-refresh: ${state.autoRefresh?'ligado':'desligado'}`;scheduleRefresh()}); ['searchInput','categoryFilter','prefixFilter','sortSelect'].forEach(id=>el(id).addEventListener('input',render)); ['categoryFilter','prefixFilter','sortSelect'].forEach(id=>el(id).addEventListener('change',render)); loadData();
+</script>
 </body>
 </html>
