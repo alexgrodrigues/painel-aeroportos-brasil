@@ -1,162 +1,119 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Painel METAR Brasil</title>
-<style>
-:root{--bg:#161512;--surface:#1f1d1a;--surface2:#26231f;--border:#3a3630;--text:#ece7de;--muted:#aaa397;--primary:#61aeb6;--success:#87c85f;--danger:#ef8394;--warn:#f0c45a}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
-body.light{--bg:#f5f3ef;--surface:#fcfbf8;--surface2:#f2efe8;--border:#d8d3c9;--text:#27241e;--muted:#6f695f;--primary:#0f7178;--success:#3e7a22;--danger:#a33b49;--warn:#b88400}
-.shell{max-width:1200px;margin:0 auto;padding:16px}.panel,.topbar{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
-.topbar{padding:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.title{font-size:clamp(1.5rem,2.8vw,2.7rem);margin:0}.muted{color:var(--muted)}
-.btn,.field{border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);min-height:44px;padding:0 14px}.btn{cursor:pointer}.btn:disabled{opacity:.65;cursor:not-allowed}
-.grid{display:grid;gap:14px}.filters{grid-template-columns:2fr 1fr 1fr 1fr auto;margin-top:14px}.cards{grid-template-columns:repeat(4,minmax(0,1fr))}
-.stat,.airport{padding:16px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}.badge{padding:6px 10px;border-radius:999px;font-size:.82rem;font-weight:700}.good{background:rgba(135,200,95,.15);color:var(--success)}.bad{background:rgba(239,131,148,.15);color:var(--danger)}.neutral{background:rgba(240,196,90,.15);color:var(--warn)}
-.tableWrap{overflow:auto;border:1px solid var(--border);border-radius:16px;background:var(--surface)}table{width:100%;min-width:1000px;border-collapse:collapse}th,td{padding:12px 14px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--surface2)}
-.link{display:inline-block;margin-top:10px;color:var(--primary);text-decoration:none}.code{font-family:ui-monospace,monospace;background:rgba(0,0,0,.2);padding:14px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
-.section{margin-top:14px}.region{margin-top:14px}.region h3{margin:0 0 10px}.hidden{display:none}
-@media (max-width:1080px){.filters,.cards{grid-template-columns:1fr 1fr}}
-@media (max-width:720px){.filters,.cards{grid-template-columns:1fr}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lista responsiva de aeroportos</title>
+  <style>
+    :root{--bg:#171510;--card:#221f19;--line:#3a342a;--text:#f3eee7;--muted:#c8bfb1;--accent:#8ac6ff;--bad:#d98f8f;--good:#a3d38a}
+    body{margin:0;background:linear-gradient(180deg,#191612,#120f0c);color:var(--text);font-family:system-ui,Segoe UI,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .hero,.panel,.item{background:rgba(34,31,25,.96);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 22px rgba(0,0,0,.22)}
+    .hero{padding:20px;margin-bottom:16px}
+    h1{margin:.2rem 0 0;font-size:clamp(1.8rem,4vw,3rem)}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+    input,button,select{background:#1a1713;color:var(--text);border:1px solid var(--line);border-radius:999px;padding:12px 16px;font:inherit}
+    button{cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+    .item{padding:16px}
+    .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .code{font-weight:800;font-size:1.2rem}
+    .cat{padding:6px 10px;border-radius:999px;background:#2b3a1f;color:var(--good);font-weight:700;font-size:.9rem}
+    .cat.ifr{background:#3d2025;color:#ef9ea1}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0 10px}
+    .stat{background:#1a1713;border:1px solid var(--line);border-radius:16px;padding:14px}
+    .label{color:var(--muted);font-size:.95rem}
+    .value{font-size:1.1rem;font-weight:800;margin-top:4px}
+    .raw{background:#1d1a16;border:1px solid var(--line);border-radius:14px;padding:12px;white-space:pre-wrap;overflow:auto}
+    .small{font-size:.95rem}
+    .link{color:var(--accent);text-decoration:none}
+    .version{opacity:.8;font-size:.95rem}
+  </style>
 </head>
 <body>
-<div class="shell" id="top">
-  <div class="topbar">
-    <div>
-      <p class="muted" style="letter-spacing:.18em;text-transform:uppercase;margin:0">Brasil · METAR em tempo real</p>
-      <h1 class="title">Lista responsiva de aeroportos</h1>
-      <p class="muted">Somente aeroportos disponíveis no momento, com bloco interpretado e raw. <span style="font-size:.9rem;opacity:.85">Versão: v22</span></p>
+<div class="wrap">
+  <div class="hero">
+    <div class="muted">BRASIL · METAR EM TEMPO REAL <span class="version">v26</span></div>
+    <h1>Lista responsiva de aeroportos</h1>
+    <p class="muted">Somente aeroportos disponíveis no momento, com bloco interpretado e raw.</p>
+    <div class="toolbar">
+      <input id="q" placeholder="Ex.: SBSP, Recife, BKN">
+      <select id="sort"><option value="cat">Pior categoria primeiro</option><option value="name">Nome</option></select>
+      <button id="refresh">Atualizar</button>
+      <button id="theme">Tema</button>
     </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn" id="refreshBtn" type="button">Atualizar</button>
-      <button class="btn" id="themeBtn" type="button">Tema</button>
-    </div>
+    <div id="status" class="muted">Carregando...</div>
   </div>
-  <section class="panel section" style="padding:18px">
-    <div class="muted" style="letter-spacing:.18em;text-transform:uppercase">Filtro e atualização</div>
-    <h2 style="margin:6px 0 10px">Consulta nacional com Worker</h2>
-    <div class="grid filters">
-      <input id="search" class="field" placeholder="Ex.: SBGR, Recife, BKN" />
-      <select id="cat" class="field"><option value="all">Todas</option><option>VFR</option><option>MVFR</option><option>IFR</option><option>LIFR</option></select>
-      <select id="prefix" class="field"><option value="all">Todos prefixos</option><option>SB</option><option>SD</option><option>SI</option><option>SJ</option><option>SN</option></select>
-      <select id="sort" class="field"><option value="worst">Pior categoria primeiro</option><option value="icao">ICAO</option><option value="city">Cidade</option></select>
-      <button class="btn" id="autoBtn" type="button">Auto: ligado</button>
+
+  <div class="panel" style="padding:16px">
+    <div class="stats">
+      <div class="stat"><div class="label">Aerportos online</div><div class="value" id="nOnline">0</div></div>
+      <div class="stat"><div class="label">Com TAF</div><div class="value" id="nTaf">0</div></div>
+      <div class="stat"><div class="label">IFR/LIFR</div><div class="value" id="nIfr">0</div></div>
+      <div class="stat"><div class="label">Versão</div><div class="value">v26</div></div>
     </div>
-    <div id="diag" class="stat" style="margin-top:14px">Preparando consulta.</div>
-    <div class="grid cards" style="margin-top:14px">
-      <div class="stat"><div class="muted">Aeroportos online</div><div style="font-size:2rem;font-weight:800" id="online">0</div></div>
-      <div class="stat"><div class="muted">Com TAF</div><div style="font-size:2rem;font-weight:800" id="tafcount">0</div></div>
-      <div class="stat"><div class="muted">IFR/LIFR</div><div style="font-size:2rem;font-weight:800" id="ifr">0</div></div>
-      <div class="stat"><div class="muted">Última atualização</div><div style="font-size:2rem;font-weight:800" id="updated">--</div><div class="muted" style="margin-top:6px">Versão exibida: v22</div></div><div class="stat"><div class="muted">Alertas TAF</div><div style="font-size:2rem;font-weight:800" id="tafAlerts">0</div><div class="muted" style="margin-top:6px">Mudanças previstas</div></div>
-    </div>
-  </section>
-  <section class="panel section" style="padding:18px">
-    <div class="muted" style="letter-spacing:.18em;text-transform:uppercase">Lista por região</div>
-    <h2 style="margin:6px 0 10px">Clique para abrir o bloco interpretado</h2>
-    <div id="list"></div>
-  </section>
-  <section class="panel section" style="padding:18px">
-    <div class="muted" style="letter-spacing:.18em;text-transform:uppercase">Detalhamento</div>
-    <h2 style="margin:6px 0 10px">METAR interpretado e raw</h2>
-    <div id="cards" class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:14px"></div>
-    <div id="empty" class="stat hidden">Nenhum aeroporto corresponde aos filtros.</div>
-  </section>
+    <div class="grid" id="list"></div>
+  </div>
 </div>
 <script>
-const WORKER_URL='https://weathered-grass-f181.alexgrodrigues.workers.dev';
-const ICAOS=['SBCO','SBPA','SBSM','SBFL','SBPE','SBCH','SBCT','SBKP','SBSP','SBGR','SBGL','SBRJ','SBBR','SBCF','SBSV','SBRF','SBJP','SBEG','SBBE','SBCG','SBFI','SBFZ','SBGO','SBIL','SBJU','SBKG','SBLE','SBLO','SBMG','SBMK','SBMO','SBMQ','SBMN','SBMA','SBME','SBAR','SBAX','SBAN','SBBH','SBBI','SBBG','SBCP','SBCJ','SBCY','SBCZ','SBDN','SBFN','SBGW','SBJR','SBJV','SBLA','SBLJ','SBMT','SBNF','SBNT','SBPB','SBPC','SBPF','SBRB','SBSJ','SBTG','SBUL','SBGV'];
-const REGIONS={Norte:['SBEG','SBBE','SBFN','SBMQ','SBMN','SBRB','SBPC','SBCJ'],Nordeste:['SBFZ','SBSV','SBRF','SBJP','SBMO','SBAR','SBLE','SBJU','SBKG','SBIL','SBPB','SBNT'],"Centro-Oeste":['SBBR','SBGO','SBCY','SBCG','SBUL','SBMK','SBAN','SBAX','SBMQ','SBTG'],Sudeste:['SBSP','SBGR','SBGL','SBRJ','SBCF','SBKP','SBMG','SBBH','SBSJ','SBMT','SBME','SBJR','SBGV','SBCP','SBDN','SBBI'],Sul:['SBPA','SBSM','SBFL','SBCT','SBCH','SBPE','SBFI','SBLO','SBJV','SBBG','SBCO','SBPF','SBLJ']};
-const CITY={SBCO:'Canoas',SBPA:'Porto Alegre',SBSM:'Santa Maria',SBFL:'Florianópolis',SBPE:'Pelotas',SBCH:'Chapecó',SBCT:'Curitiba',SBKP:'Campinas',SBSP:'São Paulo - Congonhas',SBGR:'São Paulo - Guarulhos',SBGL:'Rio de Janeiro - Galeão',SBRJ:'Rio de Janeiro - Santos Dumont',SBBR:'Brasília',SBCF:'Belo Horizonte - Confins',SBSV:'Salvador',SBRF:'Recife',SBJP:'João Pessoa',SBEG:'Manaus',SBBE:'Belém',SBCG:'Campo Grande',SBFI:'Foz do Iguaçu',SBFZ:'Fortaleza',SBGO:'Goiânia',SBIL:'Ilhéus',SBJU:'Juazeiro do Norte',SBKG:'Campina Grande',SBLE:'Lençóis',SBLO:'Londrina',SBMG:'Maringá',SBMK:'Montes Claros',SBMO:'Maceió',SBMQ:'Macapá',SBMN:'Manaus',SBMA:'Marabá',SBME:'Macaé',SBAR:'Aracaju',SBAX:'Araxá',SBAN:'Anápolis',SBBH:'Belo Horizonte',SBBI:'Curitiba',SBBG:'Bagé',SBCP:'Campos',SBCJ:'Carajás',SBCY:'Cuiabá',SBCZ:'Cruzeiro do Sul',SBDN:'Presidente Prudente',SBFN:'Fernando de Noronha',SBGW:'Guaratinguetá',SBJR:'Rio de Janeiro - Jacarepaguá',SBJV:'Joinville',SBLA:'Lagoa da Prata',SBLJ:'Lages',SBMT:'São Paulo - Campo de Marte',SBNF:'Florianópolis',SBNT:'Natal',SBPB:'Paranaguá',SBPC:'Porto Velho',SBPF:'Passo Fundo',SBRB:'Rio Branco',SBSJ:'São José dos Campos',SBTG:'Três Lagoas',SBUL:'Uberlândia',SBGV:'Governador Valadares'};
-const state={rows:[],auto:true,timer:null,theme:'dark'}; const $=id=>document.getElementById(id); const rank=c=>({LIFR:4,IFR:3,MVFR:2,VFR:1})[c]||0; const badge=c=>c==='IFR'||c==='LIFR'?'bad':(c==='VFR'||c==='MVFR'?'good':'neutral');
-function esc(s=''){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;')}
-function raw(x){return x?.rawOb||x?.rawTAF||''}
-function regionOf(icao){for(const [k,v] of Object.entries(REGIONS)){if(v.includes(icao)) return k} return 'Outras'}
-function city(icao,item){return item?.name||CITY[icao]||'Cidade não definida'}
-function wind(r){
-  const s=String(r||'').replace(/\s+/g,' ').trim();
-  let m=s.match(/((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?(?:KT|MPS))/);
-  if(m) return m[1];
-  m=s.match(/(?:\w{4}\s+)?(\d{3}|VRB)\d{2,3}(?:G\d{2,3})?(?:KT|MPS)/);
-  if(m) return m[0].replace(/^\w{4}\s+/,'');
-  m=s.match(/(\d{3}|VRB)\d{2,3}(?:G\d{2,3})?(?:KT|MPS)/);
-  return m?m[1]:'—';
-}
-function vis(r,it){if(it?.visib!=null)return String(it.visib);if(/CAVOK/.test(r))return '10 km+';const m=r.match(/(\d{4})/);return m?(m[1]==='9999'?'10 km+':`${(Number(m[1])/1000).toFixed(1).replace('.0','')} km`):'—'}
-function ceil(r,it){if(it?.clouds?.length){const b=it.clouds.filter(c=>['BKN','OVC','VV'].includes(c.cover)&&typeof c.base==='number').map(c=>c.base);if(b.length)return `${Math.min(...b)} ft`}const m=[...r.matchAll(/(?:BKN|OVC|VV)(\d{3})/g)].map(x=>Number(x[1])*100);return m.length?`${Math.min(...m)} ft`:'Sem teto'}
-function temp(r,it){if(it?.temp!=null&&it?.dewp!=null)return `${it.temp}/${it.dewp} °C`;const m=r.match(/(M?\d{2})\/(M?\d{2})/);return m?`${m[1].replace('M','-')}/${m[2].replace('M','-')} °C`:'—'}
-function cat(r,it){if(it?.fltCat)return it.fltCat; const c=ceil(r,it),v=it?.visib!=null?Number(String(it.visib).replace('6+','6')):(/9999|CAVOK/.test(r)?10:(r.match(/(\d{4})/)?Number(r.match(/(\d{4})/)[1])/1000:null)); const f=parseInt(c); if((!isNaN(f)&&f<500)||(v!=null&&v<1.6))return 'LIFR'; if((!isNaN(f)&&f<1000)||(v!=null&&v<4.8))return 'IFR'; if((!isNaN(f)&&f<=3000)||(v!=null&&v<=8.0))return 'MVFR'; return 'VFR'}
-function time(it){const d=new Date(it?.reportTime||it?.receiptTime||it?.obsTime||Date.now()); return isNaN(d)?'—':d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
-function tafsum(r){if(!r)return 'Sem TAF disponível.'; const s=String(r).replace(/\s+/g,' ').trim(); return s.length>180?s.slice(0,180)+'…':s}
-function tafInterpret(rawtaf){
-  if(!rawtaf) return 'Sem TAF disponível.';
-  const txt=String(rawtaf).replace(/\s+/g,' ').trim();
-  const parts=[];
-  const wind=txt.match(/\b(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT\b/);
-  const vis=txt.match(/\b(P6SM|\d{4})\b/);
-  const clouds=txt.match(/\b(?:FEW|SCT|BKN|OVC)\d{3}\b/g);
-  if(wind) parts.push(`Vento ${wind[0]}`);
-  if(vis) parts.push(`Visibilidade ${vis[0]}`);
-  if(clouds && clouds.length) parts.push(`Nuvens ${clouds.slice(0,3).join(', ')}`);
-  const groups=[];
-  const re=/(TEMPO|BECMG|FM\d{6}|PROB\d{2})([\s\S]*?)(?=\b(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})\b|$)/g;
-  let m; while((m=re.exec(txt))!==null){groups.push(`${m[1]} ${m[2].replace(/\s+/g,' ').trim()}`.trim())}
-  if(groups.length) parts.push(groups.join(' | '));
-  if(/\bCAVOK\b/.test(txt)) parts.push('CAVOK');
-  return parts.length?parts.join(' · '):txt;
-}
-function tafCompare(rawtaf){
-  const s=String(rawtaf||'').replace(/\s+/g,' ').trim();
-  let score=0;
-  if(/\bTEMPO\b/.test(s)) score+=1;
-  if(/\bBECMG\b/.test(s)) score+=1;
-  if(/\bFM\d{6}\b/.test(s)) score+=1;
-  if(/\bPROB\d{2}\b/.test(s)) score+=1;
-  if(/\b(2000|3000|4000)\b/.test(s)) score+=1;
-  if(/\bRA\b|\bTS\b|\bSHRA\b|\bGR\b/.test(s)) score+=1;
-  return score;
-}
-function tafDetailed(rawtaf){
-  const s=String(rawtaf||'').replace(/\s+/g,' ').trim();
-  if(!s) return 'TEND.: sem grupos de tendência relevantes';
-  const groups=[];
-  const re=/(TEMPO|BECMG|FM\d{6}|PROB\d{2})([\s\S]*?)(?=(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})|$)/g;
-  let m; while((m=re.exec(s))!==null){
-    const body=m[2].trim();
-    if(body){
-      const short=body.replace(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT/g,'vento').replace(/(P6SM|\d{4})/g,'visibilidade').replace(/(?:FEW|SCT|BKN|OVC)\d{3}/g,'nuvens');
-      groups.push(`${m[1]} ${short}`.trim());
-    }
-  }
-  if(!groups.length) return 'TEND.: sem grupos de tendência relevantes';
-  return 'TEND.: ' + groups.map(g=>g.toLowerCase()).join(' | ');
-}
-function tafAlert(rawtaf){
-  const s=String(rawtaf||'').replace(/\s+/g,' ').trim();
-  if(!s) return 'sem indicação forte de piora';
-  return /(TEMPO|BECMG|FM\d{6}|PROB\d{2}|TS|SHRA|RA|BR|FG|DZ|SN|GR)/.test(s) ? 'piora/variação prevista' : 'sem indicação forte de piora';
-}
+const WORKER_URL = 'COLE_AQUI_A_URL_DO_SEU_WORKER';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function parseWind(metar){const s=String(metar||'').replace(/\s+/g,' ').trim();const m=s.match(/((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT)/);if(m)return m[1];const m2=s.match(/((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?MPS)/);if(m2)return m2[1];return '—'}
+function parseVisibility(metar){const s=String(metar||'').replace(/\s+/g,' ').trim();const m=s.match(/(9999|P6SM|\d{4})/);return m?m[1]:'—'}
+function parseCeiling(metar){const s=String(metar||'').replace(/\s+/g,' ').trim();const m=s.match(/(?:BKN|OVC)(\d{3})/);return m?`${m[1]} ft`:'—'}
+function parseTemperature(metar){const s=String(metar||'').replace(/\s+/g,' ').trim();const m=s.match(/(M?\d{2})\/(M?\d{2})/);return m?`${m[1].replace('M','-')}/${m[2].replace('M','-')} °C`:'—'}
+function parseCat(v){if(!v)return 'N/A';const n=String(v).replace('+','');if(v==='LIFR'||v==='IFR'||v==='MVFR'||v==='VFR') return v;return 'N/A'}
+function windDebug(metar){return String(metar||'').match(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT/)?.[0] || String(metar||'').match(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?MPS/)?.[0] || '—'}
+function renderItem(r){const wind=parseWind(r.metar); const visibility=parseVisibility(r.metar); const ceiling=parseCeiling(r.metar); const temp=parseTemperature(r.metar); const cat=parseCat(r.category||r.cat);
+  return `<article class="item">
+    <div class="top"><div><div class="code">${esc(r.icao)}</div><div class="muted">${esc(r.name||'')}</div></div><div class="cat ${cat==='IFR'||cat==='LIFR'?'ifr':''}">${esc(cat)}</div></div>
+    <div class="stats">
+      <div class="stat"><div class="label">Vento</div><div class="value">${esc(wind)}</div></div>
+      <div class="stat"><div class="label">Visibilidade</div><div class="value">${esc(visibility)}</div></div>
+      <div class="stat"><div class="label">Teto</div><div class="value">${esc(ceiling)}</div></div>
+      <div class="stat"><div class="label">Temperatura</div><div class="value">${esc(temp)}</div></div>
+    </div>
+    <div class="muted small"><strong>METAR interpretado:</strong> vento ${esc(wind)} · ${esc(visibility)} · ${esc(ceiling)} · ${esc(temp)}</div>
+    <div class="muted small"><strong>Vento raw:</strong> ${esc(windDebug(r.metar))}</div>
+    <div class="muted small"><strong>Wind debug:</strong> ${esc(windDebug(r.metar))}</div>
+    <div class="raw small"><strong>METAR raw:</strong>
+${esc(r.metar||'—')}</div>
+    <div style="margin-top:10px" class="muted small"><strong>TAF interpretado:</strong> ${esc(r.tafInterpret||'Sem TAF disponível.')}</div>
+    <div class="muted small"><strong>TEND.:</strong> ${esc(r.tafTrend||'sem grupos de tendência relevantes')}</div>
+    <div class="muted small"><strong>Alerta TAF:</strong> ${esc(r.tafAlert||'sem indicação forte de piora')}</div>
+    ${r.taf?`<div class="raw small" style="margin-top:10px"><strong>TAF raw:</strong>
+${esc(r.taf)}</div>`:''}
+  </article>`}
 async function load(){
-  $('refreshBtn').disabled=true; $('autoBtn').disabled=true; $('diag').textContent='Consultando o Worker...';
   try{
+    $('status').textContent='Carregando dados...';
     const res=await fetch(WORKER_URL,{cache:'no-store',mode:'cors'});
-    const p=await res.json();
-    const mets=Array.isArray(p.metar)?p.metar:[]; const tafs=Array.isArray(p.taf)?p.taf:[];
-    const mm=new Map(mets.map(x=>[x.icaoId||x.icao||x.stationId,x])); const tm=new Map(tafs.map(x=>[x.icaoId||x.icao||x.stationId,x]));
-    state.rows=ICAOS.map(i=>{const m=mm.get(i); if(!m) return null; const r=raw(m),t=tm.get(i); return {icao:i,region:regionOf(i),city:city(i,m),category:cat(r,m),wind:wind(r),visibility:vis(r,m),ceiling:ceil(r,m),temperature:temp(r,m),observed:time(m),rawMetar:r,tafSummary:tafsum(raw(t)),hasTaf:Boolean(t)};}).filter(Boolean);
-    $('online').textContent=state.rows.length; $('tafcount').textContent=state.rows.filter(r=>r.hasTaf).length; $('ifr').textContent=state.rows.filter(r=>['IFR','LIFR'].includes(r.category)).length; $('tafAlerts').textContent=state.rows.filter(r=>tafCompare(r.tafSummary)>0).length; $('updated').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    render(); $('diag').textContent=`Consulta concluída: ${state.rows.length} aeroportos com METAR, ${state.rows.filter(r=>r.hasTaf).length} com TAF.`;
-  }catch(e){
-    state.rows=[]; render(); $('diag').textContent='Erro ao carregar dados: ' + e.message;
-  }finally{
-    $('refreshBtn').disabled=false; $('autoBtn').disabled=false; schedule();
-  }
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    const rows=(data.rows||data||[]).map(r=>({
+      icao:r.icao||r.ICAO||r.station||'',
+      name:r.name||r.city||r.nome||'',
+      category:r.category||r.cat||r.classification||'',
+      metar:r.metar||r.METAR||r.raw_metar||r.raw||'',
+      taf:r.taf||r.TAF||r.raw_taf||'',
+      tafInterpret:r.tafInterpret||r.tafSummary||'',
+      tafTrend:r.tafTrend||r.tend||'',
+      tafAlert:r.tafAlert||''
+    }));
+    const q=$('q').value.trim().toLowerCase();
+    let filtered=rows.filter(r=>!q||`${r.icao} ${r.name} ${r.category}`.toLowerCase().includes(q));
+    if($('sort').value==='name') filtered.sort((a,b)=>a.icao.localeCompare(b.icao));
+    else filtered.sort((a,b)=>(['LIFR','IFR','MVFR','VFR'].indexOf(a.category)-['LIFR','IFR','MVFR','VFR'].indexOf(b.category)));
+    $('list').innerHTML=filtered.map(renderItem).join('');
+    $('nOnline').textContent=rows.length;
+    $('nTaf').textContent=rows.filter(r=>r.taf).length;
+    $('nIfr').textContent=rows.filter(r=>r.category==='IFR'||r.category==='LIFR').length;
+    $('status').textContent=`Atualizado com ${rows.length} aeroportos`;
+  }catch(e){$('status').textContent='Erro ao carregar dados: '+e.message;}
 }
-function filtered(){const q=$('search').value.trim().toLowerCase(); let rows=[...state.rows]; if(q) rows=rows.filter(r=>[r.icao,r.city,r.region,r.rawMetar,r.tafSummary].join(' ').toLowerCase().includes(q)); if($('cat').value!=='all') rows=rows.filter(r=>r.category===$('cat').value); if($('prefix').value!=='all') rows=rows.filter(r=>r.icao.startsWith($('prefix').value)); rows.sort((a,b)=>$('sort').value==='icao'?a.icao.localeCompare(b.icao):$('sort').value==='city'?a.city.localeCompare(b.city):rank(b.category)-rank(a.category)||a.icao.localeCompare(b.icao)); return rows}
-function render(){const rows=filtered(); $('empty').classList.toggle('hidden',rows.length!==0); const groups=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul','Outras']; $('list').innerHTML=groups.map(region=>{const items=rows.filter(r=>r.region===region); if(!items.length) return ''; return `<div class="region stat"><h3>${region}</h3><div style="display:grid;gap:10px">${items.map(r=>`<a class="link" href="#airport-${r.icao}"><strong>${esc(r.icao)}</strong> — ${esc(r.city)} · ${esc(r.category)}</a>`).join('')}</div></div>`}).join(''); $('cards').innerHTML=rows.map(r=>`<article class="airport" id="airport-${r.icao}"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3 style="margin:0">${esc(r.icao)}</h3><div class="muted">${esc(r.city)} · ${esc(r.region)}</div></div><span class="badge ${badge(r.category)}">${esc(r.category)}</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px"><div class="stat"><div class="muted">Vento</div>${esc(r.wind)}</div><div class="stat"><div class="muted">Visibilidade</div>${esc(r.visibility)}</div><div class="stat"><div class="muted">Teto</div>${esc(r.ceiling)}</div><div class="stat"><div class="muted">Temperatura</div>${esc(r.temperature)}</div></div><div class="muted" style="margin:10px 0 6px"><strong>METAR interpretado:</strong> vento ${esc(r.wind)} · ${esc(r.visibility)} · ${esc(r.ceiling)} · ${esc(r.temperature)}</div><div class="muted" style="margin:0 0 6px"><strong>Vento raw:</strong> ${esc((String(r.metar||'').match(/\b((?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT|(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?MPS)\b/)||['—'])[0])}</div><div class="code"><strong>METAR raw:</strong>
-${esc(r.rawMetar)}</div><div class="muted" style="margin:10px 0 6px"><strong>TAF interpretado:</strong> ${esc(tafInterpret(r.tafSummary))}</div><div class="muted" style="margin:0 0 6px"><strong>${esc(tafDetailed(r.tafSummary))}</strong></div><div class="muted" style="margin:0 0 6px"><strong>Alerta TAF:</strong> ${esc(tafAlert(r.tafSummary))}</div><a class="link" href="#top">Voltar à lista</a></article>`).join(''); }
-function schedule(){clearTimeout(state.timer); if(!state.auto) return; state.timer=setTimeout(load,15*60*1000)}
-$('refreshBtn').addEventListener('click',load); $('themeBtn').addEventListener('click',()=>{document.body.classList.toggle('light'); state.theme=document.body.classList.contains('light')?'light':'dark'}); $('autoBtn').addEventListener('click',()=>{state.auto=!state.auto; $('autoBtn').textContent=`Auto: ${state.auto?'ligado':'desligado'}`; schedule()}); ['search','cat','prefix','sort'].forEach(id=>$(id).addEventListener('input',render)); ['cat','prefix','sort'].forEach(id=>$(id).addEventListener('change',render)); load();
+$('refresh').onclick=load;$('theme').onclick=()=>document.body.classList.toggle('light');$('q').oninput=load;$('sort').onchange=load;load();
 </script>
 </body>
 </html>
