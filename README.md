@@ -48,4 +48,4 @@ Cada item de `metar` pode conter:
 
 
 ## Versão
-- Esta edição é a v15.
+- Esta edição é a v16.
