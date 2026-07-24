@@ -1,64 +1,54 @@
-# Painel METAR Brasil
+# README v27
 
-Este projeto mostra os aeroportos disponíveis no momento, separados por região geográfica do país.
+## Objetivo
+
+Esta versão corrige a leitura real do retorno da Aviation Weather e atualiza o frontend para renderizar os aeroportos corretamente.
+
+## Mudanças principais
+
+- Worker atualizado para ler `icaoId`, `rawOb`, `rawTAF` e `fltCat`.
+- Worker agora retorna `rows` com dados prontos para o frontend.
+- Frontend atualizado para consumir a URL correta do Worker.
+- Interface marcada como versão `v27`.
 
 ## Arquivos
-- `index.html`: interface responsiva com lista por região, filtros e blocos detalhados.
-- `README.md`: documentação do projeto.
 
-## O que a página mostra
-- Lista de aeroportos disponíveis no instante da consulta.
-- Separação por região: Norte, Nordeste, Centro-Oeste, Sudeste, Sul e Outras.
-- Bloco de detalhes com METAR interpretado, TAF interpretado e raw.
-- Navegação por âncoras a partir da lista.
-- O bloco de cada aeroporto mostra um resumo interpretado do METAR antes do raw.
+- `worker_v27.js`.
+- `frontend_v27.html`.
 
-## Fonte dos dados
-- O painel consulta o Worker da Cloudflare definido em `WORKER_URL` dentro do HTML.
-- O Worker deve devolver JSON com `metar` e, se existir, `taf`.
+## Campos usados pelo Worker
 
-## Atualização automática
-- A lista é recarregada a cada 15 minutos.
-- Há botão de atualização manual.
-- Os botões ficam desabilitados durante a consulta e são reativados ao terminar.
-- A página consulta o Worker a cada 15 minutos, mas a versão nova só aparece quando você publica o novo arquivo.
+- `icaoId`.
+- `rawOb`.
+- `rawTAF`.
+- `fltCat`.
+- `name`.
+- `city`.
+- `state`.
+- `country`.
 
-## Como publicar no GitHub Pages
-1. Coloque `index.html` e `README.md` na raiz do repositório.
-2. Ative o GitHub Pages no branch/pasta publicada.
-3. Verifique se o Worker responde corretamente.
+## O que o frontend mostra
 
-## Estrutura esperada do retorno
-Cada item de `metar` pode conter:
-- `icaoId`
-- `name`
-- `rawOb`
-- `fltCat`
-- `temp`
-- `dewp`
-- `visib`
-- `clouds`
-- `reportTime` ou `receiptTime`
+- ICAO.
+- Nome.
+- Categoria.
+- Vento.
+- Visibilidade.
+- Teto.
+- Temperatura.
+- METAR raw.
+- TAF raw.
+- TAF interpretado.
+- Tendência do TAF.
+- Alerta do TAF.
+
+## Como aplicar
+
+1. Substitua o Worker pelo conteúdo de `worker_v27.js`.
+2. Substitua o frontend pelo conteúdo de `frontend_v27.html`.
+3. Publique os dois.
+4. Recarregue a página.
 
 ## Observação
-- O painel exibe apenas os aeroportos com METAR disponível no retorno do Worker.
 
-
-## TAF interpretado
-- O resumo agora tenta mostrar vento, visibilidade, nuvens e grupos de mudança do TAF antes do raw.
-
-
-## Versão
-- Esta edição é a v18.
-
-
-## Nova versão da página
-- Não existe atualização automática da própria versão do HTML no navegador.
-- Para a página mudar de v18 para v18, o novo arquivo precisa ser publicado no GitHub Pages.
-- O que é automático é somente a consulta dos dados do Worker.
-
-
-## Versão v22
-- Esta publicação corresponde à v22.
-- Mudança principal: reforço na exibição do vento, com fallback `Vento raw` para mostrar o valor extraído diretamente do METAR.
-- O bloco de atualização também identifica a v22.
+Se algum aeroporto ainda não aparecer, o problema tende a ser o retorno da API naquele ICAO específico, não o card do frontend.
