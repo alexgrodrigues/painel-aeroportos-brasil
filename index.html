@@ -116,6 +116,26 @@ function tafCompare(rawtaf){
   if(/\bRA\b|\bTS\b|\bSHRA\b|\bGR\b/.test(s)) score+=1;
   return score;
 }
+function tafDetailed(rawtaf){
+  const s=String(rawtaf||'').replace(/\s+/g,' ').trim();
+  if(!s) return 'TEND.: sem grupos de tendência relevantes';
+  const groups=[];
+  const re=/(TEMPO|BECMG|FM\d{6}|PROB\d{2})([\s\S]*?)(?=(?:TEMPO|BECMG|FM\d{6}|PROB\d{2})|$)/g;
+  let m; while((m=re.exec(s))!==null){
+    const body=m[2].trim();
+    if(body){
+      const short=body.replace(/(?:\d{3}|VRB)\d{2,3}(?:G\d{2,3})?KT/g,'vento').replace(/(P6SM|\d{4})/g,'visibilidade').replace(/(?:FEW|SCT|BKN|OVC)\d{3}/g,'nuvens');
+      groups.push(`${m[1]} ${short}`.trim());
+    }
+  }
+  if(!groups.length) return 'TEND.: sem grupos de tendência relevantes';
+  return 'TEND.: ' + groups.map(g=>g.toLowerCase()).join(' | ');
+}
+function tafAlert(rawtaf){
+  const s=String(rawtaf||'').replace(/\s+/g,' ').trim();
+  if(!s) return 'sem indicação forte de piora';
+  return /(TEMPO|BECMG|FM\d{6}|PROB\d{2}|TS|SHRA|RA|BR|FG|DZ|SN|GR)/.test(s) ? 'piora/variação prevista' : 'sem indicação forte de piora';
+}
 async function load(){
   $('refreshBtn').disabled=true; $('autoBtn').disabled=true; $('diag').textContent='Consultando o Worker...';
   try{
@@ -134,7 +154,7 @@ async function load(){
 }
 function filtered(){const q=$('search').value.trim().toLowerCase(); let rows=[...state.rows]; if(q) rows=rows.filter(r=>[r.icao,r.city,r.region,r.rawMetar,r.tafSummary].join(' ').toLowerCase().includes(q)); if($('cat').value!=='all') rows=rows.filter(r=>r.category===$('cat').value); if($('prefix').value!=='all') rows=rows.filter(r=>r.icao.startsWith($('prefix').value)); rows.sort((a,b)=>$('sort').value==='icao'?a.icao.localeCompare(b.icao):$('sort').value==='city'?a.city.localeCompare(b.city):rank(b.category)-rank(a.category)||a.icao.localeCompare(b.icao)); return rows}
 function render(){const rows=filtered(); $('empty').classList.toggle('hidden',rows.length!==0); const groups=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul','Outras']; $('list').innerHTML=groups.map(region=>{const items=rows.filter(r=>r.region===region); if(!items.length) return ''; return `<div class="region stat"><h3>${region}</h3><div style="display:grid;gap:10px">${items.map(r=>`<a class="link" href="#airport-${r.icao}"><strong>${esc(r.icao)}</strong> — ${esc(r.city)} · ${esc(r.category)}</a>`).join('')}</div></div>`}).join(''); $('cards').innerHTML=rows.map(r=>`<article class="airport" id="airport-${r.icao}"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3 style="margin:0">${esc(r.icao)}</h3><div class="muted">${esc(r.city)} · ${esc(r.region)}</div></div><span class="badge ${badge(r.category)}">${esc(r.category)}</span></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px"><div class="stat"><div class="muted">Vento</div>${esc(r.wind)}</div><div class="stat"><div class="muted">Visibilidade</div>${esc(r.visibility)}</div><div class="stat"><div class="muted">Teto</div>${esc(r.ceiling)}</div><div class="stat"><div class="muted">Temperatura</div>${esc(r.temperature)}</div></div><div class="muted" style="margin:10px 0 6px"><strong>METAR interpretado:</strong> vento ${esc(r.wind)} · ${esc(r.visibility)} · ${esc(r.ceiling)} · ${esc(r.temperature)}</div><div class="code"><strong>METAR raw:</strong>
-${esc(r.rawMetar)}</div><div class="muted" style="margin:10px 0 6px"><strong>TAF interpretado:</strong> ${esc(tafInterpret(r.tafSummary))}</div><div class="muted" style="margin:0 0 6px"><strong>${esc(tafDetailed(r.tafSummary))}</strong></div><div class="muted" style="margin:0 0 6px"><strong>Alerta TAF:</strong> ${tafCompare(r.tafSummary) > 0 ? 'piora/variação prevista' : 'sem indicação forte de piora'}</div><a class="link" href="#top">Voltar à lista</a></article>`).join(''); }
+${esc(r.rawMetar)}</div><div class="muted" style="margin:10px 0 6px"><strong>TAF interpretado:</strong> ${esc(tafInterpret(r.tafSummary))}</div><div class="muted" style="margin:0 0 6px"><strong>${esc(tafDetailed(r.tafSummary))}</strong></div><div class="muted" style="margin:0 0 6px"><strong>Alerta TAF:</strong> ${esc(tafAlert(r.tafSummary))}</div><a class="link" href="#top">Voltar à lista</a></article>`).join(''); }
 function schedule(){clearTimeout(state.timer); if(!state.auto) return; state.timer=setTimeout(load,15*60*1000)}
 $('refreshBtn').addEventListener('click',load); $('themeBtn').addEventListener('click',()=>{document.body.classList.toggle('light'); state.theme=document.body.classList.contains('light')?'light':'dark'}); $('autoBtn').addEventListener('click',()=>{state.auto=!state.auto; $('autoBtn').textContent=`Auto: ${state.auto?'ligado':'desligado'}`; schedule()}); ['search','cat','prefix','sort'].forEach(id=>$(id).addEventListener('input',render)); ['cat','prefix','sort'].forEach(id=>$(id).addEventListener('change',render)); load();
 </script>
