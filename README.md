@@ -1,13 +1,12 @@
 # Painel Aeroportos Brasil
 
-Arquivo HTML corrigido para GitHub Pages.
+Arquivo final pronto para GitHub Pages.
 
-## O que mudou
-- Troca a busca global inválida por consultas com `ids=` para METAR, TAF e stationinfo.
-- Mantém uma lista fixa de ICAOs brasileiros monitorados.
-- Continua com filtros, tabela e cards por aeroporto.
+## Publicação
+1. Use `index.html` como arquivo principal do repositório/site.
+2. Substitua o `index.html` atual no GitHub.
+3. Faça commit.
+4. Recarregue a página publicada.
 
-## Como publicar
-1. Renomeie `painel-aeroportos-brasil.html` para `index.html`.
-2. Substitua o arquivo publicado no repositório do GitHub Pages.
-3. Aguarde o deploy e recarregue a página.
+## Worker usado
+https://weathered-grass-f181.alexgrodrigues.workers.dev
