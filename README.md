@@ -21,6 +21,7 @@ Este projeto mostra os aeroportos disponíveis no momento, separados por região
 - A lista é recarregada a cada 15 minutos.
 - Há botão de atualização manual.
 - Os botões ficam desabilitados durante a consulta e são reativados ao terminar.
+- A página consulta o Worker a cada 15 minutos, mas a versão nova só aparece quando você publica o novo arquivo.
 
 ## Como publicar no GitHub Pages
 1. Coloque `index.html` e `README.md` na raiz do repositório.
@@ -48,4 +49,10 @@ Cada item de `metar` pode conter:
 
 
 ## Versão
-- Esta edição é a v16.
+- Esta edição é a v17.
+
+
+## Nova versão da página
+- Não existe atualização automática da própria versão do HTML no navegador.
+- Para a página mudar de v17 para v17, o novo arquivo precisa ser publicado no GitHub Pages.
+- O que é automático é somente a consulta dos dados do Worker.
