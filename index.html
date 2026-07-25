@@ -92,6 +92,13 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+
+        .card.alert-critical {
+            border-color: var(--ifr-color);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
         }
 
         .card-header {
@@ -156,6 +163,36 @@
             line-height: 1.3;
         }
 
+        .taf-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .taf-toggle {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .taf-toggle:hover {
+            background: rgba(56, 189, 248, 0.2);
+        }
+
+        .taf-content {
+            display: none;
+        }
+
+        .taf-content.show {
+            display: block;
+        }
+
         .loading {
             text-align: center;
             grid-column: 1 / -1;
@@ -163,13 +200,20 @@
             color: var(--text-muted);
             padding: 40px;
         }
+
+        .status-bar {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>Principais Aeroportos da América do Sul</h1>
-        <div class="version">VERSÃO 40.0 — AMÉRICA DO SUL COM TAF</div>
+        <div class="version">VERSÃO 40.0 — AMÉRICA DO SUL COM TAF E ALERTA</div>
     </header>
 
     <div class="controls">
@@ -189,6 +233,8 @@
         </select>
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
+
+    <div class="status-bar" id="statusBar">Última atualização: —</div>
 
     <main class="grid" id="airportGrid">
         <div class="loading">Carregando dados meteorológicos...</div>
@@ -210,11 +256,19 @@
                 if (json.ok && rows.length > 0) {
                     airportData = rows;
                     renderAirports(airportData);
+                    document.getElementById('statusBar').innerText = `Última atualização: ${new Date().toLocaleTimeString()} (${rows.length} aeroportos carregados)`;
                 } else {
                     grid.innerHTML = `<div class="loading">Nenhum aeroporto retornado pela API.</div>`;
                 }
             } catch (e) {
                 grid.innerHTML = `<div class="loading">Erro de conexão com o Worker. Verifique o CORS ou a rede.</div>`;
+            }
+        }
+
+        function toggleTaf(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('show');
             }
         }
 
@@ -225,37 +279,47 @@
                 return;
             }
 
-            grid.innerHTML = data.map(a => `
-                <div class="card" data-icao="${a.icao}" data-city="${a.city}" data-country="${a.country}">
-                    <div class="card-header">
-                        <div>
-                            <div class="icao">${a.icao}</div>
-                            <div class="airport-name">${a.city ? a.city + (a.name ? ' — ' + a.name : '') : (a.name || 'Aeroporto')} (${a.country})</div>
+            grid.innerHTML = data.map((a, index) => {
+                const isCritical = a.category === 'IFR' || a.category === 'LIFR';
+                const tafId = `taf-${a.icao}-${index}`;
+
+                return `
+                    <div class="card ${isCritical ? 'alert-critical' : ''}" data-icao="${a.icao}" data-city="${a.city}" data-country="${a.country}">
+                        <div class="card-header">
+                            <div>
+                                <div class="icao">${a.icao}</div>
+                                <div class="airport-name">${a.city ? a.city + (a.name ? ' — ' + a.name : '') : (a.name || 'Aeroporto')} (${a.country})</div>
+                            </div>
+                            <span class="badge ${a.category}">${a.category}</span>
                         </div>
-                        <span class="badge ${a.category}">${a.category}</span>
+                        <div class="metrics">
+                            <div class="metric-box">
+                                <span class="metric-label">💨 Vento</span>
+                                <strong>${a.wind}</strong>
+                            </div>
+                            <div class="metric-box">
+                                <span class="metric-label">⚖️ Pressão</span>
+                                <strong>${a.pressure}</strong>
+                            </div>
+                            <div class="metric-box">
+                                <span class="metric-label">🌡️ Temperatura</span>
+                                <strong>${a.temperature?.current ?? '—'}°C</strong>
+                            </div>
+                            <div class="metric-box">
+                                <span class="metric-label">💧 Ponto de Orvalho</span>
+                                <strong>${a.temperature?.dewpoint ?? '—'}°C</strong>
+                            </div>
+                        </div>
+                        ${a.metar ? `<div class="raw-data"><strong>METAR:</strong> ${a.metar}</div>` : ''}
+                        ${a.taf ? `
+                            <div class="taf-container">
+                                <button class="taf-toggle" onclick="toggleTaf('${tafId}')">📋 Ver Previsão TAF</button>
+                                <div id="${tafId}" class="taf-content raw-data"><strong>TAF:</strong> ${a.taf}</div>
+                            </div>
+                        ` : ''}
                     </div>
-                    <div class="metrics">
-                        <div class="metric-box">
-                            <span class="metric-label">💨 Vento</span>
-                            <strong>${a.wind}</strong>
-                        </div>
-                        <div class="metric-box">
-                            <span class="metric-label">⚖️ Pressão</span>
-                            <strong>${a.pressure}</strong>
-                        </div>
-                        <div class="metric-box">
-                            <span class="metric-label">🌡️ Temperatura</span>
-                            <strong>${a.temperature?.current ?? '—'}°C</strong>
-                        </div>
-                        <div class="metric-box">
-                            <span class="metric-label">💧 Ponto de Orvalho</span>
-                            <strong>${a.temperature?.dewpoint ?? '—'}°C</strong>
-                        </div>
-                    </div>
-                    ${a.metar ? `<div class="raw-data"><strong>METAR:</strong> ${a.metar}</div>` : ''}
-                    ${a.taf ? `<div class="raw-data"><strong>TAF:</strong> ${a.taf}</div>` : ''}
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function filterAirports() {

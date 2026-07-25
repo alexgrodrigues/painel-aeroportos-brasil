@@ -1,35 +1,25 @@
-# ✈️ Painel de Aeroportos da América do Sul — Atualizações e Versão 40.0
+# ✈️ Painel de Aeroportos da América do Sul — Versão 40.0
 
-Este documento detalha a grande expansão do painel meteorológico, consolidando o monitoramento de aeroportos do Brasil e expandindo para as principais capitais e hubs internacionais de toda a América do Sul.
-
----
-
-## 📋 Resumo das Alterações e Novidades
-
-### 🔹 Expansão Continental (América do Sul)
-Integração completa de estações meteorológicas de capitais e centros de tráfego aéreo sul-americanos no Worker e na interface frontend:
-* **Argentina:** Aeroparque (`SABE`), Ezeiza (`SAEZ`) e Ushuaia (`SAWH`).
-* **Bolívia:** La Paz / El Alto (`SLLP`).
-* **Chile:** Santiago (`SCEL`).
-* **Colômbia:** Bogotá (`SKBO`).
-* **Equador:** Quito (`SEQM`).
-* **Paraguai:** Assunção (`SGAS`).
-* **Peru:** Lima (`SPJC`).
-* **Uruguai:** Montevidéu (`SUMU`).
-* **Venezuela:** Caracas (`SVMI`).
-
-### 🔹 Manutenção e Cobertura do Brasil
-* Preservação e otimização de toda a grade de aeroportos brasileiros já monitorada anteriormente nas regiões Sul, Sudeste, Centro-Oeste, Nordeste e Norte.
-* Atualização da nomenclatura oficial e exibição de nomes e cidades de todas as estações de forma unificada.
+Este repositório hospeda o **Painel de Aeroportos da América do Sul**, uma ferramenta web desenvolvida para monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil e das principais capitais e hubs internacionais do continente.
 
 ---
 
-## 🛠️ Melhorias Técnicas e de Interface
-* **Título Atualizado:** Mudança oficial do título da aplicação para **"Principais Aeroportos da América do Sul"**.
-* **Filtros Regionais Expandidos:** Inclusão de seletor de países na barra de navegação superior para filtragem dinâmica por nação (Brasil, Argentina, Chile, Colômbia, etc.).
-* **Dados Meteorológicos Completos:** Exibição estruturada de METAR e TAF de forma limpa nos cards informativos, mantendo indicadores visuais de regras de voo (**VFR**, **MVFR**, **IFR**, **LIFR**).
-* **Resiliência do Worker:** Aprimoramento do tratamento de requisições assíncronas no Cloudflare Worker para garantir alta performance e cache otimizado.
+## 🌟 O Que Há de Novo na Versão 40.0
+
+* **Expansão Continental:** Inclusão de estações meteorológicas de países vizinhos da América do Sul (como Argentina, Chile, Colômbia, Uruguai, Paraguai, Bolívia, Equador, Peru e Venezuela).
+* **Alertas Visuais para Condições Críticas:** Os cards de aeroportos operando sob regras restritivas (**IFR** ou **LIFR**) agora contam com destaque visual em vermelho para identificação imediata de segurança.
+* **Previsão TAF Interativa:** O bloco de previsão (*TAF*) foi integrado com botão retrátil ("Ver Previsão TAF"), otimizando o espaço visual dos cards sem perder informações técnicas avançadas.
+* **Barra de Status Dinâmica:** Indicador em tempo real do horário da última atualização e contagem total de aeroportos monitorados.
+* **Filtros Regionais Customizados:** Seletor rápido por nação na barra de controles superior para facilitar a filtragem por país.
 
 ---
 
-*Gerado automaticamente para o repositório do [Painel de Aeroportos da América do Sul](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).*
+## 🚀 Tecnologias Utilizadas
+
+* **Frontend:** HTML5, CSS3 moderno (com variáveis e suporte responsivo em Grid) e JavaScript puro (Vanilla JS).
+* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* para cache, alta performance e tratamento de CORS assíncrono.
+* **Hospedagem:** GitHub Pages.
+
+---
+
+*Painel mantido para o monitoramento otimizado de voos e condições meteorológicas da aviação civil.*
