@@ -1,28 +1,34 @@
-# README v36.7
+# README v37
 
 ## Projeto
-Painel de Principais Aeroportos Mercosul com METAR, TAF e dados de estação, otimizado para Cloudflare Workers.
+Principais Aeroportos Mercosul V37.
 
-## Identificação da versão
-A interface principal foi reidentificada como **Principais Aeroporto Mercosul v36.7**.
+## Estrutura da interface
+- ICAO no topo.
+- Tipo de operação (IFR/LIFR/VFR/MVFR) no extremo da mesma linha.
+- Cidade abaixo do ICAO.
+- País abaixo da cidade.
+- Nome completo do aeroporto em linha secundária.
 
-## Correções incluídas
-- Botão de atualizar ajustado para forçar nova leitura dos dados.
-- Frontend com cache-busting por query string ao atualizar.
-- Título da página alinhado com a versão v36.7.
-- Mantido o suporte ao nome completo dos aeroportos, cidade e horário do METAR.
-- Mantido o backend com cache de 15 minutos.
+## Aeroportos cobertos
+- 41 aeroportos do Mercosul, com nomes e cidades definidos no frontend.
 
-## Arquivos
-- `frontend_v36_7_fixed.html`
+## Dados exibidos
+- METAR.
+- TAF.
+- Vento.
+- Pressão.
+- Temperatura.
+- Ponto de orvalho.
+- Categoria operacional.
+
+## Cache
+- O Worker continua com cache de 15 minutos.
+- O topo da página mostra o estado do cache e o tempo desde a atualização.
+
+## Arquivos principais
+- `frontend_v37.html`
 - `worker_v36_cache_15min_fix4.js`
 
-## Observações
-O botão de atualização agora dispara uma nova busca com parâmetro de tempo para evitar reaproveitamento indevido de cache do navegador.
-
-## Status
-A versão v36.7 representa a correção de identificação da página e do botão de atualização.
-
-
-## Última atualização
-Incluídos nomes completos e cidades de todos os aeroportos exibidos, incluindo os aeroportos do Brasil.
+## Observação
+A versão v37 reorganiza visualmente os cartões para facilitar leitura rápida e manter o nome completo apenas no frontend.
