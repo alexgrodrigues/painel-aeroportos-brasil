@@ -201,8 +201,8 @@
             grid.innerHTML = '<div class="loading">Buscando informações atualizadas...</div>';
 
             try {
-                // Substitua abaixo pela URL completa do seu Cloudflare Worker (ex: https://seu-worker.seu-subdominio.workers.dev)
-                const response = await fetch('https://painel-aeroportos.alexgrodrigues.workers.dev'); 
+                // URL real do seu Cloudflare Worker integrada
+                const response = await fetch('https://weathered-grass-f181.alexgrodrigues.workers.dev/'); 
                 const json = await response.json();
 
                 const rows = json.rows || json.dados || [];
@@ -214,7 +214,7 @@
                     grid.innerHTML = `<div class="loading">Nenhum aeroporto retornado pela API.</div>`;
                 }
             } catch (e) {
-                grid.innerHTML = `<div class="loading">Erro de conexão com o Worker. Verifique a URL da API ou o CORS.</div>`;
+                grid.innerHTML = `<div class="loading">Erro de conexão com o Worker. Verifique o CORS ou a rede.</div>`;
             }
         }
 
