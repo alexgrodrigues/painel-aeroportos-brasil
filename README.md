@@ -1,23 +1,24 @@
 # README v36.7
 
 ## Projeto
-Painel METAR com Worker e frontend para consulta de aeroportos na América do Sul, com dados de METAR, TAF, estação e exibição responsiva.
+Painel de Principais Aeroportos Mercosul com METAR, TAF e dados de estação, otimizado para Cloudflare Workers.
 
-## Alterações incluídas até a v36.7
-- Worker com cache de 15 minutos.
-- Parser de METAR extraindo vento, direção, intensidade, pressão, temperatura, visibilidade e teto a partir da string bruta.
-- Suporte para leitura combinada de METAR, TAF e stationinfo para preencher aeroportos que não vierem completos em um único endpoint.
-- Tratamento de `CAVOK` em visibilidade e teto.
-- Frontend mostrando a hora do METAR ao lado do nome do aeroporto quando disponível.
-- Frontend com nome completo dos aeroportos e cidade.
-- Identificação da versão no topo da página como v36.7.
+## Identificação da versão
+A interface principal foi reidentificada como **Principais Aeroporto Mercosul v36.7**.
 
-## Arquivos principais
+## Correções incluídas
+- Botão de atualizar ajustado para forçar nova leitura dos dados.
+- Frontend com cache-busting por query string ao atualizar.
+- Título da página alinhado com a versão v36.7.
+- Mantido o suporte ao nome completo dos aeroportos, cidade e horário do METAR.
+- Mantido o backend com cache de 15 minutos.
+
+## Arquivos
+- `frontend_v36_7_fixed.html`
 - `worker_v36_cache_15min_fix4.js`
-- `frontend_v36.7.html`
 
-## Observações técnicas
-A API da Aviation Weather foi atualizada em 2025 e os endpoints usados no projeto seguem o padrão `/api/data/metar`, `/api/data/taf` e `/api/data/stationinfo` com `format=json`.
+## Observações
+O botão de atualização agora dispara uma nova busca com parâmetro de tempo para evitar reaproveitamento indevido de cache do navegador.
 
-## Status atual
-A versão v36.7 foi ajustada para exibir os dados no frontend com o nome completo, cidade e horário do METAR quando houver informação disponível.
+## Status
+A versão v36.7 representa a correção de identificação da página e do botão de atualização.
