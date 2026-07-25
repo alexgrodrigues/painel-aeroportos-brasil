@@ -22,3 +22,7 @@ O botão de atualização agora dispara uma nova busca com parâmetro de tempo p
 
 ## Status
 A versão v36.7 representa a correção de identificação da página e do botão de atualização.
+
+
+## Última atualização
+Incluídos nomes completos e cidades de todos os aeroportos exibidos, incluindo os aeroportos do Brasil.
