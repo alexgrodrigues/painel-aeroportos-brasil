@@ -163,6 +163,16 @@
             line-height: 1.3;
         }
 
+        .interpreted-data {
+            font-size: 0.85rem;
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid var(--accent-color);
+            padding: 8px 10px;
+            border-radius: 0 6px 6px 0;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+
         .taf-container {
             display: flex;
             flex-direction: column;
@@ -213,7 +223,7 @@
 
     <header>
         <h1>Principais Aeroportos da América do Sul</h1>
-        <div class="version">VERSÃO 40.0 — AMÉRICA DO SUL COM TAF E ALERTA</div>
+        <div class="version">VERSÃO 40.0 — AMÉRICA DO SUL COM TAF TRADUZIDO</div>
     </header>
 
     <div class="controls">
@@ -311,9 +321,16 @@
                             </div>
                         </div>
                         ${a.metar ? `<div class="raw-data"><strong>METAR:</strong> ${a.metar}</div>` : ''}
+                        
+                        ${a.tafInterpret ? `
+                            <div class="interpreted-data">
+                                💡 <strong>Previsão Traduzida:</strong> ${a.tafInterpret}
+                            </div>
+                        ` : ''}
+
                         ${a.taf ? `
                             <div class="taf-container">
-                                <button class="taf-toggle" onclick="toggleTaf('${tafId}')">📋 Ver Previsão TAF</button>
+                                <button class="taf-toggle" onclick="toggleTaf('${tafId}')">📋 Ver Código Técnico TAF</button>
                                 <div id="${tafId}" class="taf-content raw-data"><strong>TAF:</strong> ${a.taf}</div>
                             </div>
                         ` : ''}
