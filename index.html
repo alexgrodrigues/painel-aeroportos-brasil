@@ -46,7 +46,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
@@ -74,6 +74,32 @@
 
         button:hover {
             opacity: 0.9;
+        }
+
+        .filter-chips {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .chip:hover, .chip.active {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
         }
 
         .grid {
@@ -223,11 +249,11 @@
 
     <header>
         <h1>Principais Aeroportos da América do Sul</h1>
-        <div class="version">VERSÃO 40.0 — AMÉRICA DO SUL COM TAF TRADUZIDO</div>
+        <div class="version">VERSÃO 42.0 — AMÉRICA DO SUL COM CONTROLE DE VERSÃO AUTOMÁTICO</div>
     </header>
 
     <div class="controls">
-        <input type="text" id="search" placeholder="Pesquisar ICAO, Cidade, IFR..." oninput="filterAirports()">
+        <input type="text" id="search" placeholder="Pesquisar ICAO, Cidade..." oninput="filterAirports()">
         <select id="regionFilter" onchange="filterAirports()">
             <option value="ALL">Todas as Regiões / Países</option>
             <option value="BR">Brasil</option>
@@ -244,6 +270,15 @@
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
+    <!-- Filtros Rápidos por Categoria de Voo -->
+    <div class="filter-chips">
+        <div class="chip active" onclick="setFlightCategory('ALL', this)">Todos</div>
+        <div class="chip" onclick="setFlightCategory('VFR', this)">🟢 VFR (Visual)</div>
+        <div class="chip" onclick="setFlightCategory('MVFR', this)">🔵 MVFR (Marginal)</div>
+        <div class="chip" onclick="setFlightCategory('IFR', this)">🔴 IFR (Restrito)</div>
+        <div class="chip" onclick="setFlightCategory('LIFR', this)">🟣 LIFR (Crítico)</div>
+    </div>
+
     <div class="status-bar" id="statusBar">Última atualização: —</div>
 
     <main class="grid" id="airportGrid">
@@ -252,6 +287,7 @@
 
     <script>
         let airportData = [];
+        let activeCategoryFilter = 'ALL';
 
         async function loadData() {
             const grid = document.getElementById('airportGrid');
@@ -265,7 +301,7 @@
 
                 if (json.ok && rows.length > 0) {
                     airportData = rows;
-                    renderAirports(airportData);
+                    filterAirports();
                     document.getElementById('statusBar').innerText = `Última atualização: ${new Date().toLocaleTimeString()} (${rows.length} aeroportos carregados)`;
                 } else {
                     grid.innerHTML = `<div class="loading">Nenhum aeroporto retornado pela API.</div>`;
@@ -280,6 +316,13 @@
             if (el) {
                 el.classList.toggle('show');
             }
+        }
+
+        function setFlightCategory(cat, element) {
+            activeCategoryFilter = cat;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            filterAirports();
         }
 
         function renderAirports(data) {
@@ -353,11 +396,19 @@
                     matchRegion = a.icao.startsWith(prefixFilter);
                 }
 
-                return matchTerm && matchRegion;
+                let matchCategory = true;
+                if (activeCategoryFilter !== 'ALL') {
+                    matchCategory = a.category === activeCategoryFilter;
+                }
+
+                return matchTerm && matchRegion && matchCategory;
             });
 
             renderAirports(filtered);
         }
+
+        // Auto-refresh a cada 10 minutos (600000 ms)
+        setInterval(loadData, 600000);
 
         // Carga inicial
         loadData();

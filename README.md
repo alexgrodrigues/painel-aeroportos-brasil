@@ -1,25 +1,24 @@
-# ✈️ Painel de Aeroportos da América do Sul — Versão 40.0
+# ✈️ Painel de Aeroportos da América do Sul — Versão 42.0
 
-Este repositório hospeda o **Painel de Aeroportos da América do Sul**, uma ferramenta web desenvolvida para monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil e das principais capitais e hubs internacionais do continente.
-
----
-
-## 🌟 O Que Há de Novo na Versão 40.0
-
-* **Expansão Continental:** Inclusão de estações meteorológicas de países vizinhos da América do Sul (como Argentina, Chile, Colômbia, Uruguai, Paraguai, Bolívia, Equador, Peru e Venezuela).
-* **Alertas Visuais para Condições Críticas:** Os cards de aeroportos operando sob regras restritivas (**IFR** ou **LIFR**) agora contam com destaque visual em vermelho para identificação imediata de segurança.
-* **Previsão TAF Interativa:** O bloco de previsão (*TAF*) foi integrado com botão retrátil ("Ver Previsão TAF"), otimizando o espaço visual dos cards sem perder informações técnicas avançadas.
-* **Barra de Status Dinâmica:** Indicador em tempo real do horário da última atualização e contagem total de aeroportos monitorados.
-* **Filtros Regionais Customizados:** Seletor rápido por nação na barra de controles superior para facilitar a filtragem por país.
+Este documento detalha as atualizações e melhorias implementadas no [Painel de Aeroportos da América do Sul](https://alexgrodrigues.github.io/painel-aeroportos-brasil/), consolidando o monitoramento de aeroportos estratégicos do Brasil e das principais capitais e hubs do continente.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 📋 Resumo das Alterações (Versão 42.0)
 
-* **Frontend:** HTML5, CSS3 moderno (com variáveis e suporte responsivo em Grid) e JavaScript puro (Vanilla JS).
-* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* para cache, alta performance e tratamento de CORS assíncrono.
-* **Hospedagem:** GitHub Pages.
+### 🔹 Principais Novidades e Recursos
+* **Filtros Rápidos por Categoria de Voo:** Adicionados botões interativos (chips) na interface para isolar instantaneamente estações operando sob regras **VFR** (Visual), **MVFR** (Marginal), **IFR** (Restrito) ou **LIFR** (Crítico).
+* **Previsão TAF Traduzida para Leigos:** O campo técnico de previsão (*TAF*) agora conta com uma interpretação em texto amigável (`Previsão Traduzida`), facilitando a compreensão rápida para qualquer usuário, mantendo o código técnico original recolhido em um botão expansível opcional.
+* **Alertas Visuais para Condições Críticas:** Cards de aeroportos operando em condições meteorológicas restritivas ou críticas (**IFR** / **LIFR**) ganham destaque visual em vermelho.
+* **Atualização Automática (Auto-Refresh):** Implementada rotina em segundo plano que atualiza os dados meteorológicos a cada 10 minutos de forma automatizada, exibindo também a barra de status dinâmica com o horário e contagem de estações ativas.
+* **Expansão Continental Completa:** Monitoramento unificado cobrindo o Brasil e hubs internacionais na Argentina, Bolívia, Chile, Colômbia, Equador, Paraguai, Peru, Uruguai e Venezuela.
 
 ---
 
-*Painel mantido para o monitoramento otimizado de voos e condições meteorológicas da aviação civil.*
+## 🛠️ Tecnologias e Arquitetura
+* **Frontend:** Interface moderna e responsiva utilizando HTML5, CSS Variables e JavaScript puro (Vanilla JS).
+* **Backend / API:** Cloudflare Worker dedicado para requisições assíncronas, tratamento de CORS e cache otimizado das estações de aeródromo.
+
+---
+
+*Gerado automaticamente para o repositório oficial do [Painel de Aeroportos da América do Sul](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).*
