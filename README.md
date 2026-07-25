@@ -1,79 +1,37 @@
-# Principais Aeroportos Mercosul
+# ✈️ Painel de Aeroportos do Mercosul — Atualizações e Mudanças
 
-Este projeto exibe METAR, TAF e dados interpretados de aeroportos do Brasil e de países do Mercosul em uma interface web leve.
+Este documento detalha as alterações, melhorias e correções implementadas nesta versão do painel de monitoramento meteorológico aeroportuário.
 
-## Versão atual
+---
 
-**v38.21**
+## 📋 Resumo das Alterações
 
-## Atualizações desde a v37
+### 🔹 Região Sul (`Brasil — Sul`)
+* **Chapecó (SBCH):** Atualização dos dados meteorológicos com vento a `040° / 08 KT`, pressão `Q1019` e temperatura de `19°C`.
+* **Canoas (SBCO):** Inclusão de dados METAR e TAF interpretado com previsões detalhadas de visibilidade e nuvens.
+* **Curitiba (SBCT):** Atualização do Afonso Pena com vento a `210° / 07 KT`, pressão `Q1022` e adições nas previsões de TAF (incluindo transições para CAVOK).
+* **Foz do Iguaçu (SBFI):** Monitoramento atualizado com previsão de pancadas de chuva e tempestades (`TSRA`) nos horários previstos.
+* **Florianópolis (SBFL), Navegantes (SBNF), Porto Alegre (SBPA) e Pelotas (SBPK):** Atualizações regulares de relatórios METAR/TAF com novas condições de vento, umidade e nevoeiros previstos.
 
-### v38
-- Inclusão do bloco de TAF interpretado na interface.
-- Exibição da base do TAF e das evoluções previstas.
-- Suporte a cartões com destaque visual para condições severas.
-- Melhorias na leitura e na exibição de METAR e TAF.
-- Adição de novos aeroportos e refinamentos de blocos regionais.
-- Ajustes no carregamento com atualização manual via botão.
+### 🔹 Região Sudeste (`Brasil — Sudeste`)
+* **Confins (SBCF):** Ajustes nos dados do aeroporto internacional com vento a `260° / 06 KT` e temperatura de `21°C`.
+* **Galeão (SBGL) & Santos Dumont (SBRJ):** Atualizações de condições de pista, visibilidade e previsões de chuvisco (`DZ`) para o Rio de Janeiro.
+* **Guarulhos (SBGR), Viracopos (SBKP) & Congonhas (SBSP):** Dados meteorológicos e previsões de TAF atualizados para os principais terminais paulistas.
+* **Ribeirão Preto (SBRP):** Atualização do Aeroporto Leite Lopes com vento a `170° / 07 KT`.
 
-### v38.1 a v38.9
-- Revisões na estrutura do frontend para manter o carregamento estável.
-- Inclusão da classe CSS `alerta-severo` para destacar condições críticas.
-- Aplicação dinâmica da classe no card do aeroporto quando o TAF indicar risco severo.
-- Refinos na exibição de TAF interpretado e evoluções previstas.
+### 🔹 Região Centro-Oeste (`Brasil — Centro-Oeste`)
+* **Brasília (SBBR), Campo Grande (SBCG), Várzea Grande (SBCY) e Goiânia (SBGO):** Dados de temperatura e pressão atualizados (destaque para temperaturas elevadas em Cuiabá atingindo `33°C` com céu claro/CAVOK).
 
-### v38.10 a v38.14
-- Correção do carregamento do frontend.
-- Ajustes no botão Atualizar para forçar nova requisição e evitar cache.
-- Inclusão de parâmetros de bypass de cache na URL do Worker.
-- Mensagens de status atualizadas durante o recarregamento.
+### 🔹 Região Nordeste (`Brasil — Nordeste`)
+* **Aracaju (SBAR), Fortaleza (SBFZ), João Pessoa (SBJP), Marabá (SBMA) e Maceió (SBMO):** Atualizações de relatórios METAR e TAF com condições locais de vento e umidade.
 
-### v38.15 a v38.21
-- Inclusão de aeroportos adicionais no frontend e no Worker.
-- Ajuste do aeroporto de Petrolina para a região Nordeste.
-- Inclusão de Rio Branco, Palmas, Boa Vista, Porto Velho, Belém, Teresina e Natal/SBSG conforme o mapeamento correto.
-- Correção de classificação regional para SBPE, SBBE e demais aeroportos.
-- Ajuste do subtítulo da página para refletir a versão correta.
-- Refinamento da lista de ICAOs e nomes completos dos aeroportos.
+---
 
-## Arquivos principais
+## 🛠️ Melhorias Técnicas e Interface
+* Aprimoramento da leitura e interpretação automática dos blocos **METAR** e **TAF**.
+* Atualização dos cards informativos por região com indicadores visuais de regras de voo (**VFR**, **MVFR**, etc.).
+* Otimização do cache de atualização de dados e tempo de resposta do painel.
 
-- `index.html`: interface principal.
-- `worker.js`: coleta e entrega dos dados meteorológicos.
+---
 
-## Observações
-
-- O Worker utiliza a API de meteorologia aeronáutica para buscar METAR, TAF e station info.
-- O frontend foi ajustado para lidar com mudanças de estrutura nos dados e evitar perda de exibição.
-- As versões mais recentes priorizam estabilidade, carregamento consistente e destaque de alertas.
-
-## Estrutura de exibição
-
-- **METAR**: texto bruto da observação.
-- **TAF**: texto bruto da previsão.
-- **TAF Interpretado**: resumo da base da previsão.
-- **Evoluções Previstas**: grupos de tendência como `BECMG`, `TEMPO`, `PROB` e `FM`.
-
-## Aeroportos adicionados ou ajustados
-
-- **SBSG** — São Gonçalo do Amarante - Governador Aluízio Alves (Natal).
-- **SBTI** — Aeroporto de Teresina - Senador Petrônio Portela.
-- **SBPE** — Petrolina, agora na região Nordeste.
-- **SBBE** — Belém, corretamente classificado no Norte.
-- **SBFI** — Foz do Iguaçu, incluído na região Sul.
-- **SBEI** — Rio Branco - Plácido de Castro.
-- **SBPJ** — Palmas - Brigadeiro Lysias Rodrigues.
-- **SBBV** — Boa Vista - Atlas Brasil Cantanhede.
-- **SBPV** — Porto Velho - Governador Jorge Teixeira de Oliveira.
-
-## Histórico resumido
-
-- A partir da v37, o projeto passou por expansão visual e funcional.
-- As versões v38 introduziram interpretação de TAF, alertas severos, ajustes de cache e novas localidades.
-- A v38.21 consolidou a divisão regional correta e estabilizou o carregamento do frontend.
-
-## Uso
-
-1. Abrir o arquivo HTML no navegador.
-2. O Worker entrega os dados JSON consumidos pela interface.
-3. Use o botão Atualizar para forçar uma nova consulta.
+*Gerado automaticamente para o repositório do [Painel de Aeroportos do Brasil](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).*
