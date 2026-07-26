@@ -6,8 +6,8 @@ Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferrame
 
 ## 📋 Resumo das Alterações (Versão 45.3)
 
-* **Refatoração do Contrato do Worker (Campo `group`):** O backend agora envia de forma explícita a propriedade `group` (`BR`, `AR`, `CL`, `MX`, `PA`, `CR`, `OTHER`) calculada diretamente no servidor com base nos prefixos ICAO.
-* **Limpeza de Lógica no Frontend:** Removida a regra de negações em cadeia no navegador, tornando a filtragem por abas limpa, direta e baseada na propriedade `a.group === activeCountryFilter`.
+* **Contrato do Worker Unificado (`group` e `country`):** O backend agora envia de forma limpa as propriedades `group` e `country` derivadas de uma única fonte de verdade centralizada, sem tabelas ou mapas intermediários redundantes.
+* **Filtragem Otimizada no Frontend:** O sistema de abas consome diretamente a propriedade `group` do payload do Worker, eliminando lógicas condicionais complexas no navegador.
 * **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.3**.
 
 ---
@@ -15,7 +15,7 @@ Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferrame
 ## 🚀 Tecnologias Utilizadas
 
 * **Frontend:** HTML5, CSS3 moderno (com variáveis e suporte responsivo em Grid) e JavaScript puro (Vanilla JS).
-* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* com enriquecimento de dados por grupo geográfico e tratamento de CORS.
+* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* com enriquecimento e normalização nativa de dados geográficos e meteorológicos.
 * **Hospedagem:** GitHub Pages.
 
 ---

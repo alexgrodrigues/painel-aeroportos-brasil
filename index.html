@@ -288,7 +288,7 @@
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
-    <!-- Abas de Navegação por País / Região (Consumindo o grupo do Worker) -->
+    <!-- Abas de Navegação por País / Região -->
     <div class="country-tabs" id="countryTabs">
         <button class="tab-btn active" onclick="setCountryFilter('ALL', this)">🌐 Todos</button>
         <button class="tab-btn" onclick="setCountryFilter('BR', this)">🇧🇷 Brasil</button>
@@ -431,7 +431,6 @@
                 
                 let matchCountry = true;
                 if (activeCountryFilter !== 'ALL') {
-                    // Filtragem direta usando o campo explícito 'group' enviado pelo Worker
                     matchCountry = a.group === activeCountryFilter;
                 }
 
