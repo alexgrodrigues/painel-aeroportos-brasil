@@ -76,7 +76,6 @@
             opacity: 0.9;
         }
 
-        /* Barra de Contadores Operacionais (Etapa 1) */
         .operational-counters {
             display: flex;
             justify-content: center;
@@ -107,7 +106,6 @@
         .counter-ifr { border-color: var(--ifr-color); color: var(--ifr-color); }
         .counter-lifr { border-color: var(--lifr-color); color: var(--lifr-color); }
 
-        /* Abas de Países */
         .country-tabs {
             display: flex;
             justify-content: center;
@@ -137,7 +135,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Filtros por Categoria de Voo */
         .filter-chips {
             display: flex;
             justify-content: center;
@@ -319,7 +316,6 @@
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
-    <!-- Barra de Contadores Operacionais Imediatos (Etapa 1) -->
     <div class="operational-counters" id="operationalCounters">
         <div class="counter-badge counter-total">📊 Total: <strong id="count-total">0</strong></div>
         <div class="counter-badge counter-vfr">🟢 VFR: <strong id="count-vfr">0</strong></div>
@@ -328,7 +324,6 @@
         <div class="counter-badge counter-lifr">🟣 LIFR: <strong id="count-lifr">0</strong></div>
     </div>
 
-    <!-- Abas de Navegação por País / Região -->
     <div class="country-tabs" id="countryTabs">
         <button class="tab-btn active" onclick="setCountryFilter('ALL', this)">🌐 Todos</button>
         <button class="tab-btn" onclick="setCountryFilter('BR', this)">🇧🇷 Brasil</button>
@@ -340,7 +335,6 @@
         <button class="tab-btn" onclick="setCountryFilter('OTHER', this)">🌎 Outros (América do Sul / Central)</button>
     </div>
 
-    <!-- Filtros por Categoria de Voo -->
     <div class="filter-chips">
         <div class="chip active" onclick="setFlightCategory('ALL', this)">Todas as Condições</div>
         <div class="chip" onclick="setFlightCategory('VFR', this)">🟢 VFR (Visual)</div>
@@ -367,29 +361,27 @@
             try {
                 const response = await fetch('https://weathered-grass-f181.alexgrodrigues.workers.dev/');
                 if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
+                    throw new Error('Erro HTTP: ' + response.status);
                 }
                 const json = await response.json();
-
                 const rows = json.rows || json.dados || [];
 
                 if (json.ok && rows.length > 0) {
                     airportData = rows;
                     updateGlobalCounters(airportData);
                     filterAirports();
-                    document.getElementById('statusBar').innerText = `Última atualização: ${new Date().toLocaleTimeString()} (${rows.length} aeroportos carregados)`;
+                    document.getElementById('statusBar').innerText = 'Última atualização: ' + new Date().toLocaleTimeString() + ' (' + rows.length + ' aeroportos carregados)';
                 } else {
-                    grid.innerHTML = `<div class="loading">Nenhum aeroporto retornado pela API.</div>`;
+                    grid.innerHTML = '<div class="loading">Nenhum aeroporto retornado pela API.</div>';
                 }
             } catch (e) {
-                grid.innerHTML = `<div class="loading">Erro de conexão ou falha ao carregar dados do Worker (${e.message}).</div>`;
+                grid.innerHTML = '<div class="loading">Erro de conexão ou falha ao carregar dados do Worker (' + (e?.message || e) + ').</div>';
             }
         }
 
-        // Atualiza os contadores globais no topo (Etapa 1)
         function updateGlobalCounters(data) {
-            const totals = { VFR: 0, MVFR: 0, IFR: 0, LIFR: 0, N/A: 0 };
-            data.forEach(a => {
+            const totals = { VFR: 0, MVFR: 0, IFR: 0, LIFR: 0, 'N/A': 0 };
+            data.forEach(function(a) {
                 const cat = a.category && totals[a.category] !== undefined ? a.category : 'N/A';
                 if (totals[cat] !== undefined) totals[cat]++;
             });
@@ -410,14 +402,18 @@
 
         function setFlightCategory(cat, element) {
             activeCategoryFilter = cat;
-            document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.filter-chips .chip').forEach(function(c) {
+                c.classList.remove('active');
+            });
             element.classList.add('active');
             filterAirports();
         }
 
         function setCountryFilter(country, element) {
             activeCountryFilter = country;
-            document.querySelectorAll('.country-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.country-tabs .tab-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
             element.classList.add('active');
             filterAirports();
         }
@@ -429,60 +425,47 @@
                 return;
             }
 
-            grid.innerHTML = data.map((a, index) => {
+            grid.innerHTML = data.map(function(a, index) {
                 const isCritical = a.category === 'IFR' || a.category === 'LIFR';
-                const tafId = `taf-${a.icao}-${index}`;
+                const tafId = 'taf-' + a.icao + '-' + index;
 
-                return `
-                    <div class="card ${isCritical ? 'alert-critical' : ''}" data-icao="${a.icao}" data-city="${a.city}" data-country="${a.country}">
-                        <div class="card-header">
-                            <div>
-                                <div class="icao">${a.icao}</div>
-                                <div class="airport-name">${a.city ? a.city + (a.name ? ' — ' + a.name : '') : (a.name || 'Aeroporto')} (${a.country})</div>
-                            </div>
-                            <span class="badge ${a.category}">${a.category}</span>
-                        </div>
-                        <div class="metrics">
-                            <div class="metric-box">
-                                <span class="metric-label">💨 Vento</span>
-                                <strong>${a.wind}</strong>
-                            </div>
-                            <div class="metric-box">
-                                <span class="metric-label">⚖️ Pressão</span>
-                                <strong>${a.pressure}</strong>
-                            </div>
-                            <div class="metric-box">
-                                <span class="metric-label">🌡️ Temperatura</span>
-                                <strong>${a.temperature?.current ?? '—'}°C</strong>
-                            </div>
-                            <div class="metric-box">
-                                <span class="metric-label">💧 Ponto de Orvalho</span>
-                                <strong>${a.temperature?.dewpoint ?? '—'}°C</strong>
-                            </div>
-                        </div>
-                        ${a.metar ? `<div class="raw-data"><strong>METAR:</strong> ${a.metar}</div>` : ''}
-                        
-                        ${a.tafInterpret ? `
-                            <div class="interpreted-data">
-                                💡 <strong>Previsão Traduzida:</strong> ${a.tafInterpret}
-                            </div>
-                        ` : ''}
-
-                        ${a.taf ? `
-                            <div class="taf-container">
-                                <button class="taf-toggle" onclick="toggleTaf('${tafId}')">📋 Ver Código Técnico TAF</button>
-                                <div id="${tafId}" class="taf-content raw-data"><strong>TAF:</strong> ${a.taf}</div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
+                return '<div class="card ' + (isCritical ? 'alert-critical' : '') + '" data-icao="' + a.icao + '" data-city="' + (a.city || '') + '" data-country="' + a.country + '">' +
+                    '<div class="card-header">' +
+                        '<div>' +
+                            '<div class="icao">' + a.icao + '</div>' +
+                            '<div class="airport-name">' + (a.city ? a.city + (a.name ? ' — ' + a.name : '') : (a.name || 'Aeroporto')) + ' (' + a.country + ')</div>' +
+                        '</div>' +
+                        '<span class="badge ' + a.category + '">' + a.category + '</span>' +
+                    '</div>' +
+                    '<div class="metrics">' +
+                        '<div class="metric-box">' +
+                            '<span class="metric-label">💨 Vento</span>' +
+                            '<strong>' + a.wind + '</strong>' +
+                        '</div>' +
+                        '<div class="metric-box">' +
+                            '<span class="metric-label">⚖️ Pressão</span>' +
+                            '<strong>' + a.pressure + '</strong>' +
+                        '</div>' +
+                        '<div class="metric-box">' +
+                            '<span class="metric-label">🌡️ Temperatura</span>' +
+                            '<strong>' + (a.temperature?.current ?? '—') + '°C</strong>' +
+                        '</div>' +
+                        '<div class="metric-box">' +
+                            '<span class="metric-label">💧 Ponto de Orvalho</span>' +
+                            '<strong>' + (a.temperature?.dewpoint ?? '—') + '°C</strong>' +
+                        '</div>' +
+                    '</div>' +
+                    (a.metar ? '<div class="raw-data"><strong>METAR:</strong> ' + a.metar + '</div>' : '') +
+                    (a.tafInterpret ? '<div class="interpreted-data">💡 <strong>Previsão Traduzida:</strong> ' + a.tafInterpret + '</div>' : '') +
+                    (a.taf ? '<div class="taf-container"><button class="taf-toggle" onclick="toggleTaf(\'' + tafId + '\')">📋 Ver Código Técnico TAF</button><div id="' + tafId + '" class="taf-content raw-data"><strong>TAF:</strong> ' + a.taf + '</div></div>' : '') +
+                '</div>';
             }).join('');
         }
 
         function filterAirports() {
             const term = document.getElementById('search').value.toUpperCase();
 
-            const filtered = airportData.filter(a => {
+            const filtered = airportData.filter(function(a) {
                 const matchTerm = a.icao.includes(term) || (a.city && a.city.toUpperCase().includes(term)) || (a.name && a.name.toUpperCase().includes(term)) || (a.category && a.category.includes(term));
                 
                 let matchCountry = true;
@@ -501,10 +484,7 @@
             renderAirports(filtered);
         }
 
-        // Auto-refresh a cada 10 minutos (600000 ms)
         setInterval(loadData, 600000);
-
-        // Carga inicial
         loadData();
     </script>
 </body>
