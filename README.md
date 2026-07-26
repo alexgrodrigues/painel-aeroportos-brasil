@@ -1,24 +1,28 @@
-# ✈️ Painel de Aeroportos da América Latina — Versão 46
+# 🛫 Painel de Aeroportos da América Latina
 
-Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
-
----
-
-## 📋 Resumo das Alterações (Versão 46)
-
-* **Evolução Arquitetural Completa:** Consolidação total da lógica de processamento de dados e cálculo de idade de relatórios meteorológicos (`hasMetar`, `hasTaf`, `metarAgeMins`, `isStale`) diretamente no backend (Cloudflare Worker).
-* **Identidade Visual Aprimorada:** Inclusão de favicon vetorial estilizado com o caça Gripen da FAB na aba do navegador.
-* **Estabilidade e Performance:** Limpeza de dependências do frontend e melhorias no tratamento de respostas JSON assíncronas.
-* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 46**.
+Painel em tempo real para monitoramento de condições meteorológicas de voo (**METAR** e **TAF**) de aeroportos selecionados na América Latina, estruturado com alta resiliência e suporte a cache dinâmico via Cloudflare Worker.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🏗️ Arquitetura do Sistema
 
-* **Frontend:** HTML5, CSS3 moderno (com variáveis e suporte responsivo em Grid) e JavaScript puro (Vanilla JS).
-* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* com enriquecimento e normalização nativa de dados geográficos e meteorológicos.
-* **Hospedagem:** GitHub Pages.
+O projeto é dividido em duas camadas principais:
+
+1. **Frontend (GitHub Pages):** 
+   - Interface limpa baseada em componentes web modernos (HTML5, CSS3, JavaScript Vanilla).
+   - Filtros dinâmicos por país/região, categoria de voo (VFR, MVFR, IFR, LIFR) e busca textual por código ICAO ou cidade.
+   - Atualização automática em segundo plano a cada 5 minutos.
+
+2. **Backend (Cloudflare Worker):**
+   - Atua como um proxy seguro para a API oficial de meteorologia aeronáutica (`aviationweather.gov`).
+   - Realiza o particionamento inteligente em lotes de requisições paralelas para contornar limites de tamanho de URL da origem.
+   - Faz o mapeamento rigoroso utilizando chaves de identificação robustas (`icaoId`, `stationId`).
+   - Aplica degradação graciosa: se o provedor externo retornar valores vazios ou instáveis, o painel mantém os metadados estruturais intactos, evitando quebras de interface.
 
 ---
 
-*Painel mantido para o monitoramento otimizado de voos e condições meteorológicas da aviação civil.*
+## 🚀 Como Executar Localmente
+
+1. Clone o repositório em sua máquina:
+   ```bash
+   git clone [https://github.com/alexgrodrigues/painel-aeroportos-brasil.git](https://github.com/alexgrodrigues/painel-aeroportos-brasil.git)
