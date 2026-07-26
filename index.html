@@ -378,7 +378,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.14</div>
+        <div class="version">VERSÃO 46</div>
     </header>
 
     <div class="controls">
@@ -522,7 +522,6 @@
             input.focus();
         }
 
-        // Utiliza os atributos lógicos fornecidos nativamente pelo backend Worker (hasMetar, metarAgeMins, isStale)
         function getBackendMetarAgeInfo(a) {
             if (!a.hasMetar || !a.metar) {
                 return { text: 'Sem METAR disponível', isStale: false, isMissing: true };
