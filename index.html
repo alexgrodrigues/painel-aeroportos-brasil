@@ -308,7 +308,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.5</div>
+        <div class="version">VERSÃO 45.6</div>
     </header>
 
     <div class="controls">
@@ -316,6 +316,7 @@
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
+    <!-- Contadores Dinâmicos -->
     <div class="operational-counters" id="operationalCounters">
         <div class="counter-badge counter-total">📊 Total: <strong id="count-total">0</strong></div>
         <div class="counter-badge counter-vfr">🟢 VFR: <strong id="count-vfr">0</strong></div>
@@ -368,7 +369,6 @@
 
                 if (json.ok && rows.length > 0) {
                     airportData = rows;
-                    updateGlobalCounters(airportData);
                     filterAirports();
                     document.getElementById('statusBar').innerText = 'Última atualização: ' + new Date().toLocaleTimeString() + ' (' + rows.length + ' aeroportos carregados)';
                 } else {
@@ -379,14 +379,15 @@
             }
         }
 
-        function updateGlobalCounters(data) {
+        // Atualiza os contadores com base no conjunto de dados filtrado atual
+        function updateCounters(filteredData) {
             const totals = { VFR: 0, MVFR: 0, IFR: 0, LIFR: 0, 'N/A': 0 };
-            data.forEach(function(a) {
+            filteredData.forEach(function(a) {
                 const cat = a.category && totals[a.category] !== undefined ? a.category : 'N/A';
                 if (totals[cat] !== undefined) totals[cat]++;
             });
 
-            document.getElementById('count-total').innerText = data.length;
+            document.getElementById('count-total').innerText = filteredData.length;
             document.getElementById('count-vfr').innerText = totals.VFR;
             document.getElementById('count-mvfr').innerText = totals.MVFR;
             document.getElementById('count-ifr').innerText = totals.IFR;
@@ -465,23 +466,28 @@
         function filterAirports() {
             const term = document.getElementById('search').value.toUpperCase();
 
-            const filtered = airportData.filter(function(a) {
+            // 1. Filtro por país/região primeiro para atualizar os contadores do país selecionado
+            const countryFiltered = airportData.filter(function(a) {
+                if (activeCountryFilter === 'ALL') return true;
+                return a.group === activeCountryFilter;
+            });
+
+            // Atualiza os contadores baseados no país/região selecionado (antes do filtro de texto/categoria)
+            updateCounters(countryFiltered);
+
+            // 2. Aplica os demais filtros (busca por texto e categoria de voo) na exibição da grid
+            const finalFiltered = countryFiltered.filter(function(a) {
                 const matchTerm = a.icao.includes(term) || (a.city && a.city.toUpperCase().includes(term)) || (a.name && a.name.toUpperCase().includes(term)) || (a.category && a.category.includes(term));
                 
-                let matchCountry = true;
-                if (activeCountryFilter !== 'ALL') {
-                    matchCountry = a.group === activeCountryFilter;
-                }
-
                 let matchCategory = true;
                 if (activeCategoryFilter !== 'ALL') {
                     matchCategory = a.category === activeCategoryFilter;
                 }
 
-                return matchTerm && matchCountry && matchCategory;
+                return matchTerm && matchCategory;
             });
 
-            renderAirports(filtered);
+            renderAirports(finalFiltered);
         }
 
         setInterval(loadData, 600000);
