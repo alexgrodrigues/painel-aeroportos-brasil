@@ -1,15 +1,15 @@
-# ✈️ Painel de Aeroportos da América do Sul — Versão 44.1
+# ✈️ Painel de Aeroportos da América Latina — Versão 45.0
 
-Este repositório hospeda o **Painel de Aeroportos da América do Sul**, uma ferramenta web desenvolvida para monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil e das principais capitais e hubs internacionais do continente.
+Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
 
 ---
 
-## 📋 Resumo das Alterações e Correções
+## 📋 Resumo das Alterações (Versão 45.0)
 
-* **Correção de METARs Ausentes:** Ajuste na extração de dados e propriedades do Worker para estações específicas como `SCEL`, `SBBE`, `SBCY`, `SBEG`, `SBMQ` e `SBSG`.
-* **Inclusão de Estações na Venezuela:** Adicionados tanto o aeroporto internacional civil (`SVMI`) quanto a base aérea militar (`SVBL`) para garantir cobertura completa em Caracas.
-* **Limpeza de Interface:** Remoção de textos descritivos longos no cabeçalho superior da aplicação, mantendo apenas a indicação limpa da **VERSÃO 44.1**.
-* **Filtros e Tradução TAF:** Preservação dos filtros rápidos por categoria de voo e da tradução amigável do TAF para leigos.
+* **Atualização do Título e Escopo:** O projeto evoluiu oficialmente para **Principais Aeroportos da América Latina**, refletindo a inclusão de novas regiões estratégicas.
+* **Expansão Continental (Worker e Interface):** Adicionados ao backend os principais hubs e aeroportos do México (`MMMX`, `MMUN`, `MMGL`, `MMMY`), Panamá (`MPTO`), Costa Rica (`MROC`), El Salvador (`MSLP`), Guatemala (`MGGT`), Nicarágua (`MNMG`), Honduras (`MHLM`) e Cuba (`MUHA`).
+* **Filtros e Controles Aprimorados:** Suporte a seleção de novas regiões no menu suspenso do painel.
+* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.0**.
 
 ---
 
