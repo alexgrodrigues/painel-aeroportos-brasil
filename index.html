@@ -378,7 +378,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.13</div>
+        <div class="version">VERSÃO 45.14</div>
     </header>
 
     <div class="controls">
@@ -522,35 +522,31 @@
             input.focus();
         }
 
-        function getMetarAgeInfo(metarString) {
-            if (!metarString) return { text: 'Sem METAR disponível', isStale: false, isMissing: true };
-            const match = metarString.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
-            if (!match) return { text: 'Formato METAR inválido', isStale: false, isMissing: true };
-
-            const reportHour = parseInt(match[1], 10);
-            const reportMin = parseInt(match[2], 10);
-
-            const now = new Date();
-            const nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes());
-            
-            const reportDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), reportHour, reportMin);
-            
-            let diffMs = nowUTC - reportDate;
-            if (diffMs < 0) {
-                reportDate.setUTCDate(reportDate.getUTCDate() - 1);
-                diffMs = nowUTC - reportDate;
+        // Utiliza os atributos lógicos fornecidos nativamente pelo backend Worker (hasMetar, metarAgeMins, isStale)
+        function getBackendMetarAgeInfo(a) {
+            if (!a.hasMetar || !a.metar) {
+                return { text: 'Sem METAR disponível', isStale: false, isMissing: true };
             }
 
-            const diffMins = Math.floor(diffMs / (1000 * 60));
-            if (diffMins < 0) return { text: `${match[1]}:${match[2]}Z`, isStale: false, isMissing: false };
+            const match = a.metar.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
+            const timeStr = match ? `${match[1]}:${match[2]}Z` : '—';
 
-            const hours = Math.floor(diffMins / 60);
-            const mins = diffMins % 60;
+            if (a.metarAgeMins !== undefined && a.metarAgeMins !== null) {
+                const mins = a.metarAgeMins;
+                if (mins < 0) return { text: timeStr, isStale: false, isMissing: false };
 
-            let ageText = hours > 0 ? `há ${hours}h ${mins}m` : `há ${mins}m`;
-            const isStale = diffMins > 90;
+                const hours = Math.floor(mins / 60);
+                const remainingMins = mins % 60;
+                let ageText = hours > 0 ? `há ${hours}h ${remainingMins}m` : `há ${remainingMins}m`;
+                
+                return {
+                    text: `${timeStr} (${ageText})`,
+                    isStale: !!a.isStale,
+                    isMissing: false
+                };
+            }
 
-            return { text: `${match[1]}:${match[2]}Z (${ageText})`, isStale, isMissing: false };
+            return { text: timeStr, isStale: !!a.isStale, isMissing: false };
         }
 
         function renderAirports(data) {
@@ -562,9 +558,9 @@
 
             grid.innerHTML = data.map(function(a, index) {
                 const isCritical = a.category === 'IFR' || a.category === 'LIFR';
-                const isMissing = !a.metar || a.category === 'N/A';
+                const isMissing = !a.hasMetar || !a.metar || a.category === 'N/A';
                 const tafId = 'taf-' + a.icao + '-' + index;
-                const ageInfo = getMetarAgeInfo(a.metar);
+                const ageInfo = getBackendMetarAgeInfo(a);
 
                 return '<div class="card ' + (isCritical && !isMissing ? 'alert-critical' : '') + ' ' + (isMissing ? 'card-missing-data' : '') + '" data-icao="' + a.icao + '" data-city="' + (a.city || '') + '" data-country="' + a.country + '">' +
                     '<div class="card-header">' +
@@ -601,7 +597,7 @@
                         '<div class="raw-data"><strong>METAR:</strong> ' + a.metar + '</div>'
                     ) +
                     (a.tafInterpret ? '<div class="interpreted-data">💡 <strong>Previsão Traduzida:</strong> ' + a.tafInterpret + '</div>' : '') +
-                    (a.taf ? '<div class="taf-container"><button class="taf-toggle" onclick="toggleTaf(\'' + tafId + '\')">📋 Ver Código Técnico TAF</button><div id="' + tafId + '" class="taf-content raw-data"><strong>TAF:</strong> ' + a.taf + '</div></div>' : '') +
+                    (a.hasTaf && a.taf ? '<div class="taf-container"><button class="taf-toggle" onclick="toggleTaf(\'' + tafId + '\')">📋 Ver Código Técnico TAF</button><div id="' + tafId + '" class="taf-content raw-data"><strong>TAF:</strong> ' + a.taf + '</div></div>' : '') +
                 '</div>';
             }).join('');
         }
