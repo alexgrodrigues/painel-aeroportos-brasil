@@ -1,14 +1,13 @@
-# ✈️ Painel de Aeroportos da América Latina — Versão 45.3
+# ✈️ Painel de Aeroportos da América Latina — Versão 45.4
 
 Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
 
 ---
 
-## 📋 Resumo das Alterações (Versão 45.3)
+## 📋 Resumo das Alterações (Versão 45.4)
 
-* **Contrato do Worker Unificado (`group` e `country`):** O backend agora envia de forma limpa as propriedades `group` e `country` derivadas de uma única fonte de verdade centralizada, sem tabelas ou mapas intermediários redundantes.
-* **Filtragem Otimizada no Frontend:** O sistema de abas consome diretamente a propriedade `group` do payload do Worker, eliminando lógicas condicionais complexas no navegador.
-* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.3**.
+* **Atualização Oficial de Versão:** Elevado o controle formal para a **VERSÃO 45.4**, acompanhando a unificação limpa da fonte da verdade no contrato de dados do Worker (propriedades `group` e `country`).
+* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.4**.
 
 ---
 
