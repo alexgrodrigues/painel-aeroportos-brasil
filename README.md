@@ -1,15 +1,15 @@
-# ✈️ Painel de Aeroportos da América Latina — Versão 45.7
+# ✈️ Painel de Aeroportos da América Latina — Versão 45.8
 
 Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
 
 ---
 
-## 📋 Resumo das Alterações (Versão 45.7)
+## 📋 Resumo das Alterações (Versão 45.8)
 
-* **Timestamp por Cartão:** Adicionado o indicador do horário de observação UTC extraído diretamente do METAR (`HH:MMZ`), permitindo que o operador valide instantaneamente o frescor do dado meteorológico.
-* **Resumo do Filtro Ativo:** Incluída uma linha explicativa no topo exibindo em tempo real os critérios combinados de visualização (ex: *Filtro ativo: Brasil + IFR*), eliminando qualquer ambiguidade de navegação.
-* **Contadores Operacionais Dinâmicos:** Mantida a adaptação automática dos contadores estatísticos globais e regionais conforme as abas de países e categorias são selecionadas.
-* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.7**.
+* **Idade do Dado (Timestamp com Tempo Decorrido):** Aprimorado o rodapé dos cartões para calcular dinamicamente o tempo decorrido desde a emissão do METAR UTC (ex: *04:00Z (há 25m)*).
+* **Alerta Visual de Defasagem:** Adicionado destaque automático em tom de aviso caso o relatório meteorológico ultrapasse o limiar de 90 minutos sem nova emissão, aumentando o rigor na mitigação de riscos operacionais.
+* **Manutenção dos Contadores Dinâmicos e Resumo Ativo:** Preservada a lógica inteligente de contagem por filtro regional e a exibição explícita do filtro atual no topo.
+* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.8**.
 
 ---
 

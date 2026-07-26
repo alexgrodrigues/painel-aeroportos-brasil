@@ -16,6 +16,7 @@
             --mvfr-color: #3b82f6;
             --ifr-color: #ef4444;
             --lifr-color: #a855f7;
+            --warning-color: #f59e0b;
         }
 
         body {
@@ -161,7 +162,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Resumo do Filtro Ativo */
         .active-filter-summary {
             text-align: center;
             font-size: 0.85rem;
@@ -221,6 +221,15 @@
             border-bottom: 1px solid rgba(255,255,255,0.05);
             padding-bottom: 6px;
         }
+
+        .age-badge {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            background: rgba(255,255,255,0.1);
+        }
+        .age-badge.fresh { color: var(--vfr-color); }
+        .age-badge.stale { color: var(--warning-color); background: rgba(245, 158, 11, 0.15); }
 
         .badge {
             padding: 4px 8px;
@@ -327,7 +336,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.7</div>
+        <div class="version">VERSÃO 45.8</div>
     </header>
 
     <div class="controls">
@@ -335,7 +344,6 @@
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
-    <!-- Contadores Dinâmicos -->
     <div class="operational-counters" id="operationalCounters">
         <div class="counter-badge counter-total">📊 Total: <strong id="count-total">0</strong></div>
         <div class="counter-badge counter-vfr">🟢 VFR: <strong id="count-vfr">0</strong></div>
@@ -344,7 +352,6 @@
         <div class="counter-badge counter-lifr">🟣 LIFR: <strong id="count-lifr">0</strong></div>
     </div>
 
-    <!-- Abas de Países -->
     <div class="country-tabs" id="countryTabs">
         <button class="tab-btn active" onclick="setCountryFilter('ALL', '🌐 Todos', this)">🌐 Todos</button>
         <button class="tab-btn" onclick="setCountryFilter('BR', '🇧🇷 Brasil', this)">🇧🇷 Brasil</button>
@@ -356,7 +363,6 @@
         <button class="tab-btn" onclick="setCountryFilter('OTHER', '🌎 Outros', this)">🌎 Outros (América do Sul / Central)</button>
     </div>
 
-    <!-- Filtros por Categoria -->
     <div class="filter-chips">
         <div class="chip active" onclick="setFlightCategory('ALL', 'Todas as Condições', this)">Todas as Condições</div>
         <div class="chip" onclick="setFlightCategory('VFR', '🟢 VFR (Visual)', this)">🟢 VFR (Visual)</div>
@@ -365,7 +371,6 @@
         <div class="chip" onclick="setFlightCategory('LIFR', '🟣 LIFR (Crítico)', this)">🟣 LIFR (Crítico)</div>
     </div>
 
-    <!-- Resumo do Filtro Ativo -->
     <div class="active-filter-summary" id="activeFilterSummary">Exibindo: 🌐 Todos | 📋 Todas as Condições</div>
 
     <div class="status-bar" id="statusBar">Última atualização: —</div>
@@ -453,14 +458,43 @@
             filterAirports();
         }
 
-        // Extrai o timestamp do METAR (ex: "METAR SBGR 260400Z" -> "04:00Z")
-        function extractMetarTimestamp(metarString) {
-            if (!metarString) return '—';
+        // Calcula o tempo decorrido desde o METAR UTC até o momento atual
+        function getMetarAgeInfo(metarString) {
+            if (!metarString) return { text: '—', isStale: false };
             const match = metarString.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
-            if (match) {
-                return `${match[1]}:${match[2]}Z`;
+            if (!match) return { text: '—', isStale: false };
+
+            const reportHour = parseInt(match[1], 10);
+            const reportMin = parseInt(match[2], 10);
+
+            const now = new Date();
+            const nowUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes());
+            
+            const reportDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), reportHour, reportMin);
+            
+            // Tratamento caso a observação tenha virado o dia UTC de ontem
+            let diffMs = nowUTC - reportDate;
+            if (diffMs < 0) {
+                reportDate.setUTCDate(reportDate.getUTCDate() - 1);
+                diffMs = nowUTC - reportDate;
             }
-            return '—';
+
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            if (diffMins < 0) return { text: `${match[1]}:${match[2]}Z`, isStale: false };
+
+            const hours = Math.floor(diffMins / 60);
+            const mins = diffMins % 60;
+
+            let ageText = '';
+            if (hours > 0) {
+                ageText = `há ${hours}h ${mins}m`;
+            } else {
+                ageText = `há ${mins}m`;
+            }
+
+            // Considera estagnado se tiver mais de 90 minutos sem atualização
+            const isStale = diffMins > 90;
+            return { text: `${match[1]}:${match[2]}Z (${ageText})`, isStale };
         }
 
         function renderAirports(data) {
@@ -473,7 +507,7 @@
             grid.innerHTML = data.map(function(a, index) {
                 const isCritical = a.category === 'IFR' || a.category === 'LIFR';
                 const tafId = 'taf-' + a.icao + '-' + index;
-                const timestamp = extractMetarTimestamp(a.metar);
+                const ageInfo = getMetarAgeInfo(a.metar);
 
                 return '<div class="card ' + (isCritical ? 'alert-critical' : '') + '" data-icao="' + a.icao + '" data-city="' + (a.city || '') + '" data-country="' + a.country + '">' +
                     '<div class="card-header">' +
@@ -484,7 +518,7 @@
                         '<span class="badge ' + a.category + '">' + a.category + '</span>' +
                     '</div>' +
                     '<div class="card-meta-row">' +
-                        '<span>⏱️ METAR UTC: <strong>' + timestamp + '</strong></span>' +
+                        '<span>⏱️ METAR: <span class="age-badge ' + (ageInfo.isStale ? 'stale' : 'fresh') + '">' + ageInfo.text + '</span></span>' +
                         '<span>ICAO: ' + a.icao + '</span>' +
                     '</div>' +
                     '<div class="metrics">' +
