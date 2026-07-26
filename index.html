@@ -28,7 +28,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         h1 {
@@ -46,7 +46,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
         }
 
@@ -76,11 +76,42 @@
             opacity: 0.9;
         }
 
+        /* Abas de Países (Opção 1) */
+        .country-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+        }
+
+        /* Filtros por Categoria de Voo */
         .filter-chips {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
+            gap: 8px;
+            margin-bottom: 25px;
             flex-wrap: wrap;
         }
 
@@ -88,9 +119,9 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s;
@@ -249,33 +280,29 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.0</div>
+        <div class="version">VERSÃO 45.1</div>
     </header>
 
     <div class="controls">
         <input type="text" id="search" placeholder="Pesquisar ICAO, Cidade..." oninput="filterAirports()">
-        <select id="regionFilter" onchange="filterAirports()">
-            <option value="ALL">Todas as Regiões / Países</option>
-            <option value="BR">Brasil</option>
-            <option value="SA">Argentina</option>
-            <option value="SL">Bolívia</option>
-            <option value="SC">Chile</option>
-            <option value="SK">Colômbia</option>
-            <option value="SE">Equador</option>
-            <option value="SG">Paraguai</option>
-            <option value="SP">Peru</option>
-            <option value="SU">Uruguai</option>
-            <option value="SV">Venezuela</option>
-            <option value="MX">México</option>
-            <option value="PA">Panamá</option>
-            <option value="CR">Costa Rica</option>
-        </select>
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
-    <!-- Filtros Rápidos por Categoria de Voo -->
+    <!-- Abas de Navegação por País / Região -->
+    <div class="country-tabs" id="countryTabs">
+        <button class="tab-btn active" onclick="setCountryFilter('ALL', this)">🌐 Todos</button>
+        <button class="tab-btn" onclick="setCountryFilter('BR', this)">🇧🇷 Brasil</button>
+        <button class="tab-btn" onclick="setCountryFilter('SAEZ', this)">🇦🇷 Argentina</button>
+        <button class="tab-btn" onclick="setCountryFilter('SC', this)">🇨🇱 Chile</button>
+        <button class="tab-btn" onclick="setCountryFilter('MM', this)">🇲🇽 México</button>
+        <button class="tab-btn" onclick="setCountryFilter('MPTO', this)">🇵🇦 Panamá</button>
+        <button class="tab-btn" onclick="setCountryFilter('MROC', this)">🇨🇷 Costa Rica</button>
+        <button class="tab-btn" onclick="setCountryFilter('OTHER', this)">🌎 Outros (América do Sul / Central)</button>
+    </div>
+
+    <!-- Filtros por Categoria de Voo -->
     <div class="filter-chips">
-        <div class="chip active" onclick="setFlightCategory('ALL', this)">Todos</div>
+        <div class="chip active" onclick="setFlightCategory('ALL', this)">Todas as Condições</div>
         <div class="chip" onclick="setFlightCategory('VFR', this)">🟢 VFR (Visual)</div>
         <div class="chip" onclick="setFlightCategory('MVFR', this)">🔵 MVFR (Marginal)</div>
         <div class="chip" onclick="setFlightCategory('IFR', this)">🔴 IFR (Restrito)</div>
@@ -291,6 +318,7 @@
     <script>
         let airportData = [];
         let activeCategoryFilter = 'ALL';
+        let activeCountryFilter = 'ALL';
 
         async function loadData() {
             const grid = document.getElementById('airportGrid');
@@ -323,7 +351,14 @@
 
         function setFlightCategory(cat, element) {
             activeCategoryFilter = cat;
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            filterAirports();
+        }
+
+        function setCountryFilter(country, element) {
+            activeCountryFilter = country;
+            document.querySelectorAll('.country-tabs .tab-btn').forEach(b => b.classList.remove('active'));
             element.classList.add('active');
             filterAirports();
         }
@@ -387,16 +422,25 @@
 
         function filterAirports() {
             const term = document.getElementById('search').value.toUpperCase();
-            const prefixFilter = document.getElementById('regionFilter').value;
 
             const filtered = airportData.filter(a => {
                 const matchTerm = a.icao.includes(term) || (a.city && a.city.toUpperCase().includes(term)) || (a.name && a.name.toUpperCase().includes(term)) || (a.category && a.category.includes(term));
                 
-                let matchRegion = true;
-                if (prefixFilter === 'BR') {
-                    matchRegion = a.icao.startsWith('SB');
-                } else if (prefixFilter !== 'ALL') {
-                    matchRegion = a.icao.startsWith(prefixFilter);
+                let matchCountry = true;
+                if (activeCountryFilter === 'BR') {
+                    matchCountry = a.icao.startsWith('SB');
+                } else if (activeCountryFilter === 'SAEZ') {
+                    matchCountry = a.icao.startsWith('SA');
+                } else if (activeCountryFilter === 'SC') {
+                    matchCountry = a.icao.startsWith('SC');
+                } else if (activeCountryFilter === 'MM') {
+                    matchCountry = a.icao.startsWith('MM');
+                } else if (activeCountryFilter === 'MPTO') {
+                    matchCountry = a.icao.startsWith('MP');
+                } else if (activeCountryFilter === 'MROC') {
+                    matchCountry = a.icao.startsWith('MR');
+                } else if (activeCountryFilter === 'OTHER') {
+                    matchCountry = !a.icao.startsWith('SB') && !a.icao.startsWith('SA') && !a.icao.startsWith('SC') && !a.icao.startsWith('MM') && !a.icao.startsWith('MP') && !a.icao.startsWith('MR');
                 }
 
                 let matchCategory = true;
@@ -404,7 +448,7 @@
                     matchCategory = a.category === activeCategoryFilter;
                 }
 
-                return matchTerm && matchRegion && matchCategory;
+                return matchTerm && matchCountry && matchCategory;
             });
 
             renderAirports(filtered);
