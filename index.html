@@ -18,7 +18,6 @@
             --mvfr-color: #3b82f6;
             --ifr-color: #ef4444;
             --lifr-color: #a855f7;
-            --warning-color: #f59e0b;
             --danger-color: #ef4444;
         }
 
@@ -85,7 +84,6 @@
 
         .clear-search-btn:hover {
             color: var(--text-color);
-            opacity: 1;
         }
 
         button {
@@ -253,16 +251,6 @@
             padding-bottom: 6px;
         }
 
-        .age-badge {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            background: rgba(255,255,255,0.1);
-        }
-        .age-badge.fresh { color: var(--vfr-color); }
-        .age-badge.stale { color: var(--warning-color); background: rgba(245, 158, 11, 0.15); }
-        .age-badge.missing { color: var(--danger-color); background: rgba(239, 68, 68, 0.15); }
-
         .badge {
             padding: 4px 8px;
             border-radius: 6px;
@@ -378,7 +366,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 46</div>
+        <div class="version">VERSÃO 45.13</div>
     </header>
 
     <div class="controls">
@@ -522,30 +510,30 @@
             input.focus();
         }
 
-        function getBackendMetarAgeInfo(a) {
-            if (!a.hasMetar || !a.metar) {
-                return { text: 'Sem METAR disponível', isStale: false, isMissing: true };
-            }
-
-            const match = a.metar.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
-            const timeStr = match ? `${match[1]}:${match[2]}Z` : '—';
-
-            if (a.metarAgeMins !== undefined && a.metarAgeMins !== null) {
-                const mins = a.metarAgeMins;
-                if (mins < 0) return { text: timeStr, isStale: false, isMissing: false };
-
-                const hours = Math.floor(mins / 60);
-                const remainingMins = mins % 60;
-                let ageText = hours > 0 ? `há ${hours}h ${remainingMins}m` : `há ${remainingMins}m`;
-                
-                return {
-                    text: `${timeStr} (${ageText})`,
-                    isStale: !!a.isStale,
-                    isMissing: false
-                };
-            }
-
-            return { text: timeStr, isStale: !!a.isStale, isMissing: false };
+        function getMetarAgeInfo(metarText) {
+            if (!metarText) return { text: 'Sem METAR', isStale: false, isMissing: true };
+            const match = metarText.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
+            if (!match) return { text: '—', isStale: false, isMissing: false };
+            
+            const timeStr = `${match[1]}:${match[2]}Z`;
+            const now = new Date();
+            const reportHour = parseInt(match[1], 10);
+            const reportMin = parseInt(match[2], 10);
+            
+            const reportDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), reportHour, reportMin));
+            const nowUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes()));
+            
+            let diffMs = nowUTC - reportDate;
+            if (diffMs < 0) diffMs += 24 * 3600 * 1000;
+            
+            const mins = Math.floor(diffMs / 60000);
+            const hours = Math.floor(mins / 60);
+            const remainingMins = mins % 60;
+            
+            const ageText = hours > 0 ? `há ${hours}h ${remainingMins}m` : `há ${remainingMins}m`;
+            const isStale = mins > 90;
+            
+            return { text: `${timeStr} (${ageText})`, isStale, isMissing: false };
         }
 
         function renderAirports(data) {
@@ -557,9 +545,9 @@
 
             grid.innerHTML = data.map(function(a, index) {
                 const isCritical = a.category === 'IFR' || a.category === 'LIFR';
-                const isMissing = !a.hasMetar || !a.metar || a.category === 'N/A';
+                const isMissing = !a.metar || a.category === 'N/A';
                 const tafId = 'taf-' + a.icao + '-' + index;
-                const ageInfo = getBackendMetarAgeInfo(a);
+                const ageInfo = getMetarAgeInfo(a.metar);
 
                 return '<div class="card ' + (isCritical && !isMissing ? 'alert-critical' : '') + ' ' + (isMissing ? 'card-missing-data' : '') + '" data-icao="' + a.icao + '" data-city="' + (a.city || '') + '" data-country="' + a.country + '">' +
                     '<div class="card-header">' +
@@ -570,7 +558,7 @@
                         '<span class="badge ' + a.category + '">' + (isMissing ? 'Sem METAR' : a.category) + '</span>' +
                     '</div>' +
                     '<div class="card-meta-row">' +
-                        '<span>⏱️ METAR: <span class="age-badge ' + (ageInfo.isMissing ? 'missing' : (ageInfo.isStale ? 'stale' : 'fresh')) + '">' + ageInfo.text + '</span></span>' +
+                        '<span>⏱️ METAR: <span style="font-weight:bold; color:' + (ageInfo.isMissing ? 'var(--danger-color)' : (ageInfo.isStale ? '#f59e0b' : 'var(--vfr-color)')) + '">' + ageInfo.text + '</span></span>' +
                         '<span>ICAO: ' + a.icao + '</span>' +
                     '</div>' +
                     (isMissing ? 
@@ -596,7 +584,7 @@
                         '<div class="raw-data"><strong>METAR:</strong> ' + a.metar + '</div>'
                     ) +
                     (a.tafInterpret ? '<div class="interpreted-data">💡 <strong>Previsão Traduzida:</strong> ' + a.tafInterpret + '</div>' : '') +
-                    (a.hasTaf && a.taf ? '<div class="taf-container"><button class="taf-toggle" onclick="toggleTaf(\'' + tafId + '\')">📋 Ver Código Técnico TAF</button><div id="' + tafId + '" class="taf-content raw-data"><strong>TAF:</strong> ' + a.taf + '</div></div>' : '') +
+                    (a.taf ? '<div class="taf-container"><button class="taf-toggle" onclick="toggleTaf(\'' + tafId + '\')">📋 Ver Código Técnico TAF</button><div id="' + tafId + '" class="taf-content raw-data"><strong>TAF:</strong> ' + a.taf + '</div></div>' : '') +
                 '</div>';
             }).join('');
         }
