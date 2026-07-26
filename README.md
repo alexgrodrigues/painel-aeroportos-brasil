@@ -1,21 +1,21 @@
-# ✈️ Painel de Aeroportos da América Latina — Versão 45.2
+# ✈️ Painel de Aeroportos da América Latina — Versão 45.3
 
 Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
 
 ---
 
-## 📋 Resumo das Alterações (Versão 45.2)
+## 📋 Resumo das Alterações (Versão 45.3)
 
-* **Padronização de Prefixos de Países:** Correção e limpeza lógica dos seletores de abas geográficas no frontend (substituição de IDs específicos por prefixos oficiais como `AR` para a Argentina).
-* **Validação Robusta de Resposta HTTP:** Adicionada a checagem explícita de `response.ok` no carregamento via `fetch`, prevenindo falhas silenciosas caso o Worker retorne erros de servidor (status 4xx/5xx).
-* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.2**.
+* **Refatoração do Contrato do Worker (Campo `group`):** O backend agora envia de forma explícita a propriedade `group` (`BR`, `AR`, `CL`, `MX`, `PA`, `CR`, `OTHER`) calculada diretamente no servidor com base nos prefixos ICAO.
+* **Limpeza de Lógica no Frontend:** Removida a regra de negações em cadeia no navegador, tornando a filtragem por abas limpa, direta e baseada na propriedade `a.group === activeCountryFilter`.
+* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.3**.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
 
 * **Frontend:** HTML5, CSS3 moderno (com variáveis e suporte responsivo em Grid) e JavaScript puro (Vanilla JS).
-* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* para cache, alta performance e tratamento de CORS assíncrono.
+* **Backend / API:** Cloudflare Workers integrado à API da *Aviation Weather* com enriquecimento de dados por grupo geográfico e tratamento de CORS.
 * **Hospedagem:** GitHub Pages.
 
 ---
