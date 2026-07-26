@@ -206,17 +206,10 @@
 
         .section-title {
             font-size: 0.75rem;
-            color: var(--text-secondary;);
+            color: var(--text-secondary);
             font-weight: bold;
             margin-bottom: 2px;
             text-transform: uppercase;
-        }
-
-        .footer-info {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            display: flex;
-            justify-content: space-between;
         }
     </style>
 </head>
@@ -224,7 +217,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 46</div>
+        <div class="version">VERSÃO 47</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
@@ -266,7 +259,7 @@
     </main>
 
     <script>
-        // URL DO SEU CLOUDFLARE WORKER (Substitua pela sua URL real do Worker)
+        // ⚠️ COLOQUE AQUI A SUA URL REAL DO CLOUDFLARE WORKER ⚠️
         const WORKER_URL = "https://seu-worker.seu-subdominio.workers.dev";
 
         let airportData = [];
@@ -322,7 +315,6 @@
             let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
             const filtered = airportData.filter(item => {
-                // Filtro por País/Grupo
                 let matchCountry = true;
                 if (currentCountry !== 'ALL') {
                     if (currentCountry === 'OTHER') {
@@ -332,10 +324,8 @@
                     }
                 }
 
-                // Filtro por Categoria de Voo
                 let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
-                // Filtro por Busca de Texto
                 let matchSearch = !currentSearch || 
                     item.icao.toLowerCase().includes(currentSearch) || 
                     item.name.toLowerCase().includes(currentSearch) || 
@@ -344,7 +334,6 @@
                 return matchCountry && matchCategory && matchSearch;
             });
 
-            // Contadores gerais baseados no dataset completo carregado
             airportData.forEach(item => {
                 counts.total++;
                 if (item.category === 'VFR') counts.vfr++;
@@ -416,7 +405,6 @@
             });
         }
 
-        // Carrega os dados assim que a página abre e atualiza a cada 5 minutos
         fetchData();
         setInterval(fetchData, 300000);
     </script>
