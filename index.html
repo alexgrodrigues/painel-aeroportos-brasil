@@ -50,19 +50,40 @@
             gap: 15px;
             margin-bottom: 15px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
-        input, select, button {
+        .search-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .search-container input {
             background-color: var(--card-bg);
             color: var(--text-color);
             border: 1px solid var(--border-color);
-            padding: 10px 15px;
+            padding: 10px 35px 10px 15px;
             border-radius: 8px;
             font-size: 0.95rem;
+            width: 260px;
         }
 
-        input {
-            width: 250px;
+        .clear-search-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            display: none;
+            padding: 0;
+        }
+
+        .clear-search-btn:hover {
+            color: var(--text-color);
+            opacity: 1;
         }
 
         button {
@@ -71,6 +92,9 @@
             color: #000;
             font-weight: bold;
             border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.95rem;
             transition: opacity 0.2s;
         }
 
@@ -352,11 +376,14 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.10</div>
+        <div class="version">VERSÃO 45.11</div>
     </header>
 
     <div class="controls">
-        <input type="text" id="search" placeholder="Pesquisar ICAO, Cidade..." oninput="filterAirports()">
+        <div class="search-container">
+            <input type="text" id="search" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="handleSearchInput()">
+            <button class="clear-search-btn" id="clearSearchBtn" onclick="clearSearch()" title="Limpar pesquisa">✕</button>
+        </div>
         <button onclick="loadData()">Atualizar Dados</button>
     </div>
 
@@ -474,6 +501,25 @@
             filterAirports();
         }
 
+        function handleSearchInput() {
+            const input = document.getElementById('search');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (input.value.length > 0) {
+                clearBtn.style.display = 'block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+            filterAirports();
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search');
+            input.value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            filterAirports();
+            input.focus();
+        }
+
         function getMetarAgeInfo(metarString) {
             if (!metarString) return { text: 'Sem METAR disponível', isStale: false, isMissing: true };
             const match = metarString.match(/\b\d{2}(\d{2})(\d{2})Z\b/);
@@ -569,10 +615,10 @@
             updateCounters(countryFiltered);
 
             const finalFiltered = countryFiltered.filter(function(a) {
-                // Se o usuário digitou algo, exige correspondência mais estricta no ICAO (começando com) ou nome completo da cidade
                 let matchTerm = true;
                 if (rawTerm.length > 0) {
-                    const matchIcao = a.icao.startsWith(rawTerm);
+                    // Exige que o código ICAO comece exatamente com o termo digitado, ou que a cidade/nome contenha o termo
+                    const matchIcao = a.icao.toUpperCase().startsWith(rawTerm);
                     const matchCity = a.city && a.city.toUpperCase().includes(rawTerm);
                     const matchName = a.name && a.name.toUpperCase().includes(rawTerm);
                     matchTerm = matchIcao || matchCity || matchName;
