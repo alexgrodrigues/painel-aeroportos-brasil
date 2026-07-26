@@ -213,7 +213,7 @@
         }
     </style>
 </head>
-<body>
+<body onload="fetchData()">
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
@@ -255,12 +255,12 @@
     </header>
 
     <main class="grid" id="airportGrid">
-        <!-- Os cartões serão injetados dinamicamente via JavaScript -->
+        <!-- Cartões gerados dinamicamente -->
     </main>
 
     <script>
-        // ⚠️ COLOQUE AQUI A SUA URL REAL DO CLOUDFLARE WORKER ⚠️
-        const WORKER_URL = "https://seu-worker.seu-subdominio.workers.dev";
+        // URL real do Cloudflare Worker corrigida (Versão 47)
+        const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
 
         let airportData = [];
         let currentCountry = 'ALL';
@@ -287,25 +287,17 @@
 
         function filterCountry(country) {
             currentCountry = country;
-            updateActiveButtons('countryFilters', event.target);
             renderGrid();
         }
 
         function filterCategory(category) {
             currentCategory = category;
-            updateActiveButtons('categoryFilters', event.target);
             renderGrid();
         }
 
         function filterAirports() {
             currentSearch = document.getElementById('searchInput').value.toLowerCase();
             renderGrid();
-        }
-
-        function updateActiveButtons(containerId, clickedButton) {
-            const container = document.getElementById(containerId);
-            container.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            clickedButton.classList.add('active');
         }
 
         function renderGrid() {
@@ -393,20 +385,17 @@
 
                     <div>
                         <div class="section-title">METAR</div>
-                        <div class="metar-box">${item.metar || 'Relatório METAR indisponível no momento.'}</div>
+                        <div class="metar-box">${item.metar || "METAR indisponível"}</div>
                     </div>
 
                     <div>
                         <div class="section-title">TAF</div>
-                        <div class="taf-box">${item.taf || 'Previsão TAF indisponível no momento.'}</div>
+                        <div class="taf-box">${item.taf || "TAF indisponível"}</div>
                     </div>
                 `;
-                grid.appendChild(card);
+                grid.append(card);
             });
         }
-
-        fetchData();
-        setInterval(fetchData, 300000);
     </script>
 </body>
 </html>

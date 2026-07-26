@@ -1,25 +1,19 @@
-# 🛫 Painel de Aeroportos da América Latina (Versão 47)
+# Painel de Aeroportos da América Latina (Versão 47)
 
-Painel em tempo real para monitoramento de condições meteorológicas de voo (**METAR** e **TAF**) de aeroportos selecionados na América Latina, estruturado com alta resiliência, tratamento otimizado de parsing de dados e integração via Cloudflare Worker.
+Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (METAR e TAF) dos principais aeroportos da América Latina.
 
----
+## 🚀 O que há de novo na Versão 47
+* **Correção da Conexão com o Worker:** Vinculação definitiva da variável `WORKER_URL` para apontar diretamente para o endpoint de produção do Cloudflare Worker (`https://weathered-grass-f181.alexgrodrigues.workers.dev`).
+* **Carregamento Automático:** Adicionado evento `onload` para disparar a busca de dados assim que a página é aberta.
+* **Organização de Cards:** Exibição completa de dados detalhados incluindo Vento, Pressão QNH, Temperatura, Ponto de Orvalho, METAR e TAF.
+* **Filtros Dinâmicos:** Filtragem simultânea por país (Brasil, Argentina, Chile, México, Panamá, Costa Rica, Outros) e por categoria de voo visual/instrumento (VFR, MVFR, IFR, LIFR).
 
-## 🏗️ Arquitetura do Sistema
+## 🛠️ Tecnologias Utilizadas
+* **Frontend:** HTML5, CSS3, JavaScript puro (Vanilla JS) hospedado no **GitHub Pages**.
+* **Backend:** Cloudflare Workers (JavaScript assíncrono) fazendo o intermédio das requisições via API pública da [Aviation Weather Center](https://aviationweather.gov/).
 
-1. **Frontend (GitHub Pages):** 
-   - Interface limpa e responsiva (HTML5, CSS3, JavaScript Vanilla).
-   - Filtros dinâmicos por região/país, condições de voo (VFR, MVFR, IFR, LIFR) e busca textual por código ICAO ou cidade.
-   - Atualização automática programada a cada 5 minutos.
-
-2. **Backend (Cloudflare Worker):**
-   - Proxy seguro integrado à API de meteorologia aeronáutica da origem.
-   - Particionamento inteligente de requisições paralelas em blocos para evitar truncamento de dados.
-   - Mapeamento rigoroso e unificado de chaves de identificação (`icaoId`, `stationId`, `rawTaf`) assegurando a exibição completa para todos os aeroportos da grade.
-
----
-
-## 🚀 Como Executar Localmente
-
-1. Clone o repositório em sua máquina:
-   ```bash
-   git clone [https://github.com/alexgrodrigues/painel-aeroportos-brasil.git](https://github.com/alexgrodrigues/painel-aeroportos-brasil.git)
+## ⚙️ Configuração Local / Deploy
+1. Clone o repositório.
+2. Certifique-se de que o arquivo `index.html` aponta para o Worker ativo:
+   ```javascript
+   const WORKER_URL = "[https://weathered-grass-f181.alexgrodrigues.workers.dev](https://weathered-grass-f181.alexgrodrigues.workers.dev)";
