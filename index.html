@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principais Aeroportos da América Latina</title>
+    <!-- Favicon com o caça Gripen da FAB -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231e293b%22/><path d=%22M20 65 L45 55 L75 30 L85 32 L70 60 L45 75 Z%22 fill=%22%2338bdf8%22/><text y=%22.9em%22 font-size=%2260%22 x=%2215%22>✈️</text></svg>">
     <style>
         :root {
             --bg-color: #0f172a;
@@ -376,7 +378,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.11</div>
+        <div class="version">VERSÃO 45.13</div>
     </header>
 
     <div class="controls">
@@ -617,8 +619,7 @@
             const finalFiltered = countryFiltered.filter(function(a) {
                 let matchTerm = true;
                 if (rawTerm.length > 0) {
-                    // Exige que o código ICAO comece exatamente com o termo digitado, ou que a cidade/nome contenha o termo
-                    const matchIcao = a.icao.toUpperCase().startsWith(rawTerm);
+                    const matchIcao = a.icao.toUpperCase().includes(rawTerm);
                     const matchCity = a.city && a.city.toUpperCase().includes(rawTerm);
                     const matchName = a.name && a.name.toUpperCase().includes(rawTerm);
                     matchTerm = matchIcao || matchCity || matchName;

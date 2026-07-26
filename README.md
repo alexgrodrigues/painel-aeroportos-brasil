@@ -1,14 +1,13 @@
-# ✈️ Painel de Aeroportos da América Latina — Versão 45.11
+# ✈️ Painel de Aeroportos da América Latina — Versão 45.13
 
 Este repositório hospeda o **Painel de Aeroportos da América Latina**, ferramenta web voltada para o monitoramento meteorológico em tempo real (METAR e TAF) de aeroportos estratégicos do Brasil, América do Sul, América Central e México.
 
 ---
 
-## 📋 Resumo das Alterações (Versão 45.11)
+## 📋 Resumo das Alterações (Versão 45.13)
 
-* **Botão de Limpeza e Ícone de Busca:** Adicionado botão interativo rápido (`✕`) dentro do campo de pesquisa para facilitar a remoção de termos digitados tanto em computadores quanto em dispositivos móveis, complementado por placeholder com ícone de lupa.
-* **Filtro de ICAO por Prefixo Exato:** Aprimorada a regra de busca textual (`startsWith` no código ICAO), erradicando definitivamente falsos positivos (como aeroportos contendo letras em posições intermediárias do código).
-* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.11**.
+* **Favicon Personalizado (Caça Gripen / Aviação):** Adicionado favicon em SVG estilizado na aba do navegador, trazendo identidade visual aeronáutica profissional para o painel.
+* **Controle de Versão:** Atualizado formalmente para a **VERSÃO 45.13**.
 
 ---
 
