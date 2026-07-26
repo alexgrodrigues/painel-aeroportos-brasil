@@ -76,6 +76,37 @@
             opacity: 0.9;
         }
 
+        /* Barra de Contadores Operacionais (Etapa 1) */
+        .operational-counters {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .counter-badge {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .counter-badge strong {
+            font-size: 1rem;
+        }
+
+        .counter-total { border-color: var(--accent-color); color: var(--accent-color); }
+        .counter-vfr { border-color: var(--vfr-color); color: var(--vfr-color); }
+        .counter-mvfr { border-color: var(--mvfr-color); color: var(--mvfr-color); }
+        .counter-ifr { border-color: var(--ifr-color); color: var(--ifr-color); }
+        .counter-lifr { border-color: var(--lifr-color); color: var(--lifr-color); }
+
         /* Abas de Países */
         .country-tabs {
             display: flex;
@@ -280,12 +311,21 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 45.4</div>
+        <div class="version">VERSÃO 45.5</div>
     </header>
 
     <div class="controls">
         <input type="text" id="search" placeholder="Pesquisar ICAO, Cidade..." oninput="filterAirports()">
         <button onclick="loadData()">Atualizar Dados</button>
+    </div>
+
+    <!-- Barra de Contadores Operacionais Imediatos (Etapa 1) -->
+    <div class="operational-counters" id="operationalCounters">
+        <div class="counter-badge counter-total">📊 Total: <strong id="count-total">0</strong></div>
+        <div class="counter-badge counter-vfr">🟢 VFR: <strong id="count-vfr">0</strong></div>
+        <div class="counter-badge counter-mvfr">🔵 MVFR: <strong id="count-mvfr">0</strong></div>
+        <div class="counter-badge counter-ifr">🔴 IFR: <strong id="count-ifr">0</strong></div>
+        <div class="counter-badge counter-lifr">🟣 LIFR: <strong id="count-lifr">0</strong></div>
     </div>
 
     <!-- Abas de Navegação por País / Região -->
@@ -335,6 +375,7 @@
 
                 if (json.ok && rows.length > 0) {
                     airportData = rows;
+                    updateGlobalCounters(airportData);
                     filterAirports();
                     document.getElementById('statusBar').innerText = `Última atualização: ${new Date().toLocaleTimeString()} (${rows.length} aeroportos carregados)`;
                 } else {
@@ -343,6 +384,21 @@
             } catch (e) {
                 grid.innerHTML = `<div class="loading">Erro de conexão ou falha ao carregar dados do Worker (${e.message}).</div>`;
             }
+        }
+
+        // Atualiza os contadores globais no topo (Etapa 1)
+        function updateGlobalCounters(data) {
+            const totals = { VFR: 0, MVFR: 0, IFR: 0, LIFR: 0, N/A: 0 };
+            data.forEach(a => {
+                const cat = a.category && totals[a.category] !== undefined ? a.category : 'N/A';
+                if (totals[cat] !== undefined) totals[cat]++;
+            });
+
+            document.getElementById('count-total').innerText = data.length;
+            document.getElementById('count-vfr').innerText = totals.VFR;
+            document.getElementById('count-mvfr').innerText = totals.MVFR;
+            document.getElementById('count-ifr').innerText = totals.IFR;
+            document.getElementById('count-lifr').innerText = totals.LIFR;
         }
 
         function toggleTaf(id) {
