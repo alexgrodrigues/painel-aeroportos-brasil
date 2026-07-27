@@ -35,6 +35,10 @@
         h1 {
             margin-bottom: 5px;
             font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .version {
@@ -129,7 +133,7 @@
             padding: 18px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
@@ -188,61 +192,79 @@
             font-size: 0.75rem;
         }
 
-        .metar-box, .taf-box {
-            font-family: monospace;
-            font-size: 0.78rem;
+        /* Blocos Visuais Especializados */
+        .weather-box {
             background: #0b0f19;
-            padding: 8px;
-            border-radius: 6px;
-            color: #38bdf8;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-family: monospace;
             word-break: break-all;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            margin-top: 6px;
         }
 
-        .taf-box {
-            color: #c084fc;
-            border-color: rgba(192, 132, 252, 0.2);
-        }
-
-        .taf-interpret {
-            font-size: 0.82rem;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.08);
+        /* METAR: Azul/Ciano (Observação Atual) */
+        .metar-section {
             border-left: 3px solid #38bdf8;
-            padding: 8px 10px;
-            border-radius: 4px;
+        }
+        .metar-box {
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        /* Interpretação: Verde-azulado / Insight humano */
+        .interpret-section {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid #2dd4bf;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            color: #2dd4bf;
             line-height: 1.4;
         }
 
+        /* TAF Bruto: Roxo/Violeta (Projeção Futura) */
+        .taf-raw-box {
+            color: #c084fc;
+            border: 1px solid rgba(192, 132, 252, 0.2);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .title-metar { color: #38bdf8; }
+        .title-interpret { color: #2dd4bf; }
+        .title-taf { color: #c084fc; }
+
         details summary {
             font-size: 0.75rem;
-            color: var(--text-secondary);
+            color: #c084fc;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             user-select: none;
             outline: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         details summary:hover {
-            color: var(--text-primary);
-        }
-
-        .section-title {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: bold;
-            margin-bottom: 2px;
-            text-transform: uppercase;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body onload="fetchData()">
 
     <header>
-        <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 48.2</div>
+        <h1>✈️ Principais Aeroportos da América Latina</h1>
+        <div class="version">VERSÃO 48.3</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
@@ -407,18 +429,18 @@
                         </div>
                     </div>
 
-                    <div>
-                        <div class="section-title">METAR</div>
-                        <div class="metar-box">${item.metar || "METAR indisponível"}</div>
+                    <div class="metar-section">
+                        <div class="section-title title-metar">📡 METAR (Condição Atual)</div>
+                        <div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
                     </div>
 
                     <div>
-                        <div class="section-title">TAF (Previsão)</div>
-                        ${item.tafInterpret ? `<div class="taf-interpret" style="margin-bottom: 8px;">💡 ${item.tafInterpret}</div>` : ''}
+                        <div class="section-title title-interpret">💡 Interpretação da Previsão</div>
+                        ${item.tafInterpret ? `<div class="interpret-section" style="margin-bottom: 8px;">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação disponível.</div>'}
                         
-                        <details>
-                            <summary>Ver TAF Bruto (Técnico)</summary>
-                            <div class="taf-box">${item.taf || "TAF indisponível"}</div>
+                        <details style="margin-top: 6px;">
+                            <summary>⏱️ Ver TAF Bruto (Técnico)</summary>
+                            <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
                         </details>
                     </div>
                 `;
