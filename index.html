@@ -299,7 +299,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 52</div>
+        <div class="version">VERSÃO 53</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -410,6 +410,23 @@
             renderGrid();
         }
 
+        // Função auxiliar isolada para renderizar o cabeçalho do card
+        function renderCardHeader(item) {
+            const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
+            const iataCode = item.iata ? item.iata : '—';
+            
+            return `
+                <div class="card-header">
+                    <div>
+                        <div class="airport-title">${item.name}</div>
+                        <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataCode}</div>
+                        <div class="airport-sub">${item.city} (${item.country})</div>
+                    </div>
+                    <span class="badge ${badgeClass}">${item.category}</span>
+                </div>
+            `;
+        }
+
         function renderGrid() {
             syncActiveButtons();
 
@@ -459,20 +476,10 @@
             }
 
             filtered.forEach(item => {
-                const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-                const iataCode = item.iata ? item.iata : '—';
-                
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <div>
-                            <div class="airport-title">${item.name}</div>
-                            <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataCode}</div>
-                            <div class="airport-sub">${item.city} (${item.country})</div>
-                        </div>
-                        <span class="badge ${badgeClass}">${item.category}</span>
-                    </div>
+                    ${renderCardHeader(item)}
 
                     <div class="card-info-grid">
                         <div class="info-item">
