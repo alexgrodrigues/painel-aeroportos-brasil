@@ -47,7 +47,6 @@
             margin-bottom: 15px;
         }
 
-        /* Micro-legenda de Condições / Cores */
         .legend-bar {
             display: flex;
             flex-wrap: wrap;
@@ -291,9 +290,8 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 49.7</div>
+        <div class="version">VERSÃO 49.8</div>
 
-        <!-- Micro-legenda de Condições -->
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
             <div class="legend-item"><span class="legend-dot" style="background-color: var(--vfr-color);"></span> VFR (Bom)</div>
@@ -367,7 +365,6 @@
             }
         }
 
-        // Função auxiliar robusta para sincronizar o estado visual dos botões
         function syncActiveButtons() {
             document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
                 if (btn.getAttribute('data-country') === currentCountry) {
@@ -404,7 +401,6 @@
         }
 
         function renderGrid() {
-            // Garante sincronia visual sempre que a grade for renderizada
             syncActiveButtons();
 
             const grid = document.getElementById('airportGrid');
@@ -480,12 +476,12 @@
                     <div class="card-info-grid">
                         <div class="info-item">
                             <span class="info-label">🌡️ Temperatura</span>
-                            <span><strong>${item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
+                            <span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
                         </div>
                         <div class="divider"></div>
                         <div class="info-item">
                             <span class="info-label">💧 Ponto de Orvalho</span>
-                            <span><strong>${item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
+                            <span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
                         </div>
                     </div>
 
