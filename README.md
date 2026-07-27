@@ -1,22 +1,17 @@
-# Painel de Aeroportos da América Latina e EUA (Versão 67)
+# Painel de Aeroportos da América Latina e EUA
 
-Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (METAR, TAF e interpretação automatizada de previsões) nos principais aeroportos, bases aéreas e hubs internacionais da América Latina e dos Estados Unidos.
+Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (**METAR** e **TAF**) de aeroportos selecionados na América Latina e Estados Unidos.
 
-## 🚀 Histórico de Atualizações Recentes (Versões 61 a 67)
+## 🚀 Versão 70 - Atualizações e Melhorias
 
-* **Versão 67 (Padronização Visual dos Filtros):** Ajuste milimétrico nas dimensões e proporções simétricas dos ícones SVG das bandeiras nos botões de filtro, garantindo alinhamento visual perfeito e simétrico.
-* **Versão 66 (Resturação de Parsers e Estabilidade):** Reversão de ajustes pontuais no motor de parsing para assegurar leitura nativa e estável de todos os relatórios METAR.
-* **Versão 65 (Reestruturação de Países):** Costa Rica integrada ao grupo "Outros" e inclusão oficial do Uruguai com suporte a bandeira vetorial dedicada.
-* **Versão 64 (Implementação de SVGs Nativos):** Substituição de emojis de bandeira por vetores SVG inline para garantir renderização perfeita e idêntica em 100% dos navegadores (Chrome, Brave, Edge e Firefox).
-* **Versão 63 (Limpeza de Interface):** Ajustes no favicon exclusivo da aba e remoção de redundâncias textuais nos filtros.
-* **Versão 61-62 (Formatação de Ventos e Horário Zulu):** Formatação aprimorada de ventos direcionados (`340 / 03KT`) e variáveis (`VRB 02KT`), além da adição do rodapé de horário exato de publicação e alerta de dados desatualizados.
+Esta versão consolida a arquitetura do sistema, dividindo as responsabilidades de forma limpa e estruturada entre o **Backend (Cloudflare Worker)** e o **Frontend**.
 
-## 🛠️ Tecnologias Utilizadas
-* **Frontend:** HTML5, CSS3, JavaScript puro hospedado no [GitHub Pages](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).
-* **Backend:** Cloudflare Workers integrado à API pública da [Aviation Weather Center](https://aviationweather.gov/).
+### 📡 Backend (Cloudflare Worker)
+* **Normalização Centralizada do Vento:** O tratamento e a formatação da string de vento (`item.wind`) passaram a ser realizados inteiramente no servidor. O Worker entrega o dado perfeitamente formatado (ex: `200 / 04KT`, `VRB 02KT` ou com rajadas), evitando processamentos redundantes na interface.
+* **Prioridade Absoluta para Categorias Oficiais:** A determinação da condição de voo (`VFR`, `MVFR`, `IFR`, `LIFR`) prioriza estritamente os campos oficiais da API da AWC (`flightCategory` / `fltCat`), utilizando heurísticas de texto apenas como plano de contingência (*fallback*).
+* **Pressão Altimétrica Transparente:** Conversão automatizada de polegadas de mercúrio (`inHg`) para hectopascais (`hPa`), garantindo total precisão operacional.
+* **Segregação Geográfica:** Inclusão oficial do **Uruguai (`SUMU`)** alocado em seu grupo exclusivo (`group: "UY"`).
 
-## ⚙️ Configuração e Execução
-1. Atualize o arquivo `index.html` com o código da **Versão 67**.
-2. Certifique-se de que a constante aponta para o worker ativo:
-   ```javascript
-   const WORKER_URL = "[https://weathered-grass-f181.alexgrodrigues.workers.dev](https://weathered-grass-f181.alexgrodrigues.workers.dev)";
+### 💻 Frontend (Interface)
+* **Limpeza e Desacoplamento:** Remoção definitiva da função local `formatWindDisplay()` do código HTML. O frontend atua de forma direta, consumindo e exibindo a string pronta entregue pelo Worker.
+* **Consistência Visual:** Alinhamento total entre a API e a renderização dos cartões no [Painel de Aeroportos](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).

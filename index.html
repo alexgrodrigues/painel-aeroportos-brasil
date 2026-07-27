@@ -1,691 +1,528 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principais Aeroportos da América Latina e EUA</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
-            --vfr-color: #22c55e;
-            --mvfr-color: #3b82f6;
-            --ifr-color: #ef4444;
-            --lifr-color: #a855f7;
-            --na-color: #64748b;
-            --warning-bg: rgba(239, 68, 68, 0.15);
-            --warning-border: rgba(239, 68, 68, 0.4);
-            --warning-text: #fca5a5;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Principais Aeroportos da América Latina e EUA</title>
+<style>
+:root {
+--bg-color: #0f172a;
+--card-bg: #1e293b;
+--text-primary: #f8fafc;
+--text-secondary: #94a3b8;
+--border-color: #334155;
+--vfr-color: #22c55e;
+--mvfr-color: #3b82f6;
+--ifr-color: #ef4444;
+--lifr-color: #a855f7;
+--na-color: #64748b;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-        }
+body {
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background-color: var(--bg-color);
+color: var(--text-primary);
+margin: 0;
+padding: 20px;
+}
 
-        header {
-            max-width: 1200px;
-            margin: 0 auto 25px auto;
-            text-align: center;
-        }
+header {
+max-width: 1200px;
+margin: 0 auto 25px auto;
+text-align: center;
+}
 
-        h1 {
-            margin-bottom: 5px;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+h1 {
+margin-bottom: 5px;
+font-size: 1.8rem;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+}
 
-        .version {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-        }
+.version {
+font-size: 0.85rem;
+color: var(--text-secondary);
+margin-bottom: 15px;
+}
 
-        .global-warning-banner {
-            background-color: var(--warning-bg);
-            border: 1px solid var(--warning-border);
-            color: var(--warning-text);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            max-width: 700px;
-            margin: 0 auto 15px auto;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+.legend-bar {
+display: flex;
+flex-wrap: wrap;
+gap: 12px;
+justify-content: center;
+align-items: center;
+font-size: 0.78rem;
+color: var(--text-secondary);
+background: rgba(30, 41, 59, 0.6);
+padding: 6px 12px;
+border-radius: 6px;
+max-width: 650px;
+margin: 0 auto 15px auto;
+border: 1px solid var(--border-color);
+}
 
-        .legend-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            background: rgba(30, 41, 59, 0.6);
-            padding: 6px 12px;
-            border-radius: 6px;
-            max-width: 650px;
-            margin: 0 auto 15px auto;
-            border: 1px solid var(--border-color);
-        }
+.legend-item {
+display: flex;
+align-items: center;
+gap: 4px;
+}
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+.legend-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
 
-        .legend-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
+.controls {
+display: flex;
+flex-wrap: wrap;
+gap: 15px;
+justify-content: center;
+align-items: center;
+margin-bottom: 20px;
+}
 
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+input[type="text"] {
+padding: 10px 15px;
+border-radius: 8px;
+border: 1px solid var(--border-color);
+background-color: var(--card-bg);
+color: var(--text-primary);
+width: 300px;
+font-size: 0.95rem;
+}
 
-        input[type="text"] {
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background-color: var(--card-bg);
-            color: var(--text-primary);
-            width: 300px;
-            font-size: 0.95rem;
-        }
+button {
+padding: 10px 16px;
+border-radius: 8px;
+border: none;
+background-color: #3b82f6;
+color: white;
+cursor: pointer;
+font-weight: 600;
+transition: background 0.2s;
+}
 
-        button {
-            padding: 10px 16px;
-            border-radius: 8px;
-            border: none;
-            background-color: #3b82f6;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
+button:hover {
+background-color: #2563eb;
+}
 
-        button:hover {
-            background-color: #2563eb;
-        }
+.filters {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+justify-content: center;
+margin-bottom: 15px;
+}
 
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 15px;
-        }
+.filter-btn {
+background-color: var(--card-bg);
+color: var(--text-secondary);
+border: 1px solid var(--border-color);
+padding: 6px 12px;
+font-size: 0.85rem;
+border-radius: 6px;
+cursor: pointer;
+transition: background 0.2s, color 0.2s;
+}
 
-        .filter-btn {
-            background-color: var(--card-bg);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.2s, color 0.2s;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            line-height: 1.2;
-        }
+.filter-btn.active {
+background-color: #3b82f6;
+color: white;
+border-color: #3b82f6;
+}
 
-        .filter-btn.active {
-            background-color: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
+.stats {
+display: flex;
+flex-wrap: wrap;
+gap: 15px;
+justify-content: center;
+font-size: 0.9rem;
+color: var(--text-secondary);
+margin-bottom: 20px;
+}
 
-        .filter-btn svg {
-            width: 17px;
-            height: 11px;
-            border-radius: 2px;
-            flex-shrink: 0;
-            box-shadow: 0 0 1px rgba(0,0,0,0.4);
-            display: inline-block;
-            vertical-align: middle;
-        }
+.stats span strong {
+color: var(--text-primary);
+}
 
-        .stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
+.grid {
+max-width: 1200px;
+margin: 0 auto;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+gap: 20px;
+}
 
-        .stats span strong {
-            color: var(--text-primary);
-        }
+.card {
+background-color: var(--card-bg);
+border: 1px solid var(--border-color);
+border-radius: 12px;
+padding: 18px;
+display: flex;
+flex-direction: column;
+gap: 14px;
+box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
 
-        .grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
-        }
+.card-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+}
 
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
+.airport-title {
+font-size: 1.05rem;
+font-weight: bold;
+}
 
-        .card.outdated {
-            border-color: var(--warning-border);
-        }
+.airport-codes {
+font-size: 0.8rem;
+color: #38bdf8;
+font-family: monospace;
+font-weight: bold;
+margin-top: 2px;
+}
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
+.airport-sub {
+font-size: 0.8rem;
+color: var(--text-secondary);
+margin-top: 2px;
+}
 
-        .airport-title {
-            font-size: 1.05rem;
-            font-weight: bold;
-        }
+.badge {
+padding: 4px 8px;
+border-radius: 6px;
+font-size: 0.75rem;
+font-weight: bold;
+text-transform: uppercase;
+}
 
-        .airport-codes {
-            font-size: 0.8rem;
-            color: #38bdf8;
-            font-family: monospace;
-            font-weight: bold;
-            margin-top: 2px;
-        }
+.badge-VFR { background-color: rgba(34, 197, 94, 0.2); color: var(--vfr-color); border: 1px solid var(--vfr-color); }
+.badge-MVFR { background-color: rgba(59, 130, 246, 0.2); color: var(--mvfr-color); border: 1px solid var(--mvfr-color); }
+.badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
+.badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
+.badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
 
-        .airport-sub {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
+.card-info-grid {
+display: grid;
+grid-template-columns: 1fr 1px 1fr;
+gap: 10px;
+background: rgba(15, 23, 42, 0.4);
+padding: 10px;
+border-radius: 8px;
+font-size: 0.85rem;
+}
 
-        .badge-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
+.divider {
+background-color: var(--border-color);
+}
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
+.info-item {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
 
-        .badge-VFR { background-color: rgba(34, 197, 94, 0.2); color: var(--vfr-color); border: 1px solid var(--vfr-color); }
-        .badge-MVFR { background-color: rgba(59, 130, 246, 0.2); color: var(--mvfr-color); border: 1px solid var(--mvfr-color); }
-        .badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
-        .badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
-        .badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
-        
-        .badge-outdated {
-            background-color: var(--warning-bg);
-            color: var(--warning-text);
-            border: 1px solid var(--warning-border);
-            font-size: 0.65rem;
-            padding: 2px 6px;
-        }
+.info-label {
+color: var(--text-secondary);
+font-size: 0.75rem;
+}
 
-        .card-info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1px 1fr;
-            gap: 10px;
-            background: rgba(15, 23, 42, 0.4);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
+.weather-box {
+background: #0b0f19;
+padding: 10px;
+border-radius: 8px;
+font-size: 0.78rem;
+font-family: monospace;
+word-break: break-all;
+}
 
-        .divider {
-            background-color: var(--border-color);
-        }
+.metar-section {
+border-left: 3px solid #38bdf8;
+}
+.metar-box {
+color: #38bdf8;
+border: 1px solid rgba(56, 189, 248, 0.2);
+}
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
+.interpret-section {
+background: rgba(56, 189, 248, 0.08);
+border-left: 3px solid #2dd4bf;
+padding: 9px 12px;
+border-radius: 6px;
+font-size: 0.82rem;
+color: #2dd4bf;
+line-height: 1.4;
+}
 
-        .info-label {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-        }
+.taf-raw-box {
+color: #c084fc;
+border: 1px solid rgba(192, 132, 252, 0.2);
+}
 
-        .weather-box {
-            background: #0b0f19;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.78rem;
-            font-family: monospace;
-            word-break: break-all;
-        }
+.section-title {
+font-size: 0.75rem;
+font-weight: bold;
+margin-bottom: 4px;
+text-transform: uppercase;
+display: flex;
+align-items: center;
+gap: 6px;
+}
 
-        .metar-section {
-            border-left: 3px solid #38bdf8;
-        }
-        .metar-box {
-            color: #38bdf8;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-        }
+.title-metar { color: #38bdf8; }
+.title-interpret { color: #2dd4bf; }
+.title-taf { color: #c084fc; }
 
-        .metar-footer-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 6px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+details summary {
+font-size: 0.75rem;
+color: #c084fc;
+font-weight: bold;
+text-transform: uppercase;
+cursor: pointer;
+user-select: none;
+outline: none;
+display: flex;
+align-items: center;
+gap: 6px;
+}
 
-        .metar-footer-info.outdated-text {
-            color: var(--warning-text);
-            font-weight: 600;
-        }
-
-        .interpret-section {
-            background: rgba(56, 189, 248, 0.08);
-            border-left: 3px solid #2dd4bf;
-            padding: 9px 12px;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            color: #2dd4bf;
-            line-height: 1.4;
-        }
-
-        .taf-raw-box {
-            color: #c084fc;
-            border: 1px solid rgba(192, 132, 252, 0.2);
-        }
-
-        .section-title {
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .title-metar { color: #38bdf8; }
-        .title-interpret { color: #2dd4bf; }
-        .title-taf { color: #c084fc; }
-
-        details summary {
-            font-size: 0.75rem;
-            color: #c084fc;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            user-select: none;
-            outline: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        details summary:hover {
-            opacity: 0.8;
-        }
-    </style>
+details summary:hover {
+opacity: 0.8;
+}
+</style>
 </head>
 <body onload="fetchData()">
 
-    <header>
-        <h1>Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 68</div>
+<header>
+<h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
+<div class="version">VERSÃO 70</div>
 
-        <div id="globalWarning" class="global-warning-banner">
-            ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
-        </div>
+<div class="legend-bar">
+<span><strong>Legenda:</strong></span>
+<div class="legend-item"><span class="legend-dot" style="background-color: var(--vfr-color);"></span> VFR (Bom)</div>
+<div class="legend-item"><span class="legend-dot" style="background-color: var(--mvfr-color);"></span> MVFR (Marginal)</div>
+<div class="legend-item"><span class="legend-dot" style="background-color: var(--ifr-color);"></span> IFR (Restrito)</div>
+<div class="legend-item"><span class="legend-dot" style="background-color: var(--lifr-color);"></span> LIFR (Crítico)</div>
+</div>
 
-        <div class="legend-bar">
-            <span><strong>Legenda:</strong></span>
-            <div class="legend-item"><span class="legend-dot" style="background-color: var(--vfr-color);"></span> VFR (Bom)</div>
-            <div class="legend-item"><span class="legend-dot" style="background-color: var(--mvfr-color);"></span> MVFR (Marginal)</div>
-            <div class="legend-item"><span class="legend-dot" style="background-color: var(--ifr-color);"></span> IFR (Restrito)</div>
-            <div class="legend-item"><span class="legend-dot" style="background-color: var(--lifr-color);"></span> LIFR (Crítico)</div>
-        </div>
-        
-        <div class="controls">
-            <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
-            <button onclick="fetchData()">🔄 Atualizar Dados</button>
-        </div>
+<div class="controls">
+<input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
+<button onclick="fetchData()">🔄 Atualizar Dados</button>
+</div>
 
-        <div class="stats" id="statsContainer">
-            <span>📊 Total: <strong id="statTotal">0</strong></span>
-            <span>🟢 VFR: <strong id="statVfr">0</strong></span>
-            <span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
-            <span>🔴 IFR: <strong id="statIfr">0</strong></span>
-            <span>🟣 LIFR: <strong id="statLifr">0</strong></span>
-        </div>
+<div class="stats" id="statsContainer">
+<span>📊 Total: <strong id="statTotal">0</strong></span>
+<span>🟢 VFR: <strong id="statVfr">0</strong></span>
+<span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
+<span>🔴 IFR: <strong id="statIfr">0</strong></span>
+<span>🟣 LIFR: <strong id="statLifr">0</strong></span>
+</div>
 
-        <div class="filters" id="countryFilters">
-            <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-            
-            <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">
-                <svg viewBox="0 0 900 600"><rect fill="#009b3a" width="900" height="600"/><polygon fill="#fedf00" points="450,50 850,300 450,550 50,300"/><circle fill="#002776" cx="450" cy="300" r="150"/></svg>
-                Brasil
-            </button>
+<div class="filters" id="countryFilters">
+<button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
+<button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
+<button class="filter-btn" data-country="US" onclick="filterCountry('US')">🇺🇸 EUA</button>
+<button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
+<button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">🇨🇱 Chile</button>
+<button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">🇲🇽 México</button>
+<button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">🇵🇦 Panamá</button>
+<button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">🇨🇷 Costa Rica</button>
+<button class="filter-btn" data-country="UY" onclick="filterCountry('UY')">🇺🇾 Uruguai</button>
+<button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">🌎 Outros</button>
+</div>
 
-            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">
-                <svg viewBox="0 0 1235 650"><rect fill="#b22234" width="1235" height="650"/><path d="M0,75h1235M0,225h1235M0,375h1235M0,525h1235" stroke="#fff" stroke-width="50"/><rect fill="#3c3b6e" width="494" height="350"/></svg>
-                EUA
-            </button>
+<div class="filters" id="categoryFilters">
+<button class="filter-btn active" data-category="ALL" onclick="filterCategory('ALL')">Todas as Condições</button>
+<button class="filter-btn" data-category="VFR" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
+<button class="filter-btn" data-category="MVFR" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
+<button class="filter-btn" data-category="IFR" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
+<button class="filter-btn" data-category="LIFR" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+</div>
 
-            <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">
-                <svg viewBox="0 0 900 600"><rect fill="#74acdf" width="900" height="600"/><rect fill="#fff" y="200" width="900" height="200"/></svg>
-                Argentina
-            </button>
+<div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
+</header>
 
-            <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">
-                <svg viewBox="0 0 900 600"><rect fill="#d52b1e" y="300" width="900" height="300"/><rect fill="#fff" width="900" height="300"/><rect fill="#0039a6" width="300" height="300"/><polygon fill="#fff" points="150,75 167,125 215,125 175,155 190,205 150,175 110,205 125,155 85,125 133,125"/></svg>
-                Chile
-            </button>
+<main class="grid" id="airportGrid">
+<!-- Cartões gerados dinamicamente -->
+</main>
 
-            <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">
-                <svg viewBox="0 0 900 500"><rect fill="#006847" width="300" height="500"/><rect fill="#fff" x="300" width="300" height="500"/><rect fill="#ce1126" x="600" width="300" height="500"/></svg>
-                México
-            </button>
+<script>
+const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
 
-            <button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">
-                <svg viewBox="0 0 900 600"><rect width="900" height="600" fill="#fff"/><rect x="450" width="450" height="300" fill="#da121a"/><rect y="300" width="450" height="300" fill="#0033a0"/><polygon fill="#0033a0" points="225,100 240,145 285,145 250,170 260,215 225,190 190,215 200,170 165,145 210,145"/><polygon fill="#da121a" points="675,400 690,445 735,445 700,470 710,515 675,490 640,515 650,470 615,445 660,445"/></svg>
-                Panamá
-            </button>
+let airportData = [];
+let currentCountry = 'ALL';
+let currentCategory = 'ALL';
+let currentSearch = '';
 
-            <button class="filter-btn" data-country="UY" onclick="filterCountry('UY')">
-                <svg viewBox="0 0 900 600"><rect width="900" height="600" fill="#fff"/><path d="M0,66.6h900M0,200h900M0,333.3h900M0,466.6h900" stroke="#0038a8" stroke-width="66.6"/><rect width="360" height="333.3" fill="#fff"/><circle cx="180" cy="166.6" r="60" fill="#fc0"/></svg>
-                Uruguai
-            </button>
+async function fetchData() {
+document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
+try {
+const response = await fetch(WORKER_URL);
+const json = await response.json();
+if (json.ok) {
+airportData = json.rows;
+document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
+renderGrid();
+} else {
+document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
+}
+} catch (error) {
+console.error("Erro de conexão:", error);
+document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
+}
+}
 
-            <button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">Outros</button>
-        </div>
+function syncActiveButtons() {
+document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
+if (btn.getAttribute('data-country') === currentCountry) {
+btn.classList.add('active');
+} else {
+btn.classList.remove('active');
+}
+});
 
-        <div class="filters" id="categoryFilters">
-            <button class="filter-btn active" data-category="ALL" onclick="filterCategory('ALL')">Todas as Condições</button>
-            <button class="filter-btn" data-category="VFR" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
-            <button class="filter-btn" data-category="MVFR" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
-            <button class="filter-btn" data-category="IFR" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
-            <button class="filter-btn" data-category="LIFR" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
-        </div>
+document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
+if (btn.getAttribute('data-category') === currentCategory) {
+btn.classList.add('active');
+} else {
+btn.classList.remove('active');
+}
+});
+}
 
-        <div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
-    </header>
+function filterCountry(country) {
+currentCountry = country;
+syncActiveButtons();
+renderGrid();
+}
 
-    <main class="grid" id="airportGrid">
-        <!-- Cartões gerados dinamicamente -->
-    </main>
+function filterCategory(category) {
+currentCategory = category;
+syncActiveButtons();
+renderGrid();
+}
 
-    <script>
-        const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
+function filterAirports() {
+currentSearch = document.getElementById('searchInput').value.toLowerCase();
+renderGrid();
+}
 
-        let airportData = [];
-        let currentCountry = 'ALL';
-        let currentCategory = 'ALL';
-        let currentSearch = '';
+function renderCardHeader(item) {
+const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
+const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
 
-        async function fetchData() {
-            document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
-            try {
-                const response = await fetch(WORKER_URL);
-                const json = await response.json();
-                if (json.ok) {
-                    airportData = json.rows;
-                    document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
-                    checkGlobalOutdated(airportData);
-                    renderGrid();
-                } else {
-                    document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
-                }
-            } catch (error) {
-                console.error("Erro de conexão:", error);
-                document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
-            }
-        }
+return `
+<div class="card-header">
+<div>
+<div class="airport-title">${item.name}</div>
+<div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
+<div class="airport-sub">${item.city} (${item.country})</div>
+</div>
+<span class="badge ${badgeClass}">${item.category}</span>
+</div>
+`;
+}
 
-        function checkGlobalOutdated(rows) {
-            const hasOutdated = rows.some(item => {
-                const info = parseMetarAge(item.metar);
-                return info.isOutdated;
-            });
-            const banner = document.getElementById('globalWarning');
-            if (banner) {
-                banner.style.display = hasOutdated ? 'flex' : 'none';
-            }
-        }
+function renderGrid() {
+syncActiveButtons();
 
-        function parseMetarAge(metarStr) {
-            if (!metarStr) return { text: "Sem dados", isOutdated: false, timeStr: "—" };
+const grid = document.getElementById('airportGrid');
+grid.innerHTML = '';
 
-            const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
-            if (!match) return { text: "Horário não identificado", isOutdated: false, timeStr: "—" };
+let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
-            const day = parseInt(match[1], 10);
-            const hours = parseInt(match[2], 10);
-            const minutes = parseInt(match[3], 10);
+const filtered = airportData.filter(item => {
+let matchCountry = true;
+if (currentCountry !== 'ALL') {
+if (currentCountry === 'OTHER') {
+matchCountry = item.group === 'OTHER';
+} else {
+matchCountry = item.country === currentCountry;
+}
+}
 
-            const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}Z`;
+let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
-            const now = new Date();
-            const metarDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day, hours, minutes));
+let matchSearch = !currentSearch ||
+item.icao.toLowerCase().includes(currentSearch) ||
+(item.iata && item.iata.toLowerCase().includes(currentSearch)) ||
+item.name.toLowerCase().includes(currentSearch) ||
+item.city.toLowerCase().includes(currentSearch);
 
-            if (metarDate > now) {
-                metarDate.setUTCMonth(metarDate.getUTCMonth() - 1);
-            }
+return matchCountry && matchCategory && matchSearch;
+});
 
-            const diffMs = now - metarDate;
-            const diffMins = Math.floor(diffMs / (1000 * 60));
+airportData.forEach(item => {
+counts.total++;
+if (item.category === 'VFR') counts.vfr++;
+else if (item.category === 'MVFR') counts.mvfr++;
+else if (item.category === 'IFR') counts.ifr++;
+else if (item.category === 'LIFR') counts.lifr++;
+});
 
-            if (diffMins < 0) return { text: "Publicado agora", isOutdated: false, timeStr };
-            if (diffMins < 60) {
-                return { text: `Atualizado há ${diffMins} min`, isOutdated: false, timeStr };
-            } else {
-                const diffHours = Math.floor(diffMins / 60);
-                const remMins = diffMins % 60;
-                return { 
-                    text: `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`, 
-                    isOutdated: true, 
-                    timeStr 
-                };
-            }
-        }
+document.getElementById('statTotal').innerText = counts.total;
+document.getElementById('statVfr').innerText = counts.vfr;
+document.getElementById('statMvfr').innerText = counts.mvfr;
+document.getElementById('statIfr').innerText = counts.ifr;
+document.getElementById('statLifr').innerText = counts.lifr;
 
-        function syncActiveButtons() {
-            document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
-                if (btn.getAttribute('data-country') === currentCountry) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+if (filtered.length === 0) {
+grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
+return;
+}
 
-            document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
-                if (btn.getAttribute('data-category') === currentCategory) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-        }
+filtered.forEach(item => {
+const card = document.createElement('div');
+card.className = 'card';
+card.innerHTML = `
+${renderCardHeader(item)}
 
-        function filterCountry(country) {
-            currentCountry = country;
-            syncActiveButtons();
-            renderGrid();
-        }
+<div class="card-info-grid">
+<div class="info-item">
+<span class="info-label">💨 Vento</span>
+<span><strong>${item.wind}</strong></span>
+</div>
+<div class="divider"></div>
+<div class="info-item">
+<span class="info-label">⚖️ Pressão</span>
+<span><strong>${item.pressure}</strong></span>
+</div>
+</div>
 
-        function filterCategory(category) {
-            currentCategory = category;
-            syncActiveButtons();
-            renderGrid();
-        }
+<div class="card-info-grid">
+<div class="info-item">
+<span class="info-label">🌡️ Temperatura</span>
+<span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
+</div>
+<div class="divider"></div>
+<div class="info-item">
+<span class="info-label">💧 Ponto de Orvalho</span>
+<span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
+</div>
+</div>
 
-        function filterAirports() {
-            currentSearch = document.getElementById('searchInput').value.toLowerCase();
-            renderGrid();
-        }
+<div class="metar-section">
+<div class="section-title title-metar">📡 METAR (Condição Atual)</div>
+<div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
+</div>
 
-        function renderCardHeader(item) {
-            const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-            const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
-            const ageInfo = parseMetarAge(item.metar);
-            const outdatedBadge = ageInfo.isOutdated ? `<span class="badge badge-outdated">Desatualizado</span>` : '';
+<div>
+<div class="section-title title-interpret">💡 Interpretação da Previsão</div>
+${item.tafInterpret ? `<div class="interpret-section" style="margin-bottom: 8px;">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação disponível.</div>'}
 
-            return `
-                <div class="card-header">
-                    <div>
-                        <div class="airport-title">${item.name}</div>
-                        <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
-                        <div class="airport-sub">${item.city} (${item.country})</div>
-                    </div>
-                    <div class="badge-group">
-                        <span class="badge ${badgeClass}">${item.category}</span>
-                        ${outdatedBadge}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderGrid() {
-            syncActiveButtons();
-
-            const grid = document.getElementById('airportGrid');
-            grid.innerHTML = '';
-
-            let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
-
-            const filtered = airportData.filter(item => {
-                let matchCountry = true;
-                if (currentCountry !== 'ALL') {
-                    if (currentCountry === 'OTHER') {
-                        // Tratamento limpo para o grupo Outros
-                        matchCountry = item.group === 'OTHER';
-                    } else {
-                        matchCountry = item.country === currentCountry;
-                    }
-                }
-
-                let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
-
-                let matchSearch = !currentSearch || 
-                    item.icao.toLowerCase().includes(currentSearch) || 
-                    (item.iata && item.iata.toLowerCase().includes(currentSearch)) || 
-                    item.name.toLowerCase().includes(currentSearch) || 
-                    item.city.toLowerCase().includes(currentSearch);
-
-                return matchCountry && matchCategory && matchSearch;
-            });
-
-            airportData.forEach(item => {
-                counts.total++;
-                if (item.category === 'VFR') counts.vfr++;
-                else if (item.category === 'MVFR') counts.mvfr++;
-                else if (item.category === 'IFR') counts.ifr++;
-                else if (item.category === 'LIFR') counts.lifr++;
-            });
-
-            document.getElementById('statTotal').innerText = counts.total;
-            document.getElementById('statVfr').innerText = counts.vfr;
-            document.getElementById('statMvfr').innerText = counts.mvfr;
-            document.getElementById('statIfr').innerText = counts.ifr;
-            document.getElementById('statLifr').innerText = counts.lifr;
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
-                return;
-            }
-
-            filtered.forEach(item => {
-                const ageInfo = parseMetarAge(item.metar);
-                const cardClass = `card ${ageInfo.isOutdated ? 'outdated' : ''}`;
-                const footerClass = `metar-footer-info ${ageInfo.isOutdated ? 'outdated-text' : ''}`;
-
-                const card = document.createElement('div');
-                card.className = cardClass;
-                card.innerHTML = `
-                    ${renderCardHeader(item)}
-
-                    <div class="card-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">💨 Vento</span>
-                            <span><strong>${item.wind}</strong></span>
-                        </div>
-                        <div class="divider"></div>
-                        <div class="info-item">
-                            <span class="info-label">⚖️ Pressão</span>
-                            <span><strong>${item.pressure}</strong></span>
-                        </div>
-                    </div>
-
-                    <div class="card-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">🌡️ Temperatura</span>
-                            <span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
-                        </div>
-                        <div class="divider"></div>
-                        <div class="info-item">
-                            <span class="info-label">💧 Ponto de Orvalho</span>
-                            <span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
-                        </div>
-                    </div>
-
-                    <div class="metar-section">
-                        <div class="section-title title-metar">📡 METAR (Condição Atual)</div>
-                        <div class="weather-box metar-box">${item.metar && item.metar.trim() !== "" ? item.metar : "METAR indisponível"}</div>
-                        <div class="${footerClass}">
-                            <span>⏱️ Publicado às ${ageInfo.timeStr}</span>
-                            <span>${ageInfo.text}</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="section-title title-interpret">💡 Interpretação da Previsão</div>
-                        ${item.tafInterpret ? `<div class="interpret-section" style="margin-bottom: 8px;">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação disponível.</div>'}
-                        
-                        <details style="margin-top: 6px;">
-                            <summary>⏱️ Ver TAF Bruto (Técnico)</summary>
-                            <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf && item.taf.trim() !== "" ? item.taf : "TAF indisponível"}</div>
-                        </details>
-                    </div>
-                `;
-                grid.append(card);
-            });
-        }
-    </script>
+<details style="margin-top: 6px;">
+<summary>⏱️ Ver TAF Bruto (Técnico)</summary>
+<div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
+</details>
+</div>
+`;
+grid.append(card);
+});
+}
+</script>
 </body>
 </html>
