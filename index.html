@@ -16,6 +16,9 @@
             --ifr-color: #ef4444;
             --lifr-color: #a855f7;
             --na-color: #64748b;
+            --warning-bg: rgba(239, 68, 68, 0.15);
+            --warning-border: rgba(239, 68, 68, 0.4);
+            --warning-text: #fca5a5;
         }
 
         body {
@@ -45,6 +48,22 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
             margin-bottom: 15px;
+        }
+
+        /* Banner global discreto e profissional */
+        .global-warning-banner {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            max-width: 700px;
+            margin: 0 auto 15px auto;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .legend-bar {
@@ -167,6 +186,10 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
+        .card.outdated {
+            border-color: var(--warning-border);
+        }
+
         .card-header {
             display: flex;
             justify-content: space-between;
@@ -192,6 +215,13 @@
             margin-top: 2px;
         }
 
+        .badge-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
         .badge {
             padding: 4px 8px;
             border-radius: 6px;
@@ -205,6 +235,14 @@
         .badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
         .badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
         .badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
+        
+        .badge-outdated {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid var(--warning-border);
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
 
         .card-info-grid {
             display: grid;
@@ -246,6 +284,15 @@
         .metar-box {
             color: #38bdf8;
             border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .metar-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
         }
 
         .interpret-section {
@@ -299,7 +346,12 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 57</div>
+        <div class="version">VERSÃO 58</div>
+
+        <!-- Banner global discreto -->
+        <div id="globalWarning" class="global-warning-banner">
+            ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
+        </div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -365,6 +417,7 @@
                 if (json.ok) {
                     airportData = json.rows;
                     document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
+                    checkGlobalOutdated(airportData);
                     renderGrid();
                 } else {
                     document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
@@ -372,6 +425,53 @@
             } catch (error) {
                 console.error("Erro de conexão:", error);
                 document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
+            }
+        }
+
+        // Analisa se há pelo menos um aeroporto com mais de 1 hora de atraso para exibir o banner global
+        function checkGlobalOutdated(rows) {
+            const hasOutdated = rows.some(item => {
+                const info = parseMetarAge(item.metar);
+                return info.isOutdated;
+            });
+            const banner = document.getElementById('globalWarning');
+            if (banner) {
+                banner.style.display = hasOutdated ? 'flex' : 'none';
+            }
+        }
+
+        // Função para calcular a idade do METAR com base no formato DDHHMMZ Zulu
+        function parseMetarAge(metarStr) {
+            if (!metarStr) return { text: "Sem dados", isOutdated: false };
+
+            const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+            if (!match) return { text: "Horário não identificado", isOutdated: false };
+
+            const day = parseInt(match[1], 10);
+            const hours = parseInt(match[2], 10);
+            const minutes = parseInt(match[3], 10);
+
+            const now = new Date(); // Hora atual UTC do cliente
+            const metarDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day, hours, minutes));
+
+            // Lidar com virada de mês básica caso o dia do METAR seja maior que o dia atual (ex: último dia do mês anterior)
+            if (metarDate > now) {
+                metarDate.setUTCMonth(metarDate.getUTCMonth() - 1);
+            }
+
+            const diffMs = now - metarDate;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+
+            if (diffMins < 0) return { text: "Recém emitido", isOutdated: false };
+            if (diffMins < 60) {
+                return { text: `Atualizado há ${diffMins} min`, isOutdated: false };
+            } else {
+                const diffHours = Math.floor(diffMins / 60);
+                const remMins = diffMins % 60;
+                return { 
+                    text: `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`, 
+                    isOutdated: true 
+                };
             }
         }
 
@@ -413,7 +513,10 @@
         function renderCardHeader(item) {
             const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
             const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
+            const ageInfo = parseMetarAge(item.metar);
             
+            const outdatedBadge = ageInfo.isOutdated ? `<span class="badge badge-outdated">Desatualizado</span>` : '';
+
             return `
                 <div class="card-header">
                     <div>
@@ -421,7 +524,10 @@
                         <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
                         <div class="airport-sub">${item.city} (${item.country})</div>
                     </div>
-                    <span class="badge ${badgeClass}">${item.category}</span>
+                    <div class="badge-group">
+                        <span class="badge ${badgeClass}">${item.category}</span>
+                        ${outdatedBadge}
+                    </div>
                 </div>
             `;
         }
@@ -475,8 +581,11 @@
             }
 
             filtered.forEach(item => {
+                const ageInfo = parseMetarAge(item.metar);
+                const cardClass = `card ${ageInfo.isOutdated ? 'outdated' : ''}`;
+
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = cardClass;
                 card.innerHTML = `
                     ${renderCardHeader(item)}
 
@@ -507,6 +616,9 @@
                     <div class="metar-section">
                         <div class="section-title title-metar">📡 METAR (Condição Atual)</div>
                         <div class="weather-box metar-box">${item.metar && item.metar.trim() !== "" ? item.metar : "METAR indisponível"}</div>
+                        <div class="metar-footer-info">
+                            <span>⏱️ ${ageInfo.text}</span>
+                        </div>
                     </div>
 
                     <div>
