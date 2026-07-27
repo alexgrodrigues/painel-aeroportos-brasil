@@ -90,7 +90,7 @@
             border: 1px solid var(--border-color);
             background-color: var(--card-bg);
             color: var(--text-primary);
-            width: 280px;
+            width: 300px;
             font-size: 0.95rem;
         }
 
@@ -174,7 +174,7 @@
         }
 
         .airport-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
         }
 
@@ -290,7 +290,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 50</div>
+        <div class="version">VERSÃO 51</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -301,7 +301,7 @@
         </div>
         
         <div class="controls">
-            <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
+            <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
             <button onclick="fetchData()">🔄 Atualizar Dados</button>
         </div>
 
@@ -421,8 +421,10 @@
 
                 let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
+                // Suporte completo à busca por ICAO, IATA, Nome ou Cidade
                 let matchSearch = !currentSearch || 
                     item.icao.toLowerCase().includes(currentSearch) || 
+                    (item.iata && item.iata.toLowerCase().includes(currentSearch)) || 
                     item.name.toLowerCase().includes(currentSearch) || 
                     item.city.toLowerCase().includes(currentSearch);
 
@@ -450,13 +452,14 @@
 
             filtered.forEach(item => {
                 const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
+                const iataDisplay = item.iata ? ` / ${item.iata}` : '';
                 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <div class="card-header">
                         <div>
-                            <div class="airport-title">${item.icao} — ${item.name}</div>
+                            <div class="airport-title">${item.icao}${iataDisplay} — ${item.name}</div>
                             <div class="airport-sub">${item.city} (${item.country})</div>
                         </div>
                         <span class="badge ${badgeClass}">${item.category}</span>
