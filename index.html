@@ -351,7 +351,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 60</div>
+        <div class="version">VERSÃO 61</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
@@ -479,12 +479,18 @@
             }
         }
 
-        // Função ajustada para extrair os 3 dígitos da direção e formatar no padrão 340 / 03KT
+        // Função ajustada para tratar ventos variáveis (VRB) e direcionados perfeitamente
         function formatWindDisplay(windStr) {
             if (!windStr || windStr === "—") return "—";
             
-            // Regex para capturar padrão tipo 34003KT ou VRB02KT
-            const match = windStr.match(/^(\d{3})(\d{2})KT$/) || windStr.match(/^(VRB)(\d{2})KT$/);
+            // Tratamento específico para ventos variáveis (ex: VRB02KT ou VRB1KT)
+            const vrbMatch = windStr.match(/^(VRB)(\d{1,2})KT$/);
+            if (vrbMatch) {
+                return `${vrbMatch[1]} ${vrbMatch[2]}KT`;
+            }
+
+            // Tratamento padrão para ventos direcionados (ex: 34003KT)
+            const match = windStr.match(/^(\d{3})(\d{2})KT$/);
             if (match) {
                 return `${match[1]} / ${match[2]}KT`;
             }
