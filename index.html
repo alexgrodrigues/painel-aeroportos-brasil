@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Principais Aeroportos da América Latina</title>
+    <title>Principais Aeroportos da América Latina e EUA</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -289,8 +289,8 @@
 <body onload="fetchData()">
 
     <header>
-        <h1>✈️ Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 49.8</div>
+        <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
+        <div class="version">VERSÃO 50</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -316,6 +316,7 @@
         <div class="filters" id="countryFilters">
             <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
             <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
+            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">🇺🇸 EUA</button>
             <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
             <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">🇨🇱 Chile</button>
             <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">🇲🇽 México</button>
@@ -414,7 +415,7 @@
                     if (currentCountry === 'OTHER') {
                         matchCountry = item.group === 'OTHER';
                     } else {
-                        matchCountry = item.country === currentCountry;
+                        matchCountry = item.country === currentCountry || item.group === currentCountry;
                     }
                 }
 
