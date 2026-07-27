@@ -299,7 +299,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 54</div>
+        <div class="version">VERSÃO 57</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -410,7 +410,6 @@
             renderGrid();
         }
 
-        // Função auxiliar refinada com fallback humanizado para IATA ausente
         function renderCardHeader(item) {
             const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
             const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
@@ -507,7 +506,7 @@
 
                     <div class="metar-section">
                         <div class="section-title title-metar">📡 METAR (Condição Atual)</div>
-                        <div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
+                        <div class="weather-box metar-box">${item.metar && item.metar.trim() !== "" ? item.metar : "METAR indisponível"}</div>
                     </div>
 
                     <div>
@@ -516,7 +515,7 @@
                         
                         <details style="margin-top: 6px;">
                             <summary>⏱️ Ver TAF Bruto (Técnico)</summary>
-                            <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
+                            <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf && item.taf.trim() !== "" ? item.taf : "TAF indisponível"}</div>
                         </details>
                     </div>
                 `;
