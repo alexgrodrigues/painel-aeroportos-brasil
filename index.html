@@ -192,7 +192,6 @@
             font-size: 0.75rem;
         }
 
-        /* Blocos Visuais Especializados */
         .weather-box {
             background: #0b0f19;
             padding: 10px;
@@ -202,7 +201,6 @@
             word-break: break-all;
         }
 
-        /* METAR: Azul/Ciano (Observação Atual) */
         .metar-section {
             border-left: 3px solid #38bdf8;
         }
@@ -211,7 +209,6 @@
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
 
-        /* Interpretação: Verde-azulado / Insight humano */
         .interpret-section {
             background: rgba(56, 189, 248, 0.08);
             border-left: 3px solid #2dd4bf;
@@ -222,7 +219,6 @@
             line-height: 1.4;
         }
 
-        /* TAF Bruto: Roxo/Violeta (Projeção Futura) */
         .taf-raw-box {
             color: #c084fc;
             border: 1px solid rgba(192, 132, 252, 0.2);
@@ -264,7 +260,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 48.3</div>
+        <div class="version">VERSÃO 49.6</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
@@ -280,22 +276,22 @@
         </div>
 
         <div class="filters" id="countryFilters">
-            <button class="filter-btn active" onclick="filterCountry('ALL')">🌐 Todos</button>
-            <button class="filter-btn" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
-            <button class="filter-btn" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
-            <button class="filter-btn" onclick="filterCountry('CL')">🇨🇱 Chile</button>
-            <button class="filter-btn" onclick="filterCountry('MX')">🇲🇽 México</button>
-            <button class="filter-btn" onclick="filterCountry('PA')">🇵🇦 Panamá</button>
-            <button class="filter-btn" onclick="filterCountry('CR')">🇨🇷 Costa Rica</button>
-            <button class="filter-btn" onclick="filterCountry('OTHER')">🌎 Outros</button>
+            <button class="filter-btn active" onclick="filterCountry('ALL', event)">🌐 Todos</button>
+            <button class="filter-btn" onclick="filterCountry('BR', event)">🇧🇷 Brasil</button>
+            <button class="filter-btn" onclick="filterCountry('AR', event)">🇦🇷 Argentina</button>
+            <button class="filter-btn" onclick="filterCountry('CL', event)">🇨🇱 Chile</button>
+            <button class="filter-btn" onclick="filterCountry('MX', event)">🇲🇽 México</button>
+            <button class="filter-btn" onclick="filterCountry('PA', event)">🇵🇦 Panamá</button>
+            <button class="filter-btn" onclick="filterCountry('CR', event)">🇨🇷 Costa Rica</button>
+            <button class="filter-btn" onclick="filterCountry('OTHER', event)">🌎 Outros</button>
         </div>
 
         <div class="filters" id="categoryFilters">
-            <button class="filter-btn active" onclick="filterCategory('ALL')">Todas as Condições</button>
-            <button class="filter-btn" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
-            <button class="filter-btn" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
-            <button class="filter-btn" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
-            <button class="filter-btn" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+            <button class="filter-btn active" onclick="filterCategory('ALL', event)">Todas as Condições</button>
+            <button class="filter-btn" onclick="filterCategory('VFR', event)">🟢 VFR (Visual)</button>
+            <button class="filter-btn" onclick="filterCategory('MVFR', event)">🔵 MVFR (Marginal)</button>
+            <button class="filter-btn" onclick="filterCategory('IFR', event)">🔴 IFR (Restrito)</button>
+            <button class="filter-btn" onclick="filterCategory('LIFR', event)">🟣 LIFR (Crítico)</button>
         </div>
 
         <div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
@@ -331,13 +327,17 @@
             }
         }
 
-        function filterCountry(country) {
+        function filterCountry(country, event) {
             currentCountry = country;
+            document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
             renderGrid();
         }
 
-        function filterCategory(category) {
+        function filterCategory(category, event) {
             currentCategory = category;
+            document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
             renderGrid();
         }
 
