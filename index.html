@@ -133,6 +133,7 @@
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
+            align-items: center;
             margin-bottom: 15px;
         }
 
@@ -149,6 +150,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            line-height: 1.2;
         }
 
         .filter-btn.active {
@@ -157,12 +159,15 @@
             border-color: #3b82f6;
         }
 
+        /* Padronização rigorosa e simétrica para todas as bandeiras SVG */
         .filter-btn svg {
-            width: 16px;
-            height: 12px;
+            width: 17px;
+            height: 11px;
             border-radius: 2px;
             flex-shrink: 0;
-            box-shadow: 0 0 1px rgba(0,0,0,0.5);
+            box-shadow: 0 0 1px rgba(0,0,0,0.4);
+            display: inline-block;
+            vertical-align: middle;
         }
 
         .stats {
@@ -364,7 +369,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 66</div>
+        <div class="version">VERSÃO 67</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
