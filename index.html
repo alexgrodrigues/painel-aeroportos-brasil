@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✈️ Principais Aeroportos da América Latina e EUA</title>
-    <!-- Favicon profissional universal para a aba -->
+    <title>Principais Aeroportos da América Latina e EUA</title>
+    <!-- Favicon SVG universal e único -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
     <style>
         :root {
@@ -146,8 +146,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
-            /* Força renderização correta de fontes e emojis em navegadores Chromium */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Segoe UI Emoji", "Apple Color Emoji", sans-serif;
+            font-weight: 500;
         }
 
         .filter-btn.active {
@@ -354,8 +353,8 @@
 <body onload="fetchData()">
 
     <header>
-        <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 62</div>
+        <h1>Principais Aeroportos da América Latina e EUA</h1>
+        <div class="version">VERSÃO 63</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
@@ -384,14 +383,14 @@
 
         <div class="filters" id="countryFilters">
             <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-            <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
-            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">🇺🇸 EUA</button>
-            <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
-            <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">🇨🇱 Chile</button>
-            <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">🇲🇽 México</button>
-            <button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">🇵🇦 Panamá</button>
-            <button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">🇨🇷 Costa Rica</button>
-            <button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">🌎 Outros</button>
+            <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">Brasil [BR]</button>
+            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">EUA [US]</button>
+            <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">Argentina [AR]</button>
+            <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">Chile [CL]</button>
+            <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">México [MX]</button>
+            <button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">Panamá [PA]</button>
+            <button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">Costa Rica [CR]</button>
+            <button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">Outros</button>
         </div>
 
         <div class="filters" id="categoryFilters">
