@@ -351,7 +351,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 59</div>
+        <div class="version">VERSÃO 60</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
@@ -479,6 +479,18 @@
             }
         }
 
+        // Função ajustada para extrair os 3 dígitos da direção e formatar no padrão 340 / 03KT
+        function formatWindDisplay(windStr) {
+            if (!windStr || windStr === "—") return "—";
+            
+            // Regex para capturar padrão tipo 34003KT ou VRB02KT
+            const match = windStr.match(/^(\d{3})(\d{2})KT$/) || windStr.match(/^(VRB)(\d{2})KT$/);
+            if (match) {
+                return `${match[1]} / ${match[2]}KT`;
+            }
+            return windStr;
+        }
+
         function syncActiveButtons() {
             document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
                 if (btn.getAttribute('data-country') === currentCountry) {
@@ -587,6 +599,7 @@
                 const ageInfo = parseMetarAge(item.metar);
                 const cardClass = `card ${ageInfo.isOutdated ? 'outdated' : ''}`;
                 const footerClass = `metar-footer-info ${ageInfo.isOutdated ? 'outdated-text' : ''}`;
+                const formattedWind = formatWindDisplay(item.wind);
 
                 const card = document.createElement('div');
                 card.className = cardClass;
@@ -596,7 +609,7 @@
                     <div class="card-info-grid">
                         <div class="info-item">
                             <span class="info-label">💨 Vento</span>
-                            <span><strong>${item.wind}</strong></span>
+                            <span><strong>${formattedWind}</strong></span>
                         </div>
                         <div class="divider"></div>
                         <div class="info-item">
