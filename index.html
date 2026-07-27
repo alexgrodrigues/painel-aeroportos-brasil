@@ -159,7 +159,6 @@
             border-color: #3b82f6;
         }
 
-        /* Padronização rigorosa e simétrica para todas as bandeiras SVG */
         .filter-btn svg {
             width: 17px;
             height: 11px;
@@ -369,7 +368,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 67</div>
+        <div class="version">VERSÃO 68</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
@@ -594,7 +593,8 @@
                 let matchCountry = true;
                 if (currentCountry !== 'ALL') {
                     if (currentCountry === 'OTHER') {
-                        matchCountry = item.group === 'OTHER' || item.country === 'CR';
+                        // Tratamento limpo para o grupo Outros
+                        matchCountry = item.group === 'OTHER';
                     } else {
                         matchCountry = item.country === currentCountry;
                     }
