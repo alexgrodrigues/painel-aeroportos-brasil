@@ -147,12 +147,24 @@
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
             font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .filter-btn.active {
             background-color: #3b82f6;
             color: white;
             border-color: #3b82f6;
+        }
+
+        /* Estilização para as bandeiras SVG embutidas */
+        .filter-btn svg {
+            width: 16px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            box-shadow: 0 0 1px rgba(0,0,0,0.5);
         }
 
         .stats {
@@ -354,7 +366,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 63</div>
+        <div class="version">VERSÃO 64</div>
 
         <div id="globalWarning" class="global-warning-banner">
             ⚠️ <span>Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.</span>
@@ -383,13 +395,49 @@
 
         <div class="filters" id="countryFilters">
             <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-            <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">Brasil [BR]</button>
-            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">EUA [US]</button>
-            <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">Argentina [AR]</button>
-            <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">Chile [CL]</button>
-            <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">México [MX]</button>
-            <button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">Panamá [PA]</button>
-            <button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">Costa Rica [CR]</button>
+            
+            <!-- Brasil [BR] com SVG -->
+            <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">
+                <svg viewBox="0 0 900 600"><rect fill="#009b3a" width="900" height="600"/><polygon fill="#fedf00" points="450,50 850,300 450,550 50,300"/><circle fill="#002776" cx="450" cy="300" r="150"/></svg>
+                Brasil
+            </button>
+
+            <!-- EUA [US] com SVG -->
+            <button class="filter-btn" data-country="US" onclick="filterCountry('US')">
+                <svg viewBox="0 0 1235 650"><rect fill="#b22234" width="1235" height="650"/><path d="M0,75h1235M0,225h1235M0,375h1235M0,525h1235" stroke="#fff" stroke-width="50"/><rect fill="#3c3b6e" width="494" height="350"/></svg>
+                EUA
+            </button>
+
+            <!-- Argentina [AR] com SVG -->
+            <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">
+                <svg viewBox="0 0 900 600"><rect fill="#74acdf" width="900" height="600"/><rect fill="#fff" y="200" width="900" height="200"/></svg>
+                Argentina
+            </button>
+
+            <!-- Chile [CL] com SVG -->
+            <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">
+                <svg viewBox="0 0 900 600"><rect fill="#d52b1e" y="300" width="900" height="300"/><rect fill="#fff" width="900" height="300"/><rect fill="#0039a6" width="300" height="300"/><polygon fill="#fff" points="150,75 167,125 215,125 175,155 190,205 150,175 110,205 125,155 85,125 133,125"/></svg>
+                Chile
+            </button>
+
+            <!-- México [MX] com SVG -->
+            <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">
+                <svg viewBox="0 0 900 500"><rect fill="#006847" width="300" height="500"/><rect fill="#fff" x="300" width="300" height="500"/><rect fill="#ce1126" x="600" width="300" height="500"/></svg>
+                México
+            </button>
+
+            <!-- Panamá [PA] com SVG -->
+            <button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">
+                <svg viewBox="0 0 900 600"><rect width="900" height="600" fill="#fff"/><rect x="450" width="450" height="300" fill="#da121a"/><rect y="300" width="450" height="300" fill="#0033a0"/><polygon fill="#0033a0" points="225,100 240,145 285,145 250,170 260,215 225,190 190,215 200,170 165,145 210,145"/><polygon fill="#da121a" points="675,400 690,445 735,445 700,470 710,515 675,490 640,515 650,470 615,445 660,445"/></svg>
+                Panamá
+            </button>
+
+            <!-- Costa Rica [CR] com SVG -->
+            <button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">
+                <svg viewBox="0 0 900 600"><rect width="900" height="600" fill="#002b7f"/><rect y="100" width="900" height="400" fill="#fff"/><rect y="200" width="900" height="200" fill="#ce1126"/></svg>
+                Costa Rica
+            </button>
+
             <button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">Outros</button>
         </div>
 
