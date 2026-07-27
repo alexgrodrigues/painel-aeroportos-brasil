@@ -1,18 +1,18 @@
-# Painel de Aeroportos da América Latina e EUA (Versão 51)
+# Painel de Aeroportos da América Latina e EUA (Versão 52)
 
 Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (METAR, TAF e interpretação automatizada de previsões) nos principais aeroportos, bases aéreas e hubs internacionais da América Latina e dos Estados Unidos.
 
-## 🚀 O que há de novo na Versão 51
-* **Suporte a Códigos IATA na Pesquisa e Exibição:** Adicionados os códigos de 3 letras (IATA) para todos os aeroportos, bases e hubs do painel. Agora é possível buscar diretamente por códigos como `GRU`, `MIA`, `JFK`, além de visualizá-los diretamente nos títulos dos cartões.
-* **Filtro Dedicado para os EUA (`🇺🇸 EUA`):** Botão de filtro rápido no cabeçalho do frontend para isolar o monitoramento dos aeroportos norte-americanos.
-* **Sincronização de Estado de Filtros:** Manutenção da consistência visual automática dos botões ativos de categorias e países.
-* **Micro-legenda de Condições e Parser Blindado:** Indicadores visuais intuitivos no topo e motor de interpretação de TAF baseado em tokens.
+## 🚀 O que há de novo na Versão 52
+* **Desacoplamento de Filtros (País vs Grupo):** Refatoração da lógica de filtragem para utilizar estritamente a propriedade `country` nas consultas de países reais e reservar a propriedade `group` apenas para agrupamentos genéricos (como `'OTHER'`), mantendo o código limpo e intuitivo.
+* **Layout de Cartões Otimizado:** O código IATA foi reorganizado para uma linha limpa de apoio abaixo do nome (`ICAO • IATA`), reduzindo o ruído visual em nomes de aeroportos longos.
+* **Pesquisa Abrangente:** Suporte completo para busca instantânea por códigos de 3 letras (IATA) ou 4 letras (ICAO), além de cidades e nomes.
+* **Filtros Dedicados:** Inclusão do botão de acesso rápido para os EUA (`🇺🇸 EUA`) e demais regiões.
 
 ## 🛠️ Tecnologias Utilizadas
 * **Frontend:** HTML5, CSS3, JavaScript puro hospedado no [GitHub Pages](https://alexgrodrigues.github.io/painel-aeroportos-brasil/).
 * **Backend:** Cloudflare Workers integrado à API pública da [Aviation Weather Center](https://aviationweather.gov/).
 
 ## ⚙️ Configuração e Execução
-1. Atualize o script do seu Cloudflare Worker com o array contendo os códigos IATA da **Versão 51**.
-2. Atualize o arquivo `index.html` com o código completo da **Versão 51**.
+1. Atualize o seu Cloudflare Worker para a **Versão 52**.
+2. Atualize o arquivo `index.html` com o código da **Versão 52**.
 3. Faça o commit e publique as atualizações no repositório do GitHub.

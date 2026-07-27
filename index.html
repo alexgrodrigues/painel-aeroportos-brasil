@@ -178,9 +178,18 @@
             font-weight: bold;
         }
 
+        .airport-codes {
+            font-size: 0.8rem;
+            color: #38bdf8;
+            font-family: monospace;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
         .airport-sub {
             font-size: 0.8rem;
             color: var(--text-secondary);
+            margin-top: 2px;
         }
 
         .badge {
@@ -290,7 +299,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 51</div>
+        <div class="version">VERSÃO 52</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -415,13 +424,12 @@
                     if (currentCountry === 'OTHER') {
                         matchCountry = item.group === 'OTHER';
                     } else {
-                        matchCountry = item.country === currentCountry || item.group === currentCountry;
+                        matchCountry = item.country === currentCountry;
                     }
                 }
 
                 let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
-                // Suporte completo à busca por ICAO, IATA, Nome ou Cidade
                 let matchSearch = !currentSearch || 
                     item.icao.toLowerCase().includes(currentSearch) || 
                     (item.iata && item.iata.toLowerCase().includes(currentSearch)) || 
@@ -452,14 +460,15 @@
 
             filtered.forEach(item => {
                 const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-                const iataDisplay = item.iata ? ` / ${item.iata}` : '';
+                const iataCode = item.iata ? item.iata : '—';
                 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <div class="card-header">
                         <div>
-                            <div class="airport-title">${item.icao}${iataDisplay} — ${item.name}</div>
+                            <div class="airport-title">${item.name}</div>
+                            <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataCode}</div>
                             <div class="airport-sub">${item.city} (${item.country})</div>
                         </div>
                         <span class="badge ${badgeClass}">${item.category}</span>
