@@ -204,6 +204,15 @@
             border-color: rgba(192, 132, 252, 0.2);
         }
 
+        .taf-interpret {
+            font-size: 0.8rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 3px solid #38bdf8;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
         .section-title {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -259,7 +268,6 @@
     </main>
 
     <script>
-        // URL real do Cloudflare Worker corrigida (Versão 47)
         const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
 
         let airportData = [];
@@ -391,6 +399,7 @@
                     <div>
                         <div class="section-title">TAF</div>
                         <div class="taf-box">${item.taf || "TAF indisponível"}</div>
+                        ${item.tafInterpret ? `<div class="taf-interpret" style="margin-top: 6px;">💡 <strong>Interpretação:</strong> ${item.tafInterpret}</div>` : ''}
                     </div>
                 `;
                 grid.append(card);
