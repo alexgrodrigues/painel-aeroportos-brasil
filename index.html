@@ -197,6 +197,7 @@
             color: #38bdf8;
             word-break: break-all;
             border: 1px solid rgba(56, 189, 248, 0.2);
+            margin-top: 6px;
         }
 
         .taf-box {
@@ -214,6 +215,20 @@
             line-height: 1.4;
         }
 
+        details summary {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+            outline: none;
+        }
+
+        details summary:hover {
+            color: var(--text-primary);
+        }
+
         .section-title {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -227,7 +242,7 @@
 
     <header>
         <h1>Principais Aeroportos da América Latina</h1>
-        <div class="version">VERSÃO 48.1</div>
+        <div class="version">VERSÃO 48.2</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
@@ -399,8 +414,12 @@
 
                     <div>
                         <div class="section-title">TAF (Previsão)</div>
-                        ${item.tafInterpret ? `<div class="taf-interpret" style="margin-bottom: 6px;">💡 ${item.tafInterpret}</div>` : ''}
-                        <div class="taf-box">${item.taf || "TAF indisponível"}</div>
+                        ${item.tafInterpret ? `<div class="taf-interpret" style="margin-bottom: 8px;">💡 ${item.tafInterpret}</div>` : ''}
+                        
+                        <details>
+                            <summary>Ver TAF Bruto (Técnico)</summary>
+                            <div class="taf-box">${item.taf || "TAF indisponível"}</div>
+                        </details>
                     </div>
                 `;
                 grid.append(card);
