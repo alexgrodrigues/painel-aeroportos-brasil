@@ -299,7 +299,7 @@
 
     <header>
         <h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-        <div class="version">VERSÃO 53</div>
+        <div class="version">VERSÃO 54</div>
 
         <div class="legend-bar">
             <span><strong>Legenda:</strong></span>
@@ -410,16 +410,16 @@
             renderGrid();
         }
 
-        // Função auxiliar isolada para renderizar o cabeçalho do card
+        // Função auxiliar refinada com fallback humanizado para IATA ausente
         function renderCardHeader(item) {
             const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-            const iataCode = item.iata ? item.iata : '—';
+            const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
             
             return `
                 <div class="card-header">
                     <div>
                         <div class="airport-title">${item.name}</div>
-                        <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataCode}</div>
+                        <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
                         <div class="airport-sub">${item.city} (${item.country})</div>
                     </div>
                     <span class="badge ${badgeClass}">${item.category}</span>
