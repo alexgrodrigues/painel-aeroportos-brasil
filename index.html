@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Principais Aeroportos da América Latina e EUA</title>
+<title>Principais Aeroportos da América Latina, EUA e Europa</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -298,8 +298,8 @@ opacity: 0.8;
 <body onload="fetchData()">
 
 <header>
-<h1>✈️ Principais Aeroportos da América Latina e EUA</h1>
-<div class="version">VERSÃO 70</div>
+<h1>✈️ Principais Aeroportos da América Latina, EUA e Europa</h1>
+<div class="version">VERSÃO 71</div>
 
 <div class="legend-bar">
 <span><strong>Legenda:</strong></span>
@@ -326,6 +326,7 @@ opacity: 0.8;
 <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
 <button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
 <button class="filter-btn" data-country="US" onclick="filterCountry('US')">🇺🇸 EUA</button>
+<button class="filter-btn" data-country="EU" onclick="filterCountry('EU')">🇪🇺 Europa</button>
 <button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
 <button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">🇨🇱 Chile</button>
 <button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">🇲🇽 México</button>
@@ -365,7 +366,6 @@ try {
 const response = await fetch(WORKER_URL);
 const json = await response.json();
 if (json.ok) {
-// Mescla os dados novos com o cache para evitar perda de dados em transições de horário
 airportData = json.rows.map(item => {
 if ((!item.metar || item.metar === "") && airportCache[item.icao]) {
 const cached = airportCache[item.icao];
@@ -464,6 +464,8 @@ let matchCountry = true;
 if (currentCountry !== 'ALL') {
 if (currentCountry === 'OTHER') {
 matchCountry = item.group === 'OTHER';
+} else if (currentCountry === 'EU') {
+matchCountry = item.group === 'EU';
 } else {
 matchCountry = item.country === currentCountry;
 }
