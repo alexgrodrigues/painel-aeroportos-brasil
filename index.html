@@ -47,6 +47,21 @@ color: var(--text-secondary);
 margin-bottom: 15px;
 }
 
+.cache-warning-banner {
+background-color: rgba(245, 158, 11, 0.15);
+border: 1px solid #f59e0b;
+color: #fbbf24;
+padding: 8px 15px;
+border-radius: 8px;
+font-size: 0.85rem;
+margin-bottom: 15px;
+display: none;
+align-items: center;
+justify-content: center;
+gap: 8px;
+font-weight: 500;
+}
+
 .legend-bar {
 display: flex;
 flex-wrap: wrap;
@@ -270,12 +285,20 @@ margin-bottom: 4px;
 text-transform: uppercase;
 display: flex;
 align-items: center;
+justify-content: space-between;
 gap: 6px;
 }
 
 .title-metar { color: #38bdf8; }
 .title-interpret { color: #2dd4bf; }
 .title-taf { color: #c084fc; }
+
+.metar-time {
+font-size: 0.7rem;
+color: var(--text-secondary);
+font-family: monospace;
+font-weight: normal;
+}
 
 details summary {
 font-size: 0.75rem;
@@ -299,7 +322,11 @@ opacity: 0.8;
 
 <header>
 <h1>✈️ Principais Aeroportos da América Latina, EUA e Europa</h1>
-<div class="version">VERSÃO 71</div>
+<div class="version">VERSÃO 71.1</div>
+
+<div id="cacheWarningBanner" class="cache-warning-banner">
+  ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
+</div>
 
 <div class="legend-bar">
 <span><strong>Legenda:</strong></span>
@@ -366,6 +393,8 @@ try {
 const response = await fetch(WORKER_URL);
 const json = await response.json();
 if (json.ok) {
+let hasOutdatedItems = false;
+
 airportData = json.rows.map(item => {
 if ((!item.metar || item.metar === "") && airportCache[item.icao]) {
 const cached = airportCache[item.icao];
@@ -388,6 +417,23 @@ airportCache[item.icao] = item;
 return item;
 });
 
+// Verifica se algum aeroporto tem METAR com mais de 1 hora de atraso
+airportData.forEach(item => {
+if (item.metar) {
+const ageInfo = parseMetarAge(item.metar);
+if (ageInfo.isOutdated) {
+hasOutdatedItems = true;
+}
+}
+});
+
+const banner = document.getElementById('cacheWarningBanner');
+if (hasOutdatedItems) {
+banner.style.display = 'flex';
+} else {
+banner.style.display = 'none';
+}
+
 document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
 renderGrid();
 } else {
@@ -397,6 +443,40 @@ document.getElementById('updateStatus').innerText = "Erro ao carregar dados do s
 console.error("Erro de conexão:", error);
 document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
 }
+}
+
+// Lógica de cálculo de idade do METAR (parseMetarAge)
+function parseMetarAge(metarStr) {
+if (!metarStr) return { text: "", isOutdated: false };
+const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+if (!match) return { text: "", isOutdated: false };
+
+const day = parseInt(match[1], 10);
+const hour = parseInt(match[2], 10);
+const minute = parseInt(match[3], 10);
+
+const now = new Date();
+const metarDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day, hour, minute));
+let diffMs = now - metarDate;
+
+if (diffMs < 0) {
+return { text: `Emitido às ${match[2]}:${match[3]}Z`, isOutdated: false };
+}
+
+const diffMins = Math.floor(diffMs / (1000 * 60));
+const diffHours = Math.floor(diffMins / 60);
+const remMins = diffMins % 60;
+
+const isOutdated = diffMins > 60;
+
+let text = "";
+if (diffMins < 60) {
+text = `Atualizado há ${diffMins} min`;
+} else {
+text = `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
+}
+
+return { text, isOutdated };
 }
 
 function syncActiveButtons() {
@@ -437,12 +517,11 @@ renderGrid();
 function renderCardHeader(item) {
 const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
 const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
-const cacheNotice = item.isCached ? ' <span style="font-size:0.65rem; color:#f59e0b;" title="Dado mantido em cache (aguardando atualização horária)">⚠️ Cache</span>' : '';
 
 return `
 <div class="card-header">
 <div>
-<div class="airport-title">${item.name} ${cacheNotice}</div>
+<div class="airport-title">${item.name}</div>
 <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
 <div class="airport-sub">${item.city} (${item.country})</div>
 </div>
@@ -502,6 +581,7 @@ return;
 }
 
 filtered.forEach(item => {
+const ageInfo = parseMetarAge(item.metar);
 const card = document.createElement('div');
 card.className = 'card';
 card.innerHTML = `
@@ -532,7 +612,10 @@ ${renderCardHeader(item)}
 </div>
 
 <div class="metar-section">
-<div class="section-title title-metar">📡 METAR (Condição Atual)</div>
+<div class="section-title title-metar">
+<span>📡 METAR (Condição Atual)</span>
+<span class="metar-time">${ageInfo.text}</span>
+</div>
 <div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
 </div>
 
