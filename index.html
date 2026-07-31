@@ -141,13 +141,24 @@ font-size: 0.85rem;
 border-radius: 6px;
 cursor: pointer;
 transition: background 0.2s, color 0.2s;
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+display: inline-flex;
+align-items: center;
+gap: 6px;
 }
 
 .filter-btn.active {
 background-color: #3b82f6;
 color: white;
 border-color: #3b82f6;
+}
+
+.flag-img {
+width: 18px;
+height: 13px;
+border-radius: 2px;
+object-fit: cover;
+display: inline-block;
+vertical-align: middle;
 }
 
 .stats {
@@ -352,15 +363,15 @@ opacity: 0.8;
 
 <div class="filters" id="countryFilters">
 <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-<button class="filter-btn" data-country="BR" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
-<button class="filter-btn" data-country="US" onclick="filterCountry('US')">🇺🇸 EUA</button>
-<button class="filter-btn" data-country="EU" onclick="filterCountry('EU')">🇪🇺 Europa</button>
-<button class="filter-btn" data-country="AR" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
-<button class="filter-btn" data-country="CL" onclick="filterCountry('CL')">🇨🇱 Chile</button>
-<button class="filter-btn" data-country="MX" onclick="filterCountry('MX')">🇲🇽 México</button>
-<button class="filter-btn" data-country="PA" onclick="filterCountry('PA')">🇵🇦 Panamá</button>
-<button class="filter-btn" data-country="CR" onclick="filterCountry('CR')">🇨🇷 Costa Rica</button>
-<button class="filter-btn" data-country="UY" onclick="filterCountry('UY')">🇺🇾 Uruguai</button>
+<button class="filter-btn" data-country="BR" onclick="filterCountry('BR')"><img src="https://flagcdn.com/w20/br.png" class="flag-img" alt="BR"> Brasil</button>
+<button class="filter-btn" data-country="US" onclick="filterCountry('US')"><img src="https://flagcdn.com/w20/us.png" class="flag-img" alt="US"> EUA</button>
+<button class="filter-btn" data-country="EU" onclick="filterCountry('EU')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
+<button class="filter-btn" data-country="AR" onclick="filterCountry('AR')"><img src="https://flagcdn.com/w20/ar.png" class="flag-img" alt="AR"> Argentina</button>
+<button class="filter-btn" data-country="CL" onclick="filterCountry('CL')"><img src="https://flagcdn.com/w20/cl.png" class="flag-img" alt="CL"> Chile</button>
+<button class="filter-btn" data-country="MX" onclick="filterCountry('MX')"><img src="https://flagcdn.com/w20/mx.png" class="flag-img" alt="MX"> México</button>
+<button class="filter-btn" data-country="PA" onclick="filterCountry('PA')"><img src="https://flagcdn.com/w20/pa.png" class="flag-img" alt="PA"> Panamá</button>
+<button class="filter-btn" data-country="CR" onclick="filterCountry('CR')"><img src="https://flagcdn.com/w20/cr.png" class="flag-img" alt="CR"> Costa Rica</button>
+<button class="filter-btn" data-country="UY" onclick="filterCountry('UY')"><img src="https://flagcdn.com/w20/uy.png" class="flag-img" alt="UY"> Uruguai</button>
 <button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">🌎 Outros</button>
 </div>
 
