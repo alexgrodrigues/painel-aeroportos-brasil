@@ -417,7 +417,6 @@ airportCache[item.icao] = item;
 return item;
 });
 
-// Verifica se algum aeroporto tem METAR com mais de 1 hora de atraso
 airportData.forEach(item => {
 if (item.metar) {
 const ageInfo = parseMetarAge(item.metar);
@@ -445,7 +444,6 @@ document.getElementById('updateStatus').innerText = "Falha de conexão com o Clo
 }
 }
 
-// Lógica de cálculo de idade do METAR (parseMetarAge)
 function parseMetarAge(metarStr) {
 if (!metarStr) return { text: "", isOutdated: false };
 const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
