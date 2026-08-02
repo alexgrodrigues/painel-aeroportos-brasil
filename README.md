@@ -1,19 +1,25 @@
-# Painel de Aeroportos da América Latina, EUA e Europa (Versão 71.4)
+# Painel de Aeroportos Globais (Versão 71.5)
 
-Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (**METAR** e **TAF**) de aeroportos selecionados.
+Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (**METAR** e **TAF**) de aeroportos estratégicos no Brasil, Américas, Europa, Ásia, Rússia e Oriente Médio.
 
-## 🚀 Versão 71.4 - Atualizações e Melhorias Recentes
+## 🚀 Versão 71.5 - Atualizações e Melhorias Recentes
 
-Esta versão traz avanços estruturais importantes na performance, persistência de dados e atualização autônoma do painel.
+Esta versão consolida a grande expansão intercontinental da malha monitorada e aprimora a robustez de cache e atualização autônoma.
 
 ### 📡 Backend (Cloudflare Worker & KV)
-* **Cache Persistente via Cloudflare KV:** Integração com armazenamento KV permanente no Cloudflare, garantindo que o primeiro acesso e o carregamento inicial da página ocorram de forma instantânea (sem depender do tempo de resposta da API externa).
-* **Controle Rigoroso de Cache HTTP:** Inclusão de cabeçalhos anti-cache estritos (`no-store`, `no-cache`, `must-revalidate`) nas respostas do Worker, impedindo que navegadores armazenem versões antigas e defasadas dos dados meteorológicos.
-* **Expansão Global:** Monitoramento contínuo dos principais aeroportos da América Latina, Estados Unidos e as principais rotas da Europa (**Lisboa - LPPT**, **Madri - LEMD**, **Paris - LFPG**, **Londres - LHR** e **Frankfurt - FRA**).
-* **Interpretação Avançada do TAF:** Decodificação detalhada e linha por linha das previsões de aeródromo, cobrindo validade, variações graduais (`BECMG`), temporárias (`TEMPO`), temperaturas extremas e observações finais (`RMK`).
+* **Expansão Global (Ásia, Rússia, Oriente Médio, Istambul e Gibraltar):** Inclusão de grandes hubs internacionais e rotas de longa distância:
+  * **Moscou:** Sheremetyevo (`UUEE`) e Domodedovo (`UUDD`)
+  * **Dubai:** Aeroporto Internacional de Dubai (`OMDB`)
+  * **Japão:** Narita (`RJAA`) e Haneda (`RJTT`)
+  * **China:** Pequim-Capital (`ZBAA`) e Xangai-Pudong (`ZSPD`)
+  * **Cingapura & Seul:** Changi (`WSSS`) e Incheon (`RKSI`)
+  * **Turquia & Gibraltar:** Istambul (`LTFM`) e Gibraltar (`LXGB`)
+* **Cache Persistente via Cloudflare KV:** Armazenamento KV permanente garantindo abertura instantânea e carregamento sem latência na primeira requisição.
+* **Controle Rigoroso de Cache HTTP:** Cabeçalhos restritos (`no-store`, `no-cache`, `must-revalidate`) para evitar versões defasadas no navegador.
+* **Interpretação Avançada do TAF:** Decodificação detalhada linha por linha cobrindo validades, variações graduais (`BECMG`), temporárias (`TEMPO`), temperaturas extremas e observações finais (`RMK`).
 
 ### 💻 Frontend (Interface)
-* **Atualização Automática em Segundo Plano:** Implementado sistema de sincronização periódica a cada 5 minutos, buscando novas emissões horárias e mensagens SPECI automaticamente sem necessidade de atualizar a aba manualmente.
-* **Indicadores Visuais de Defasagem:** Contadores em tempo real do METAR exibidos diretamente em cada cartão ("Atualizado há X min") e alerta global no topo da página em caso de defasagem superior a 1 hora.
-* **Bandeiras SVG Padronizadas:** Utilização de ícones SVG (`flagcdn`) nos botões de filtro regional para assegurar renderização nativa e perfeita em qualquer sistema operacional ou dispositivo.
-* **Versão 71.4 Sincronizada:** Indicador visual oficial atualizado no cabeçalho do painel.
+* **Atualização Automática em Segundo Plano:** Sistema de varredura periódica a cada 5 minutos para capturar novas emissões horárias e mensagens SPECI automaticamente.
+* **Indicadores Visuais de Defasagem:** Contadores em tempo real do METAR por cartão e alerta global em caso de defasagem superior a 1 hora.
+* **Bandeiras SVG Padronizadas:** Ícones em formato SVG (`flagcdn`) nos botões de filtro regional para renderização perfeita em qualquer sistema operacional.
+* **Versão 71.5 Sincronizada:** Indicador visual oficial atualizado no cabeçalho do painel.
