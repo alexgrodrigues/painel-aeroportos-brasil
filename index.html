@@ -334,7 +334,7 @@ opacity: 0.8;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 71.7</div>
+<div class="version">VERSÃO 71.8</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -361,14 +361,14 @@ opacity: 0.8;
 <span>🟣 LIFR: <strong id="statLifr">0</strong></span>
 </div>
 
-<div class="filters" id="countryFilters">
-<button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-<button class="filter-btn" data-country="SOUTH_AMERICA" onclick="filterCountry('SOUTH_AMERICA')">🟢 América do Sul</button>
-<button class="filter-btn" data-country="CENTRAL_AMERICA" onclick="filterCountry('CENTRAL_AMERICA')">🟡 América Central</button>
-<button class="filter-btn" data-country="CARIBBEAN" onclick="filterCountry('CARIBBEAN')">🏝️ Caribe</button>
-<button class="filter-btn" data-country="NORTH_AMERICA" onclick="filterCountry('NORTH_AMERICA')">🔵 América do Norte</button>
-<button class="filter-btn" data-country="EUROPE" onclick="filterCountry('EUROPE')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
-<button class="filter-btn" data-country="ASIA_ME" onclick="filterCountry('ASIA_ME')">🌏 Ásia / Oriente Médio / Rússia</button>
+<div class="filters" id="regionFilters">
+<button class="filter-btn active" data-region="ALL" onclick="filterRegion('ALL')">🌐 Todos</button>
+<button class="filter-btn" data-region="SOUTH_AMERICA" onclick="filterRegion('SOUTH_AMERICA')">🟢 América do Sul</button>
+<button class="filter-btn" data-region="CENTRAL_AMERICA" onclick="filterRegion('CENTRAL_AMERICA')">🟡 América Central</button>
+<button class="filter-btn" data-region="CARIBBEAN" onclick="filterRegion('CARIBBEAN')">🏝️ Caribe</button>
+<button class="filter-btn" data-region="NORTH_AMERICA" onclick="filterRegion('NORTH_AMERICA')">🔵 América do Norte</button>
+<button class="filter-btn" data-region="EUROPE" onclick="filterRegion('EUROPE')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
+<button class="filter-btn" data-region="ASIA_ME" onclick="filterRegion('ASIA_ME')">🌏 Ásia / Oriente Médio / Rússia</button>
 </div>
 
 <div class="filters" id="categoryFilters">
@@ -391,7 +391,7 @@ const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
 
 let airportData = [];
 let airportCache = {};
-let currentCountry = 'ALL';
+let currentRegion = 'ALL';
 let currentCategory = 'ALL';
 let currentSearch = '';
 
@@ -488,8 +488,8 @@ return { text, isOutdated };
 }
 
 function syncActiveButtons() {
-document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
-  if (btn.getAttribute('data-country') === currentCountry) {
+document.querySelectorAll('#regionFilters .filter-btn').forEach(btn => {
+  if (btn.getAttribute('data-region') === currentRegion) {
     btn.classList.add('active');
   } else {
     btn.classList.remove('active');
@@ -505,8 +505,8 @@ document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
 });
 }
 
-function filterCountry(country) {
-currentCountry = country;
+function filterRegion(region) {
+currentRegion = region;
 syncActiveButtons();
 renderGrid();
 }
@@ -547,9 +547,9 @@ grid.innerHTML = '';
 let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
 const filtered = airportData.filter(item => {
-  let matchCountry = true;
-  if (currentCountry !== 'ALL') {
-    matchCountry = item.group === currentCountry;
+  let matchRegion = true;
+  if (currentRegion !== 'ALL') {
+    matchRegion = item.group === currentRegion;
   }
 
   let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
@@ -560,7 +560,7 @@ const filtered = airportData.filter(item => {
     item.name.toLowerCase().includes(currentSearch) ||
     item.city.toLowerCase().includes(currentSearch);
 
-  return matchCountry && matchCategory && matchSearch;
+  return matchRegion && matchCategory && matchSearch;
 });
 
 airportData.forEach(item => {
