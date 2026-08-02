@@ -334,7 +334,7 @@ opacity: 0.8;
 
 <header>
 <h1>✈️ Principais Aeroportos da América Latina, EUA e Europa</h1>
-<div class="version">VERSÃO 71.3</div>
+<div class="version">VERSÃO 71.4</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -399,60 +399,62 @@ let currentCountry = 'ALL';
 let currentCategory = 'ALL';
 let currentSearch = '';
 
-async function fetchData() {
-document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
+async function fetchData(isBackground = false) {
+if (!isBackground) {
+  document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
+}
 try {
-const response = await fetch(WORKER_URL);
-const json = await response.json();
-if (json.ok) {
-let hasOutdatedItems = false;
+  const response = await fetch(WORKER_URL, { cache: "no-store" });
+  const json = await response.json();
+  if (json.ok) {
+    let hasOutdatedItems = false;
 
-airportData = json.rows.map(item => {
-if ((!item.metar || item.metar === "") && airportCache[item.icao]) {
-const cached = airportCache[item.icao];
-return {
-...item,
-metar: cached.metar,
-taf: item.taf || cached.taf,
-category: cached.category,
-wind: cached.wind,
-pressure: cached.pressure,
-temperature: cached.temperature,
-tafInterpret: item.tafInterpret || cached.tafInterpret,
-isCached: true
-};
-}
+    airportData = json.rows.map(item => {
+      if ((!item.metar || item.metar === "") && airportCache[item.icao]) {
+        const cached = airportCache[item.icao];
+        return {
+          ...item,
+          metar: cached.metar,
+          taf: item.taf || cached.taf,
+          category: cached.category,
+          wind: cached.wind,
+          pressure: cached.pressure,
+          temperature: cached.temperature,
+          tafInterpret: item.tafInterpret || cached.tafInterpret,
+          isCached: true
+        };
+      }
 
-if (item.metar && item.metar !== "") {
-airportCache[item.icao] = item;
-}
-return item;
-});
+      if (item.metar && item.metar !== "") {
+        airportCache[item.icao] = item;
+      }
+      return item;
+    });
 
-airportData.forEach(item => {
-if (item.metar) {
-const ageInfo = parseMetarAge(item.metar);
-if (ageInfo.isOutdated) {
-hasOutdatedItems = true;
-}
-}
-});
+    airportData.forEach(item => {
+      if (item.metar) {
+        const ageInfo = parseMetarAge(item.metar);
+        if (ageInfo.isOutdated) {
+          hasOutdatedItems = true;
+        }
+      }
+    });
 
-const banner = document.getElementById('cacheWarningBanner');
-if (hasOutdatedItems) {
-banner.style.display = 'flex';
-} else {
-banner.style.display = 'none';
-}
+    const banner = document.getElementById('cacheWarningBanner');
+    if (hasOutdatedItems) {
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
 
-document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
-renderGrid();
-} else {
-document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
-}
+    document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
+    renderGrid();
+  } else {
+    if (!isBackground) document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
+  }
 } catch (error) {
-console.error("Erro de conexão:", error);
-document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
+  console.error("Erro de conexão:", error);
+  if (!isBackground) document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
 }
 }
 
@@ -470,7 +472,7 @@ const metarDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day
 let diffMs = now - metarDate;
 
 if (diffMs < 0) {
-return { text: `Emitido às ${match[2]}:${match[3]}Z`, isOutdated: false };
+  return { text: `Emitido às ${match[2]}:${match[3]}Z`, isOutdated: false };
 }
 
 const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -481,9 +483,9 @@ const isOutdated = diffMins > 60;
 
 let text = "";
 if (diffMins < 60) {
-text = `Atualizado há ${diffMins} min`;
+  text = `Atualizado há ${diffMins} min`;
 } else {
-text = `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
+  text = `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
 }
 
 return { text, isOutdated };
@@ -491,19 +493,19 @@ return { text, isOutdated };
 
 function syncActiveButtons() {
 document.querySelectorAll('#countryFilters .filter-btn').forEach(btn => {
-if (btn.getAttribute('data-country') === currentCountry) {
-btn.classList.add('active');
-} else {
-btn.classList.remove('active');
-}
+  if (btn.getAttribute('data-country') === currentCountry) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
 });
 
 document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
-if (btn.getAttribute('data-category') === currentCategory) {
-btn.classList.add('active');
-} else {
-btn.classList.remove('active');
-}
+  if (btn.getAttribute('data-category') === currentCategory) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
 });
 }
 
@@ -529,14 +531,14 @@ const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
 const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
 
 return `
-<div class="card-header">
-<div>
-<div class="airport-title">${item.name}</div>
-<div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
-<div class="airport-sub">${item.city} (${item.country})</div>
-</div>
-<span class="badge ${badgeClass}">${item.category}</span>
-</div>
+  <div class="card-header">
+    <div>
+      <div class="airport-title">${item.name}</div>
+      <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
+      <div class="airport-sub">${item.city} (${item.country})</div>
+    </div>
+    <span class="badge ${badgeClass}">${item.category}</span>
+  </div>
 `;
 }
 
@@ -549,34 +551,34 @@ grid.innerHTML = '';
 let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
 const filtered = airportData.filter(item => {
-let matchCountry = true;
-if (currentCountry !== 'ALL') {
-if (currentCountry === 'OTHER') {
-matchCountry = item.group === 'OTHER';
-} else if (currentCountry === 'EU') {
-matchCountry = item.group === 'EU';
-} else {
-matchCountry = item.country === currentCountry;
-}
-}
+  let matchCountry = true;
+  if (currentCountry !== 'ALL') {
+    if (currentCountry === 'OTHER') {
+      matchCountry = item.group === 'OTHER';
+    } else if (currentCountry === 'EU') {
+      matchCountry = item.group === 'EU';
+    } else {
+      matchCountry = item.country === currentCountry;
+    }
+  }
 
-let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
+  let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
-let matchSearch = !currentSearch ||
-item.icao.toLowerCase().includes(currentSearch) ||
-(item.iata && item.iata.toLowerCase().includes(currentSearch)) ||
-item.name.toLowerCase().includes(currentSearch) ||
-item.city.toLowerCase().includes(currentSearch);
+  let matchSearch = !currentSearch ||
+    item.icao.toLowerCase().includes(currentSearch) ||
+    (item.iata && item.iata.toLowerCase().includes(currentSearch)) ||
+    item.name.toLowerCase().includes(currentSearch) ||
+    item.city.toLowerCase().includes(currentSearch);
 
-return matchCountry && matchCategory && matchSearch;
+  return matchCountry && matchCategory && matchSearch;
 });
 
 airportData.forEach(item => {
-counts.total++;
-if (item.category === 'VFR') counts.vfr++;
-else if (item.category === 'MVFR') counts.mvfr++;
-else if (item.category === 'IFR') counts.ifr++;
-else if (item.category === 'LIFR') counts.lifr++;
+  counts.total++;
+  if (item.category === 'VFR') counts.vfr++;
+  else if (item.category === 'MVFR') counts.mvfr++;
+  else if (item.category === 'IFR') counts.ifr++;
+  else if (item.category === 'LIFR') counts.lifr++;
 });
 
 document.getElementById('statTotal').innerText = counts.total;
@@ -586,62 +588,67 @@ document.getElementById('statIfr').innerText = counts.ifr;
 document.getElementById('statLifr').innerText = counts.lifr;
 
 if (filtered.length === 0) {
-grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
-return;
+  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
+  return;
 }
 
 filtered.forEach(item => {
-const ageInfo = parseMetarAge(item.metar);
-const card = document.createElement('div');
-card.className = 'card';
-card.innerHTML = `
-${renderCardHeader(item)}
+  const ageInfo = parseMetarAge(item.metar);
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    ${renderCardHeader(item)}
 
-<div class="card-info-grid">
-<div class="info-item">
-<span class="info-label">💨 Vento</span>
-<span><strong>${item.wind}</strong></span>
-</div>
-<div class="divider"></div>
-<div class="info-item">
-<span class="info-label">⚖️ Pressão</span>
-<span><strong>${item.pressure}</strong></span>
-</div>
-</div>
+    <div class="card-info-grid">
+      <div class="info-item">
+        <span class="info-label">💨 Vento</span>
+        <span><strong>${item.wind}</strong></span>
+      </div>
+      <div class="divider"></div>
+      <div class="info-item">
+        <span class="info-label">⚖️ Pressão</span>
+        <span><strong>${item.pressure}</strong></span>
+      </div>
+    </div>
 
-<div class="card-info-grid">
-<div class="info-item">
-<span class="info-label">🌡️ Temperatura</span>
-<span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
-</div>
-<div class="divider"></div>
-<div class="info-item">
-<span class="info-label">💧 Ponto de Orvalho</span>
-<span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
-</div>
-</div>
+    <div class="card-info-grid">
+      <div class="info-item">
+        <span class="info-label">🌡️ Temperatura</span>
+        <span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
+      </div>
+      <div class="divider"></div>
+      <div class="info-item">
+        <span class="info-label">💧 Ponto de Orvalho</span>
+        <span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
+      </div>
+    </div>
 
-<div class="metar-section">
-<div class="section-title title-metar">
-<span>📡 METAR (Condição Atual)</span>
-<span class="metar-time">${ageInfo.text}</span>
-</div>
-<div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
-</div>
+    <div class="metar-section">
+      <div class="section-title title-metar">
+        <span>📡 METAR (Condição Atual)</span>
+        <span class="metar-time">${ageInfo.text}</span>
+      </div>
+      <div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
+    </div>
 
-<div>
-<div class="section-title title-interpret">💡 Interpretação da Previsão</div>
-${item.tafInterpret ? `<div class="interpret-section" style="margin-bottom: 8px;">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação disponível.</div>'}
+    <div>
+      <div class="section-title title-interpret">💡 Interpretação da Previsão</div>
+      ${item.tafInterpret ? `<div class="interpret-section" style="margin-bottom: 8px;">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação disponível.</div>'}
 
-<details style="margin-top: 6px;">
-<summary>⏱️ Ver TAF Bruto (Técnico)</summary>
-<div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
-</details>
-</div>
-`;
-grid.append(card);
+      <details style="margin-top: 6px;">
+        <summary>⏱️ Ver TAF Bruto (Técnico)</summary>
+        <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
+      </details>
+    </div>
+  `;
+  grid.append(card);
 });
 }
+
+// Atualização automática a cada 5 minutos em segundo plano
+setInterval(() => {
+  fetchData(true);
+}, 300000);
 </script>
 </body>
 </html>

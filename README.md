@@ -1,23 +1,19 @@
-# Painel de Aeroportos da América Latina, EUA e Europa (Versão 71.3)
+# Painel de Aeroportos da América Latina, EUA e Europa (Versão 71.4)
 
 Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (**METAR** e **TAF**) de aeroportos selecionados.
 
-## 🚀 Versão 71.3 - Atualizações e Melhorias Recentes
+## 🚀 Versão 71.4 - Atualizações e Melhorias Recentes
 
-Esta versão consolida a expansão global da malha de aeroportos monitorados e traz otimizações fundamentais de performance, estabilidade e clareza analítica.
+Esta versão traz avanços estruturais importantes na performance, persistência de dados e atualização autônoma do painel.
 
-### 📡 Backend (Cloudflare Worker)
-* **Expansão Global (América Latina, EUA e Europa):** Inclusão oficial dos principais aeroportos estratégicos, destacando agora a rota de transatlânticos da Europa:
-  * **Lisboa (LPPT)**
-  * **Madri (LEMD)**
-  * **Paris-Charles de Gaulle (LFPG)**
-  * **Londres-Heathrow (EGLL)**
-  * **Frankfurt (EDDF)**
-* **Cache Inteligente e Cron Triggers:** Implementação de cache de 10 minutos na camada do Cloudflare Worker com rotina automática em segundo plano (`Cron Trigger`), garantindo que o primeiro acesso e o carregamento da página ocorram instantaneamente e sem falhas de timeout.
-* **Interpretação Avançada do TAF:** Nova rotina de decodificação detalhada e linha por linha das previsões (TAF), decompondo o período de validade, condições iniciais, variações graduais (`BECMG`), períodos temporários (`TEMPO`), probabilidades e observações finais (`RMK`).
+### 📡 Backend (Cloudflare Worker & KV)
+* **Cache Persistente via Cloudflare KV:** Integração com armazenamento KV permanente no Cloudflare, garantindo que o primeiro acesso e o carregamento inicial da página ocorram de forma instantânea (sem depender do tempo de resposta da API externa).
+* **Controle Rigoroso de Cache HTTP:** Inclusão de cabeçalhos anti-cache estritos (`no-store`, `no-cache`, `must-revalidate`) nas respostas do Worker, impedindo que navegadores armazenem versões antigas e defasadas dos dados meteorológicos.
+* **Expansão Global:** Monitoramento contínuo dos principais aeroportos da América Latina, Estados Unidos e as principais rotas da Europa (**Lisboa - LPPT**, **Madri - LEMD**, **Paris - LFPG**, **Londres - LHR** e **Frankfurt - FRA**).
+* **Interpretação Avançada do TAF:** Decodificação detalhada e linha por linha das previsões de aeródromo, cobrindo validade, variações graduais (`BECMG`), temporárias (`TEMPO`), temperaturas extremas e observações finais (`RMK`).
 
 ### 💻 Frontend (Interface)
-* **Indicadores Visuais de Defasagem:** Adicionado contador de tempo decorrido do METAR diretamente nos cartões de cada aeroporto ("Atualizado há X min" ou "Desatualizado") e um aviso global no topo da página quando houver dados com mais de 1 hora de atraso.
-* **Filtros Regionais com Bandeiras SVG:** Barra de navegação por países e regiões atualizada para utilizar bandeiras em formato SVG (`flagcdn`), garantindo renderização nativa e perfeita em qualquer sistema operacional (Windows, Linux, macOS, iOS e Android).
-* **Tratamento Contra Transições Horárias:** Sistema de cache local persistente para impedir que cartões fiquem vazios ou exibam `N/A` durante a janela de transição e virada de hora da API de meteorologia.
-* **Versão 71.3 Atualizada:** Interface visualmente sincronizada com o indicador oficial de versão no topo do painel.
+* **Atualização Automática em Segundo Plano:** Implementado sistema de sincronização periódica a cada 5 minutos, buscando novas emissões horárias e mensagens SPECI automaticamente sem necessidade de atualizar a aba manualmente.
+* **Indicadores Visuais de Defasagem:** Contadores em tempo real do METAR exibidos diretamente em cada cartão ("Atualizado há X min") e alerta global no topo da página em caso de defasagem superior a 1 hora.
+* **Bandeiras SVG Padronizadas:** Utilização de ícones SVG (`flagcdn`) nos botões de filtro regional para assegurar renderização nativa e perfeita em qualquer sistema operacional ou dispositivo.
+* **Versão 71.4 Sincronizada:** Indicador visual oficial atualizado no cabeçalho do painel.
