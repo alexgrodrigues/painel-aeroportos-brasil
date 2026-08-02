@@ -291,7 +291,7 @@ border-radius: 6px;
 font-size: 0.82rem;
 color: #2dd4bf;
 line-height: 1.4;
-margin-bottom: 6px;
+margin-top: 6px;
 }
 
 .taf-raw-box {
@@ -323,7 +323,6 @@ font-weight: normal;
 
 details summary {
 font-size: 0.75rem;
-color: #c084fc;
 font-weight: bold;
 text-transform: uppercase;
 cursor: pointer;
@@ -336,6 +335,14 @@ gap: 6px;
 
 details summary:hover {
 opacity: 0.8;
+}
+
+details.interpret-details summary {
+color: #2dd4bf;
+}
+
+details.taf-details summary {
+color: #c084fc;
 }
 
 /* Modal Styles */
@@ -442,7 +449,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 72.1</div>
+<div class="version">VERSÃO 72.2</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -797,12 +804,14 @@ filtered.forEach(item => {
     </div>
 
     <div>
-      <div class="section-title title-interpret">💡 Interpretação do METAR & Previsão</div>
-      ${item.metarInterpret ? `<div class="interpret-section"><strong>Visibilidade/Condição:</strong> ${item.metarInterpret}</div>` : ''}
-      ${item.tafInterpret ? `<div class="interpret-section">${item.tafInterpret}</div>` : '<div class="interpret-section">Nenhuma interpretação de TAF disponível.</div>'}
+      <details class="interpret-details" style="margin-bottom: 6px;">
+        <summary>💡 Ver Interpretação do METAR</summary>
+        <div class="interpret-section">${item.metarInterpret || "Nenhuma interpretação disponível."}</div>
+      </details>
 
-      <details style="margin-top: 6px;">
-        <summary>⏱️ Ver TAF Bruto (Técnico)</summary>
+      <details class="taf-details" style="margin-top: 6px;">
+        <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
+        <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpret || "Nenhuma interpretação de TAF disponível."}</div>
         <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
       </details>
     </div>
