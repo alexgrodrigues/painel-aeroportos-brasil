@@ -1,18 +1,26 @@
-# Painel de Aeroportos Globais (Versão 71.7)
+# Painel de Aeroportos Globais (Versão 72.0)
 
 Painel web em tempo real para monitoramento de condições meteorológicas aeronáuticas (**METAR** e **TAF**) de aeroportos estratégicos distribuídos globalmente.
 
-## 🚀 Versão 71.7 - Atualizações e Melhorias Recentes
+## 🚀 Versão 72.0 - Atualizações e Melhorias Recentes
 
-Esta versão traz uma reestruturação completa na categorização regional e na experiência de navegação do painel.
+Esta versão conclui a cobertura intercontinental global com a inclusão oficial do **continente africano**, além de manter as correções de ventos em unidades `MPS`/`KT` e a padronização de filtros regionais.
 
-### 🌎 Nova Organização por Regiões e Continentes
-* **América do Sul (`SOUTH_AMERICA`):** Terminais do Brasil, Argentina, Chile, Colômbia, Peru, Uruguai e Paraguai.
-* **América Central (`CENTRAL_AMERICA`):** Panamá, Costa Rica, Guatemala, Honduras, Nicarágua e El Salvador.
-* **Caribe (`CARIBBEAN`):** Cuba (Havana) e Porto Rico (San Juan).
-* **América do Norte (`NORTH_AMERICA`):** Estados Unidos e México.
-* **Europa (`EUROPE`):** Lisboa, Madri, Paris, Londres, Frankfurt, Istambul e Gibraltar.
-* **Ásia / Oriente Médio / Rússia (`ASIA_ME`):** Moscou, Dubai, Tóquio, Pequim, Xangai, Cingapura e Seul.
+### 🌍 Nova Região Adicionada (`AFRICA`)
+* **África (`AFRICA`):** Inclusão de principais hubs intercontinentais de referência:
+  * **Johanesburgo:** Aeroporto Internacional O. R. Tambo (`FAOR` / `JNB`)
+  * **Cairo:** Aeroporto Internacional do Cairo (`HECA` / `CAI`)
+  * **Casablanca:** Aeroporto Internacional Mohammed V (`GMAD` / `CMN`)
+  * **Cidade do Cabo:** Aeroporto Internacional da Cidade do Cabo (`FACT` / `CPT`)
+
+### 🌐 Coleta e Regiões Padronizadas (`currentRegion`)
+* **América do Sul (`SOUTH_AMERICA`)**
+* **América Central (`CENTRAL_AMERICA`)**
+* **Caribe (`CARIBBEAN`)**
+* **América do Norte (`NORTH_AMERICA`)**
+* **Europa (`EUROPE`)**
+* **Ásia / Oriente Médio / Rússia (`ASIA_ME`)**
+* **África (`AFRICA`)**
 
 ### 📡 Arquitetura & Persistência (Cloudflare Worker & KV)
 * **Armazenamento KV Permanente:** Leitura instantânea e carregamento sem latência na primeira abertura da página.
