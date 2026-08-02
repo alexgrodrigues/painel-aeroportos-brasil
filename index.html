@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Principais Aeroportos Globais (América, Europa, Ásia, Rússia e Oriente Médio)</title>
+<title>Painel de Aeroportos Globais</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -333,8 +333,8 @@ opacity: 0.8;
 <body onload="fetchData()">
 
 <header>
-<h1>✈️ Principais Aeroportos Globais</h1>
-<div class="version">VERSÃO 71.5</div>
+<h1>✈️ Painel de Aeroportos Globais</h1>
+<div class="version">VERSÃO 71.7</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -363,16 +363,12 @@ opacity: 0.8;
 
 <div class="filters" id="countryFilters">
 <button class="filter-btn active" data-country="ALL" onclick="filterCountry('ALL')">🌐 Todos</button>
-<button class="filter-btn" data-country="BR" onclick="filterCountry('BR')"><img src="https://flagcdn.com/w20/br.png" class="flag-img" alt="BR"> Brasil</button>
-<button class="filter-btn" data-country="US" onclick="filterCountry('US')"><img src="https://flagcdn.com/w20/us.png" class="flag-img" alt="US"> EUA</button>
-<button class="filter-btn" data-country="EU" onclick="filterCountry('EU')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
-<button class="filter-btn" data-country="AR" onclick="filterCountry('AR')"><img src="https://flagcdn.com/w20/ar.png" class="flag-img" alt="AR"> Argentina</button>
-<button class="filter-btn" data-country="CL" onclick="filterCountry('CL')"><img src="https://flagcdn.com/w20/cl.png" class="flag-img" alt="CL"> Chile</button>
-<button class="filter-btn" data-country="MX" onclick="filterCountry('MX')"><img src="https://flagcdn.com/w20/mx.png" class="flag-img" alt="MX"> México</button>
-<button class="filter-btn" data-country="PA" onclick="filterCountry('PA')"><img src="https://flagcdn.com/w20/pa.png" class="flag-img" alt="PA"> Panamá</button>
-<button class="filter-btn" data-country="CR" onclick="filterCountry('CR')"><img src="https://flagcdn.com/w20/cr.png" class="flag-img" alt="CR"> Costa Rica</button>
-<button class="filter-btn" data-country="UY" onclick="filterCountry('UY')"><img src="https://flagcdn.com/w20/uy.png" class="flag-img" alt="UY"> Uruguai</button>
-<button class="filter-btn" data-country="OTHER" onclick="filterCountry('OTHER')">🌎 Outros / Ásia / Rússia</button>
+<button class="filter-btn" data-country="SOUTH_AMERICA" onclick="filterCountry('SOUTH_AMERICA')">🟢 América do Sul</button>
+<button class="filter-btn" data-country="CENTRAL_AMERICA" onclick="filterCountry('CENTRAL_AMERICA')">🟡 América Central</button>
+<button class="filter-btn" data-country="CARIBBEAN" onclick="filterCountry('CARIBBEAN')">🏝️ Caribe</button>
+<button class="filter-btn" data-country="NORTH_AMERICA" onclick="filterCountry('NORTH_AMERICA')">🔵 América do Norte</button>
+<button class="filter-btn" data-country="EUROPE" onclick="filterCountry('EUROPE')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
+<button class="filter-btn" data-country="ASIA_ME" onclick="filterCountry('ASIA_ME')">🌏 Ásia / Oriente Médio / Rússia</button>
 </div>
 
 <div class="filters" id="categoryFilters">
@@ -553,13 +549,7 @@ let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 const filtered = airportData.filter(item => {
   let matchCountry = true;
   if (currentCountry !== 'ALL') {
-    if (currentCountry === 'OTHER') {
-      matchCountry = item.group === 'OTHER';
-    } else if (currentCountry === 'EU') {
-      matchCountry = item.group === 'EU';
-    } else {
-      matchCountry = item.country === currentCountry;
-    }
+    matchCountry = item.group === currentCountry;
   }
 
   let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
