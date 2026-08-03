@@ -97,6 +97,7 @@ gap: 15px;
 justify-content: center;
 align-items: center;
 margin-bottom: 20px;
+position: relative;
 }
 
 input[type="text"] {
@@ -122,6 +123,71 @@ transition: background 0.2s;
 
 button:hover {
 background-color: #2563eb;
+}
+
+/* --- BOTÃO DISCRETO PARA BASES AÉREAS / REGIÕES DO BRASIL --- */
+.container-filtro-bases {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-discreto-bases {
+    background: transparent;
+    border: 1px solid #475569;
+    color: #94a3b8;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.btn-discreto-bases:hover {
+    background-color: rgba(51, 65, 85, 0.5);
+    color: #f8fafc;
+    border-color: #64748b;
+}
+
+.dropdown-bases {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 110%;
+    background-color: var(--card-bg);
+    min-width: 220px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    z-index: 200;
+    overflow: hidden;
+    text-align: left;
+}
+
+.dropdown-bases a {
+    color: var(--text-secondary);
+    padding: 10px 14px;
+    text-decoration: none;
+    display: block;
+    font-size: 0.85rem;
+    transition: background 0.1s, color 0.1s;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+}
+
+.dropdown-bases a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-bases a:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: #38bdf8;
+}
+
+.dropdown-bases.ativo {
+    display: block;
 }
 
 .filters {
@@ -449,7 +515,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 72.2</div>
+<div class="version">VERSÃO 73.0</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -466,6 +532,25 @@ font-family: monospace;
 <div class="controls">
 <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
 <button onclick="fetchData()">🔄 Atualizar Dados</button>
+
+<!-- BOTÃO DISCRETO PARA BASES AÉREAS POR REGIÃO DO BRASIL -->
+<div class="container-filtro-bases">
+    <button id="btnBasesRegiao" class="btn-discreto-bases" onclick="toggleBasesMenu()">
+        <span>📍 Bases Aéreas</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+    <div id="menuBasesRegiao" class="dropdown-bases">
+        <a href="#" onclick="filtrarBasesRegiao('todas')">Todas as Bases</a>
+        <a href="#" onclick="filtrarBasesRegiao('Norte')">Região Norte</a>
+        <a href="#" onclick="filtrarBasesRegiao('Nordeste')">Região Nordeste</a>
+        <a href="#" onclick="filtrarBasesRegiao('Centro-Oeste')">Região Centro-Oeste</a>
+        <a href="#" onclick="filtrarBasesRegiao('Sudeste')">Região Sudeste</a>
+        <a href="#" onclick="filtrarBasesRegiao('Sul')">Região Sul</a>
+    </div>
+</div>
+
 </div>
 
 <div class="stats" id="statsContainer">
@@ -540,6 +625,7 @@ let airportCache = {};
 let currentRegion = 'ALL';
 let currentCategory = 'ALL';
 let currentSearch = '';
+let selectedBasesRegiao = 'todas';
 
 async function fetchData(isBackground = false) {
 if (!isBackground) {
@@ -603,7 +689,7 @@ try {
 
 function parseMetarAge(metarStr) {
 if (!metarStr) return { text: "", isOutdated: false };
-const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+const match = metarStr.match(/(\d{2})(\d{2})(\d{2})Z/);
 if (!match) return { text: "", isOutdated: false };
 
 const day = parseInt(match[1], 10);
@@ -654,6 +740,7 @@ document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
 
 function filterRegion(region) {
 currentRegion = region;
+selectedBasesRegiao = 'todas'; // Reseta o filtro de bases ao mudar região geral
 syncActiveButtons();
 renderGrid();
 }
@@ -667,6 +754,61 @@ renderGrid();
 function filterAirports() {
 currentSearch = document.getElementById('searchInput').value.toLowerCase();
 renderGrid();
+}
+
+// Funções do botão discreto de Bases Aéreas por Região
+function toggleBasesMenu() {
+    const menu = document.getElementById('menuBasesRegiao');
+    menu.classList.toggle('ativo');
+}
+
+window.addEventListener('click', function(event) {
+    if (!event.target.closest('.container-filtro-bases')) {
+        const menu = document.getElementById('menuBasesRegiao');
+        if (menu && menu.classList.contains('ativo')) {
+            menu.classList.remove('ativo');
+        }
+    }
+});
+
+function filtrarBasesRegiao(regiao) {
+    selectedBasesRegiao = regiao;
+    if (regiao !== 'todas') {
+        currentRegion = 'SOUTH_AMERICA'; // Força América do Sul onde estão as bases do Brasil
+    }
+    syncActiveButtons();
+    renderGrid();
+    document.getElementById('menuBasesRegiao').classList.remove('ativo');
+}
+
+// Função auxiliar para identificar se é base aérea e qual região brasileira pertence
+function getBaseAereaInfo(item) {
+    const nomeU = item.name.toUpperCase();
+    const icaoU = item.icao.toUpperCase();
+    
+    // Lista de identificação de bases e aeroportos militares/mistos no Brasil
+    const isBase = nomeU.includes("BASE AÉREA") || 
+                   ["SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN"].includes(icaoU) ||
+                   icaoU.startsWith("SB") && (nomeU.includes("ASA") || nomeU.includes("FORÇA AÉREA"));
+    
+    if (!isBase) return null;
+
+    // Classificação por estado/cidade para as regiões do Brasil
+    const norte = ["MANAUS", "BELÉM", "MARABÁ", "PORTO VELHO", "VILHENA", "BOA VISTA", "MACAPÁ", "RIO BRANCO", "SANTARÉM"];
+    const nordeste = ["NATAL", "FORTALEZA", "RECIFE", "SALVADOR", "ARACAJU", "MACEIÓ", "SÃO LUÍS", "TERESINA", "PETROLINA", "CAMPINA GRANDE"];
+    const centroOeste = ["BRASÍLIA", "CAMPO GRANDE", "GOIÂNIA", "CUIABÁ", "ANÁPOLIS"];
+    const sul = ["CANOAS", "SANTA MARIA", "FLORIANÓPOLIS", "CURITIBA", "FOZ DO IGUAÇU", "CHAPECÓ", "PELOTAS", "PORTO ALEGRE", "MARINGÁ"];
+    const sudeste = ["RIO DE JANEIRO", "SÃO PAULO", "SÃO JOSÉ DOS CAMPOS", "CAMPINAS", "BELO HORIZONTE", "VITÓRIA", "SANTA CRUZ", "AFONSOS", "SANTOS DUMONT", "GUARULHOS", "CONGONHAS", "CONFINS"];
+
+    const cityU = item.city.toUpperCase();
+
+    if (norte.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Norte";
+    if (nordeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Nordeste";
+    if (centroOeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Centro-Oeste";
+    if (sul.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sul";
+    if (sudeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sudeste";
+
+    return "Sudeste"; // Padrão seguro para o eixo RJ/SP/BSB caso genérico
 }
 
 function openModal(icao) {
@@ -734,6 +876,13 @@ const filtered = airportData.filter(item => {
     matchRegion = item.group === currentRegion;
   }
 
+  // Filtro específico de bases aéreas por região do Brasil
+  let matchBases = true;
+  if (selectedBasesRegiao !== 'todas') {
+    const regiaoBase = getBaseAereaInfo(item);
+    matchBases = (regiaoBase === selectedBasesRegiao);
+  }
+
   let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
   let matchSearch = !currentSearch ||
@@ -742,7 +891,7 @@ const filtered = airportData.filter(item => {
     item.name.toLowerCase().includes(currentSearch) ||
     item.city.toLowerCase().includes(currentSearch);
 
-  return matchRegion && matchCategory && matchSearch;
+  return matchRegion && matchBases && matchCategory && matchSearch;
 });
 
 airportData.forEach(item => {
@@ -760,7 +909,7 @@ document.getElementById('statIfr').innerText = counts.ifr;
 document.getElementById('statLifr').innerText = counts.lifr;
 
 if (filtered.length === 0) {
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
+  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto ou base aérea encontrado com os filtros atuais.</div>';
   return;
 }
 
