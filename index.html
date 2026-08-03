@@ -125,7 +125,6 @@ button:hover {
 background-color: #2563eb;
 }
 
-/* --- BOTÃO DISCRETO PARA BASES AÉREAS / REGIÕES DO BRASIL --- */
 .container-filtro-bases {
     position: relative;
     display: inline-block;
@@ -411,7 +410,6 @@ details.taf-details summary {
 color: #c084fc;
 }
 
-/* Modal Styles */
 .modal-overlay {
 position: fixed;
 top: 0;
@@ -515,7 +513,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 74.0</div>
+<div class="version">VERSÃO 75.0</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -533,7 +531,6 @@ font-family: monospace;
 <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
 <button onclick="fetchData()">🔄 Atualizar Dados</button>
 
-<!-- BOTÃO DISCRETO PARA BASES AÉREAS POR REGIÃO DO BRASIL -->
 <div class="container-filtro-bases">
     <button id="btnBasesRegiao" class="btn-discreto-bases" onclick="toggleBasesMenu()">
         <span>📍 Bases Aéreas</span>
@@ -584,10 +581,8 @@ font-family: monospace;
 </header>
 
 <main class="grid" id="airportGrid">
-<!-- Cartões gerados dinamicamente -->
 </main>
 
-<!-- Modal de Informações do Aeroporto -->
 <div class="modal-overlay" id="airportModal" onclick="closeModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModal()">&times;</button>
@@ -612,7 +607,6 @@ font-family: monospace;
 
     <div class="modal-section-title">🛫 Pistas Disponíveis</div>
     <ul class="runway-list" id="modalRunways">
-      <!-- Inserido via JS -->
     </ul>
   </div>
 </div>
@@ -780,34 +774,6 @@ function filtrarBasesRegiao(regiao) {
     document.getElementById('menuBasesRegiao').classList.remove('ativo');
 }
 
-function getBaseAereaInfo(item) {
-    const nomeU = item.name.toUpperCase();
-    const icaoU = item.icao.toUpperCase();
-    
-    const isBase = nomeU.includes("BASE AÉREA") || 
-                   nomeU.includes("ACADEMIA DA FORÇA AÉREA") ||
-                   ["SBBR", "SBFL", "SBRF", "SBSV", "SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN", "SBML", "SBBV", "SBST", "SBMT"].includes(icaoU) ||
-                   icaoU.startsWith("SB") && (nomeU.includes("ASA") || nomeU.includes("FORÇA AÉREA"));
-    
-    if (!isBase) return null;
-
-    const norte = ["MANAUS", "BELÉM", "MARABÁ", "PORTO VELHO", "VILHENA", "BOA VISTA", "MACAPÁ", "RIO BRANCO", "SANTARÉM"];
-    const nordeste = ["NATAL", "FORTALEZA", "RECIFE", "SALVADOR", "ARACAJU", "MACEIÓ", "SÃO LUÍS", "TERESINA", "PETROLINA", "CAMPINA GRANDE"];
-    const centroOeste = ["BRASÍLIA", "CAMPO GRANDE", "GOIÂNIA", "CUIABÁ", "ANÁPOLIS"];
-    const sul = ["CANOAS", "SANTA MARIA", "FLORIANÓPOLIS", "CURITIBA", "FOZ DO IGUAÇU", "CHAPECÓ", "PELOTAS", "PORTO ALEGRE", "MARINGÁ"];
-    const sudeste = ["RIO DE JANEIRO", "SÃO PAULO", "SÃO JOSÉ DOS CAMPOS", "CAMPINAS", "BELO HORIZONTE", "VITÓRIA", "SANTA CRUZ", "AFONSOS", "SANTOS DUMONT", "GUARULHOS", "CONGONHAS", "CONFINS", "PIRASSUNUNGA", "GUARUJÁ"];
-
-    const cityU = item.city.toUpperCase();
-
-    if (norte.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Norte";
-    if (nordeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Nordeste";
-    if (centroOeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Centro-Oeste";
-    if (sul.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sul";
-    if (sudeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sudeste";
-
-    return "Sudeste";
-}
-
 function openModal(icao) {
 const item = airportData.find(a => a.icao === icao);
 if (!item) return;
@@ -873,10 +839,10 @@ const filtered = airportData.filter(item => {
     matchRegion = item.group === currentRegion;
   }
 
+  // Filtragem limpa baseada diretamente no modelo de dados do backend
   let matchBases = true;
   if (selectedBasesRegiao !== 'todas') {
-    const regiaoBase = getBaseAereaInfo(item);
-    matchBases = (regiaoBase === selectedBasesRegiao);
+    matchBases = item.isAirBase && (item.brazilRegion === selectedBasesRegiao);
   }
 
   let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
