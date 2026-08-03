@@ -515,7 +515,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 73.0</div>
+<div class="version">VERSÃO 74.0</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -740,7 +740,7 @@ document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
 
 function filterRegion(region) {
 currentRegion = region;
-selectedBasesRegiao = 'todas'; // Reseta o filtro de bases ao mudar região geral
+selectedBasesRegiao = 'todas';
 syncActiveButtons();
 renderGrid();
 }
@@ -756,7 +756,6 @@ currentSearch = document.getElementById('searchInput').value.toLowerCase();
 renderGrid();
 }
 
-// Funções do botão discreto de Bases Aéreas por Região
 function toggleBasesMenu() {
     const menu = document.getElementById('menuBasesRegiao');
     menu.classList.toggle('ativo');
@@ -774,27 +773,24 @@ window.addEventListener('click', function(event) {
 function filtrarBasesRegiao(regiao) {
     selectedBasesRegiao = regiao;
     if (regiao !== 'todas') {
-        currentRegion = 'SOUTH_AMERICA'; // Força América do Sul onde estão as bases do Brasil
+        currentRegion = 'SOUTH_AMERICA';
     }
     syncActiveButtons();
     renderGrid();
     document.getElementById('menuBasesRegiao').classList.remove('ativo');
 }
 
-// Função auxiliar para identificar se é base aérea e qual região brasileira pertence
 function getBaseAereaInfo(item) {
     const nomeU = item.name.toUpperCase();
     const icaoU = item.icao.toUpperCase();
     
-    // Lista de identificação de bases e aeroportos militares/mistos no Brasil
     const isBase = nomeU.includes("BASE AÉREA") || 
                    nomeU.includes("ACADEMIA DA FORÇA AÉREA") ||
-                   ["SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN", "SBML", "SBBV", "SBST", "SBMT"].includes(icaoU) ||
+                   ["SBBR", "SBFL", "SBRF", "SBSV", "SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN", "SBML", "SBBV", "SBST", "SBMT"].includes(icaoU) ||
                    icaoU.startsWith("SB") && (nomeU.includes("ASA") || nomeU.includes("FORÇA AÉREA"));
     
     if (!isBase) return null;
 
-    // Classificação por estado/cidade para as regiões do Brasil
     const norte = ["MANAUS", "BELÉM", "MARABÁ", "PORTO VELHO", "VILHENA", "BOA VISTA", "MACAPÁ", "RIO BRANCO", "SANTARÉM"];
     const nordeste = ["NATAL", "FORTALEZA", "RECIFE", "SALVADOR", "ARACAJU", "MACEIÓ", "SÃO LUÍS", "TERESINA", "PETROLINA", "CAMPINA GRANDE"];
     const centroOeste = ["BRASÍLIA", "CAMPO GRANDE", "GOIÂNIA", "CUIABÁ", "ANÁPOLIS"];
@@ -809,7 +805,7 @@ function getBaseAereaInfo(item) {
     if (sul.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sul";
     if (sudeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sudeste";
 
-    return "Sudeste"; // Padrão seguro para o eixo RJ/SP/BSB caso genérico
+    return "Sudeste";
 }
 
 function openModal(icao) {
@@ -877,7 +873,6 @@ const filtered = airportData.filter(item => {
     matchRegion = item.group === currentRegion;
   }
 
-  // Filtro específico de bases aéreas por região do Brasil
   let matchBases = true;
   if (selectedBasesRegiao !== 'todas') {
     const regiaoBase = getBaseAereaInfo(item);
@@ -970,7 +965,6 @@ filtered.forEach(item => {
 });
 }
 
-// Atualização automática a cada 5 minutos em segundo plano
 setInterval(() => {
   fetchData(true);
 }, 300000);
