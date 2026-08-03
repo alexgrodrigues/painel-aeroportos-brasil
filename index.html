@@ -689,7 +689,7 @@ try {
 
 function parseMetarAge(metarStr) {
 if (!metarStr) return { text: "", isOutdated: false };
-const match = metarStr.match(/(\d{2})(\d{2})(\d{2})Z/);
+const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
 if (!match) return { text: "", isOutdated: false };
 
 const day = parseInt(match[1], 10);
@@ -788,7 +788,8 @@ function getBaseAereaInfo(item) {
     
     // Lista de identificação de bases e aeroportos militares/mistos no Brasil
     const isBase = nomeU.includes("BASE AÉREA") || 
-                   ["SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN"].includes(icaoU) ||
+                   nomeU.includes("ACADEMIA DA FORÇA AÉREA") ||
+                   ["SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN", "SBML", "SBBV", "SBST", "SBMT"].includes(icaoU) ||
                    icaoU.startsWith("SB") && (nomeU.includes("ASA") || nomeU.includes("FORÇA AÉREA"));
     
     if (!isBase) return null;
@@ -798,7 +799,7 @@ function getBaseAereaInfo(item) {
     const nordeste = ["NATAL", "FORTALEZA", "RECIFE", "SALVADOR", "ARACAJU", "MACEIÓ", "SÃO LUÍS", "TERESINA", "PETROLINA", "CAMPINA GRANDE"];
     const centroOeste = ["BRASÍLIA", "CAMPO GRANDE", "GOIÂNIA", "CUIABÁ", "ANÁPOLIS"];
     const sul = ["CANOAS", "SANTA MARIA", "FLORIANÓPOLIS", "CURITIBA", "FOZ DO IGUAÇU", "CHAPECÓ", "PELOTAS", "PORTO ALEGRE", "MARINGÁ"];
-    const sudeste = ["RIO DE JANEIRO", "SÃO PAULO", "SÃO JOSÉ DOS CAMPOS", "CAMPINAS", "BELO HORIZONTE", "VITÓRIA", "SANTA CRUZ", "AFONSOS", "SANTOS DUMONT", "GUARULHOS", "CONGONHAS", "CONFINS"];
+    const sudeste = ["RIO DE JANEIRO", "SÃO PAULO", "SÃO JOSÉ DOS CAMPOS", "CAMPINAS", "BELO HORIZONTE", "VITÓRIA", "SANTA CRUZ", "AFONSOS", "SANTOS DUMONT", "GUARULHOS", "CONGONHAS", "CONFINS", "PIRASSUNUNGA", "GUARUJÁ"];
 
     const cityU = item.city.toUpperCase();
 
