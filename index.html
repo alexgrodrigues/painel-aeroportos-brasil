@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v79</title>
+<title>Painel de Aeroportos Globais - v80</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -334,9 +334,10 @@ font-weight: bold;
 cursor: pointer;
 color: #38bdf8;
 transition: opacity 0.2s;
+outline: none;
 }
 
-.airport-title:hover {
+.airport-title:hover, .airport-title:focus {
 opacity: 0.8;
 text-decoration: underline;
 }
@@ -603,7 +604,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 79.0 - Alta Robustez e Acessibilidade</div>
+<div class="version">VERSÃO 80.0 - Rigor Temporal e Segurança Segura</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
@@ -717,7 +718,7 @@ const CONFIG = {
   REFRESH_INTERVAL_MS: 300000,
   STORAGE_KEYS: {
     FAVORITES: "airport_favorites_v78",
-    PERSISTED_STATE: "airport_weather_persisted_state_v79"
+    PERSISTED_STATE: "airport_weather_persisted_state_v80"
   }
 };
 
@@ -726,6 +727,8 @@ const savedPersistedState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.
 const State = {
   airports: savedPersistedState ? savedPersistedState.airports : [],
   cache: {},
+  fetchedAtISO: savedPersistedState ? savedPersistedState.fetchedAtISO : null,
+  version: savedPersistedState ? savedPersistedState.version : null,
   currentRegion: 'ALL',
   currentCountry: 'ALL',
   currentCategory: 'ALL',
@@ -733,8 +736,18 @@ const State = {
   selectedBasesRegiao: 'todas',
   favorites: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'),
   isLoading: false,
-  lastFetchedDateStr: savedPersistedState ? savedPersistedState.fetchedStr : ''
+  lastFetchedDateStr: savedPersistedState ? savedPersistedState.fetchedStr : '',
+  lastTriggeredElement: null
 };
+
+// Sincroniza cache em memória com dados persistidos ao iniciar
+if (savedPersistedState && Array.isArray(savedPersistedState.airports)) {
+  savedPersistedState.airports.forEach(item => {
+    if (item.metar) {
+      State.cache[item.icao] = { ...item };
+    }
+  });
+}
 
 function escapeHTML(str) {
   if (!str) return '';
@@ -746,14 +759,27 @@ function escapeHTML(str) {
     .replace(/'/g, '&#039;');
 }
 
-function interpretTaf(tafStr, airportName) {
-  if (!tafStr) return "Nenhuma interpretação disponível.";
-  
-  let lines = [`Previsão de Aeródromo (TAF) para ${airportName}:`];
+// Interpretação segura de TAF utilizando elementos DOM para evitar innerHTML bruto inseguro
+function buildTafInterpretationDOM(tafStr, airportName) {
+  const container = document.createElement('div');
+  if (!tafStr) {
+    container.textContent = "Nenhuma interpretação disponível.";
+    return container;
+  }
+
+  const pTitle = document.createElement('div');
+  pTitle.textContent = `Previsão de Aeródromo (TAF) para ${airportName}:`;
+  container.appendChild(pTitle);
+
   const headerMatch = tafStr.match(/TAF\s+([A-Z]{4})\s+(\d{6}Z)\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
   if (headerMatch) {
-    lines.push(`• <strong>Emissão:</strong> Dia ${headerMatch[2].slice(0,2)} às ${headerMatch[2].slice(2,4)}:${headerMatch[2].slice(4,6)}Z.`);
-    lines.push(`• <strong>Validade:</strong> Do dia ${headerMatch[3]} às ${headerMatch[4]}Z até o dia ${headerMatch[5]} às ${headerMatch[6]}Z.`);
+    const pEmissao = document.createElement('div');
+    pEmissao.innerHTML = `• <strong>Emissão:</strong> Dia ${headerMatch[2].slice(0,2)} às ${headerMatch[2].slice(2,4)}:${headerMatch[2].slice(4,6)}Z.`;
+    container.appendChild(pEmissao);
+
+    const pValidade = document.createElement('div');
+    pValidade.innerHTML = `• <strong>Validade:</strong> Do dia ${headerMatch[3]} às ${headerMatch[4]}Z até o dia ${headerMatch[5]} às ${headerMatch[6]}Z.`;
+    container.appendChild(pValidade);
   }
 
   const parts = tafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bPROB\d+\b)/);
@@ -761,6 +787,7 @@ function interpretTaf(tafStr, airportName) {
     part = part.trim();
     if (!part) return;
 
+    const pLine = document.createElement('div');
     if (index === 0) {
       let desc = [];
       const vento = part.match(/\b(\d{3}|VRB)(\d{2,3})(G\d{2,3})?KT\b/);
@@ -776,28 +803,39 @@ function interpretTaf(tafStr, airportName) {
       if (tempo) desc.push(`condição de ${tempo[1]}`);
 
       if (desc.length > 0) {
-        lines.push(`• <strong>Início do período:</strong> ${desc.join(', ')}.`);
+        pLine.innerHTML = `• <strong>Início do período:</strong> ${escapeHTML(desc.join(', '))}.`;
+        container.appendChild(pLine);
       }
     } else {
       if (part.startsWith("BECMG")) {
         const periodMatch = part.match(/BECMG\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
         const timeStr = periodMatch ? `entre ${periodMatch[1]}h${periodMatch[2]}Z e ${periodMatch[3]}h${periodMatch[4]}Z` : "";
-        lines.push(`• <strong>Em transição (${timeStr}):</strong> Mudança gradual prevista.`);
-        
-        if (part.includes("CAVOK")) lines.push(`  ↳ Condição prevista: <strong>CAVOK</strong> (céu claro).`);
-        if (part.includes("FG")) lines.push(`  ↳ Alerta: Previsão de <strong>Nevoeiro (FG)</strong>.`);
-        if (part.includes("BKN")) lines.push(`  ↳ Céu nubulado (BKN) previsto.`);
+        pLine.innerHTML = `• <strong>Em transição (${escapeHTML(timeStr)}):</strong> Mudança gradual prevista.`;
+        container.appendChild(pLine);
+
+        if (part.includes("CAVOK")) {
+          const sub = document.createElement('div');
+          sub.innerHTML = `&nbsp;&nbsp;↳ Condição: <strong>CAVOK</strong> (céu claro).`;
+          container.appendChild(sub);
+        }
+        if (part.includes("FG")) {
+          const sub = document.createElement('div');
+          sub.innerHTML = `&nbsp;&nbsp;↳ Alerta: Previsão de <strong>Nevoeiro (FG)</strong>.`;
+          container.appendChild(sub);
+        }
       } else if (part.startsWith("PROB")) {
         const probMatch = part.match(/PROB(\d{2})\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
         const probVal = probMatch ? probMatch[1] : "30/40";
-        lines.push(`• <strong>Probabilidade (${probVal}%):</strong> Instabilidade temporária.`);
+        pLine.innerHTML = `• <strong>Probabilidade (${escapeHTML(probVal)}%):</strong> Instabilidade temporária.`;
+        container.appendChild(pLine);
       } else if (part.startsWith("TEMPO")) {
-        lines.push(`• <strong>Temporariamente:</strong> Flutuações nas condições.`);
+        pLine.innerHTML = `• <strong>Temporariamente:</strong> Flutuações nas condições.`;
+        container.appendChild(pLine);
       }
     }
   });
 
-  return lines.join("<br>");
+  return container;
 }
 
 async function fetchData(isBackground = false) {
@@ -820,14 +858,17 @@ async function fetchData(isBackground = false) {
 
     const json = await response.json();
     
-    // Validação estrita da versão do Worker
-    if (json.version !== "v78-strict") {
+    // Validação estrita da versão e armazenamento
+    if (json.version && json.version !== "v78-strict") {
       console.warn("Aviso: A versão retornada pelo Worker difere da esperada.");
     }
 
     if (!json.ok || !Array.isArray(json.rows)) {
       throw new Error("Formato de resposta inválido recebido do Worker.");
     }
+
+    State.fetchedAtISO = json.fetchedAtISO;
+    State.version = json.version;
 
     let hasOutdatedItems = false;
     State.airports = json.rows.map(item => {
@@ -842,24 +883,24 @@ async function fetchData(isBackground = false) {
           pressure: cached.pressure,
           temperature: cached.temperature,
           metarInterpret: cached.metarInterpret,
-          tafInterpret: interpretTaf(item.taf || cached.taf, item.name),
-          isCached: true,
-          cachedAtText: cached.fetchedAtTime || "Cache anterior"
+          tafInterpretHTML: cached.tafInterpretHTML || "",
+          isCached: true
         };
       }
 
-      const interpretedTafText = interpretTaf(item.taf, item.name);
-      const processedItem = { ...item, tafInterpret: interpretedTafText };
+      // Constrói TAF interpretado via elemento temporário para serializar o HTML seguro
+      const tafDom = buildTafInterpretationDOM(item.taf, item.name);
+      const processedItem = { ...item, tafInterpretHTML: tafDom.innerHTML };
 
       if (item.metar && item.metar !== "") {
-        State.cache[item.icao] = { ...processedItem, fetchedAtTime: json.fetchedAt };
+        State.cache[item.icao] = { ...processedItem };
       }
       return processedItem;
     });
 
     State.airports.forEach(item => {
       if (item.metar) {
-        const ageInfo = parseMetarAge(item, json.fetchedAtISO);
+        const ageInfo = parseMetarAge(item, State.fetchedAtISO);
         if (ageInfo.isOutdated) {
           hasOutdatedItems = true;
         }
@@ -871,10 +912,12 @@ async function fetchData(isBackground = false) {
 
     State.lastFetchedDateStr = `${json.fetchedDate || ''} às ${json.fetchedAt}`;
     
-    // Persistência do estado local
+    // Persistência unificada do estado local
     localStorage.setItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE, JSON.stringify({
       airports: State.airports,
-      fetchedStr: State.lastFetchedDateStr
+      fetchedStr: State.lastFetchedDateStr,
+      fetchedAtISO: State.fetchedAtISO,
+      version: State.version
     }));
 
     statusEl.innerText = `Fonte: Aviation Weather | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
@@ -885,7 +928,9 @@ async function fetchData(isBackground = false) {
     if (!isBackground) {
       statusEl.innerText = `⚠️ Falha ao carregar: ${error.message}`;
     } else {
-      statusEl.innerText += ` | ⚠️ Falha na atualização automática (${new Date().toLocaleTimeString('pt-BR')})`;
+      // Evita acumulação excessiva de mensagens de erro em background: substitui a última menção de erro
+      const baseText = State.lastFetchedDateStr ? `Última sincronização bem-sucedida em: ${State.lastFetchedDateStr}` : "Modo offline / Cache ativo";
+      statusEl.innerText = `${baseText} | ⚠️ Falha na tentativa automática (${new Date().toLocaleTimeString('pt-BR')})`;
     }
   } finally {
     State.isLoading = false;
@@ -898,10 +943,16 @@ function parseMetarAge(item, fetchedAtISO) {
 
   let metarDate = null;
 
-  // Prioriza o observationTime oficial fornecido pelo Worker/API
-  if (item.observationTime) {
-    metarDate = new Date(item.observationTime * 1000);
-  } else {
+  // observationTime compatível com número (epoch) ou string ISO
+  if (item.observationTime !== undefined && item.observationTime !== null) {
+    if (typeof item.observationTime === 'number') {
+      metarDate = new Date(item.observationTime * 1000);
+    } else if (typeof item.observationTime === 'string') {
+      metarDate = new Date(item.observationTime);
+    }
+  }
+
+  if (!metarDate || isNaN(metarDate.getTime())) {
     const match = item.metar.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
     if (match) {
       const day = parseInt(match[1], 10);
@@ -921,8 +972,8 @@ function parseMetarAge(item, fetchedAtISO) {
     return { text: "Horário não mapeado", isOutdated: false };
   }
 
-  const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
-  let diffMs = baseDate - metarDate;
+  // Compara sempre com o momento real atual (Date.now()) para calcular a idade real mesmo em dados recuperados do cache local
+  let diffMs = Date.now() - metarDate.getTime();
   if (diffMs < 0) diffMs = 0;
 
   const diffMins = Math.floor(diffMs / (1000 * 60));
@@ -1019,7 +1070,7 @@ function renderGrid() {
   const fragment = document.createDocumentFragment();
 
   filtered.forEach(item => {
-    const ageInfo = parseMetarAge(item);
+    const ageInfo = parseMetarAge(item, State.fetchedAtISO);
     const badgeClass = `badge-${item.category}`;
     const iataDisplay = item.iata ? escapeHTML(item.iata) : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
     const isFav = State.favorites.includes(item.icao);
@@ -1081,7 +1132,7 @@ function renderGrid() {
 
         <details class="taf-details" style="margin-top: 6px;">
           <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
-          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpret}</div>
+          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpretHTML || "Nenhuma interpretação de TAF disponível."}</div>
           <div class="weather-box taf-raw-box" style="margin-top: 6px;">${escapeHTML(item.taf || "TAF indisponível")}</div>
         </details>
       </div>
@@ -1092,7 +1143,8 @@ function renderGrid() {
   grid.appendChild(fragment);
 }
 
-function openModal(icao) {
+function openModal(icao, triggerElement = null) {
+  State.lastTriggeredElement = triggerElement;
   const item = State.airports.find(a => a.icao === icao);
   if (!item) return;
 
@@ -1127,6 +1179,10 @@ function openModal(icao) {
 
 function closeModal() {
   document.getElementById('airportModal').style.display = 'none';
+  if (State.lastTriggeredElement && typeof State.lastTriggeredElement.focus === 'function') {
+    State.lastTriggeredElement.focus();
+    State.lastTriggeredElement = null;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1235,7 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('airportGrid').addEventListener('click', (e) => {
     const titleEl = e.target.closest('[data-action="open-modal"]');
     if (titleEl) {
-      openModal(titleEl.getAttribute('data-icao'));
+      openModal(titleEl.getAttribute('data-icao'), titleEl);
       return;
     }
     const favEl = e.target.closest('[data-action="toggle-fav"]');
@@ -1251,7 +1307,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Acessibilidade: Fechar modal com a tecla Escape
+  // Suporte a Enter e Barra de Espaço para acessibilidade no título do aeroporto
+  document.getElementById('airportGrid').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const titleEl = e.target.closest('[data-action="open-modal"]');
+      if (titleEl) {
+        e.preventDefault();
+        openModal(titleEl.getAttribute('data-icao'), titleEl);
+      }
+    }
+  });
+
+  // Fechar modal com a tecla Escape
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
