@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v80</title>
+<title>Painel de Aeroportos Globais - v81</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -448,6 +448,17 @@ line-height: 1.4;
 margin-top: 6px;
 }
 
+/* Estilos estruturados para blocos do TAF */
+.taf-block {
+margin-bottom: 6px;
+padding-left: 6px;
+border-left: 2px solid rgba(45, 212, 191, 0.4);
+}
+.taf-header-block { font-weight: bold; color: #38bdf8; }
+.taf-base-block { color: #f8fafc; }
+.taf-change-block { color: #38bdf8; }
+.taf-temp-block { color: #facc15; }
+
 .taf-raw-box {
 color: #c084fc;
 border: 1px solid rgba(192, 132, 252, 0.2);
@@ -604,7 +615,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 80.0 - Rigor Temporal e Segurança Segura</div>
+<div class="version">VERSÃO 81.0 - Parser Estruturado de TAF por Períodos e Grupos</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
@@ -718,7 +729,7 @@ const CONFIG = {
   REFRESH_INTERVAL_MS: 300000,
   STORAGE_KEYS: {
     FAVORITES: "airport_favorites_v78",
-    PERSISTED_STATE: "airport_weather_persisted_state_v80"
+    PERSISTED_STATE: "airport_weather_persisted_state_v81"
   }
 };
 
@@ -740,7 +751,6 @@ const State = {
   lastTriggeredElement: null
 };
 
-// Sincroniza cache em memória com dados persistidos ao iniciar
 if (savedPersistedState && Array.isArray(savedPersistedState.airports)) {
   savedPersistedState.airports.forEach(item => {
     if (item.metar) {
@@ -759,7 +769,106 @@ function escapeHTML(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Interpretação segura de TAF utilizando elementos DOM para evitar innerHTML bruto inseguro
+// ==========================================
+// PARSER AVANÇADO E ESTRUTURADO DE TAF
+// ==========================================
+function decodeWindGroup(token) {
+  if (token === "00000KT") return "Vento calmo";
+  const match = token.match(/\b(VRB|\d{3})(\d{2,3})(G\d{2,3})?(KT|MPS)\b/);
+  if (!match) return null;
+  const dir = match[1] === "VRB" ? "variável" : `${match[1]}°`;
+  const speed = parseInt(match[2], 10);
+  const unit = match[4] === "KT" ? "nós" : "m/s";
+  let text = `Vento de ${dir} a ${speed} ${unit}`;
+  if (match[3]) {
+    const gust = parseInt(match[3].slice(1), 10);
+    text += `, com rajadas de ${gust} ${unit}`;
+  }
+  return text;
+}
+
+function decodeVisibilityGroup(token) {
+  if (token === "CAVOK") return "Visibilidade superior a 10 km (CAVOK)";
+  if (/^\d{4}$/.test(token)) {
+    const meters = parseInt(token, 10);
+    return meters >= 9999 ? "Visibilidade de 10 km ou mais" : `Visibilidade de ${meters} metros`;
+  }
+  return null;
+}
+
+function decodeWeatherPhenomenon(token) {
+  const mapPhenom = {
+    "RA": "chuva", "-RA": "chuva fraca", "+RA": "chuva forte",
+    "SN": "neve", "-SN": "neve fraca", "+SN": "neve forte",
+    "DZ": "garoa", "-DZ": "garoa fraca", "+DZ": "garoa forte",
+    "TS": "trovoada", "TSRA": "trovoada com chuva",
+    "SHRA": "pancadas de chuva", "SHSN": "pancadas de neve",
+    "FG": "nevoeiro", "BR": "névoa úmida", "HZ": "névoa seca",
+    "FU": "fumaça", "VA": "cinza vulcânica", "SQ": "squall (linha de instabilidade)",
+    "NSW": "fim dos fenômenos significativos anteriores"
+  };
+  return mapPhenom[token] || null;
+}
+
+function decodeCloudGroup(token) {
+  if (token === "NSC" || token === "SKC") return "Céu limpo / Sem nuvens significativas";
+  const match = token.match(/^(FEW|SCT|BKN|OVC|VV)(\d{3})(CB|TCU)?$/);
+  if (!match) return null;
+  const code = match[1];
+  const height = parseInt(match[2], 10) * 100;
+  const modifier = match[3];
+
+  let desc = "";
+  if (code === "FEW") desc = `Poucas nuvens a ${height} pés`;
+  if (code === "SCT") desc = `Nuvens esparsas a ${height} pés`;
+  if (code === "BKN") desc = `Teto nublado a ${height} pés`;
+  if (code === "OVC") desc = `Céu encoberto a ${height} pés`;
+  if (code === "VV") desc = `Visibilidade vertical de ${height} pés`;
+
+  if (modifier === "CB") desc += " (Cumulonimbus)";
+  if (modifier === "TCU") desc += " (Towering Cumulus)";
+  return desc;
+}
+
+function decodeTemperatureGroup(token) {
+  const matchMax = token.match(/^TX(M?\d{2})\/(\d{2})(\d{2})Z$/);
+  if (matchMax) {
+    const temp = matchMax[1].replace('M', '-');
+    return `Temperatura máxima de ${temp} °C prevista para o dia ${matchMax[2]} às ${matchMax[3]}:00 UTC`;
+  }
+  const matchMin = token.match(/^TN(M?\d{2})\/(\d{2})(\d{2})Z$/);
+  if (matchMin) {
+    const temp = matchMin[1].replace('M', '-');
+    return `Temperatura mínima de ${temp} °C prevista para o dia ${matchMin[2]} às ${matchMin[3]}:00 UTC`;
+  }
+  return null;
+}
+
+function parseTafTokens(tokens) {
+  let descriptions = [];
+  let i = 0;
+  while (i < tokens.length) {
+    let t = tokens[i];
+    let wind = decodeWindGroup(t);
+    if (wind) { descriptions.push(wind); i++; continue; }
+
+    let vis = decodeVisibilityGroup(t);
+    if (vis) { descriptions.push(vis); i++; continue; }
+
+    let phenom = decodeWeatherPhenomenon(t);
+    if (phenom) { descriptions.push(phenom); i++; continue; }
+
+    let cloud = decodeCloudGroup(t);
+    if (cloud) { descriptions.push(cloud); i++; continue; }
+
+    let temp = decodeTemperatureGroup(t);
+    if (temp) { descriptions.push(temp); i++; continue; }
+
+    i++;
+  }
+  return descriptions;
+}
+
 function buildTafInterpretationDOM(tafStr, airportName) {
   const container = document.createElement('div');
   if (!tafStr) {
@@ -767,76 +876,81 @@ function buildTafInterpretationDOM(tafStr, airportName) {
     return container;
   }
 
-  const pTitle = document.createElement('div');
-  pTitle.textContent = `Previsão de Aeródromo (TAF) para ${airportName}:`;
-  container.appendChild(pTitle);
+  const rawTokens = tafStr.trim().split(/\s+/);
+  if (rawTokens.length === 0) return container;
 
-  const headerMatch = tafStr.match(/TAF\s+([A-Z]{4})\s+(\d{6}Z)\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
-  if (headerMatch) {
-    const pEmissao = document.createElement('div');
-    pEmissao.innerHTML = `• <strong>Emissão:</strong> Dia ${headerMatch[2].slice(0,2)} às ${headerMatch[2].slice(2,4)}:${headerMatch[2].slice(4,6)}Z.`;
-    container.appendChild(pEmissao);
+  // 1. Cabeçalho
+  let station = rawTokens[1] || airportName;
+  let issueTime = rawTokens[2] || "";
+  let validity = rawTokens[3] || "";
+  let isAmend = tafStr.includes("AMD");
+  let isCorr = tafStr.includes("COR");
 
-    const pValidade = document.createElement('div');
-    pValidade.innerHTML = `• <strong>Validade:</strong> Do dia ${headerMatch[3]} às ${headerMatch[4]}Z até o dia ${headerMatch[5]} às ${headerMatch[6]}Z.`;
-    container.appendChild(pValidade);
-  }
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'taf-block taf-header-block';
+  let headerText = `Previsão (${station})`;
+  if (isAmend) headerText += " [EMENDA / AMD]";
+  if (isCorr) headerText += " [CORRIGIDA / COR]";
+  if (issueTime) headerText += ` — Emitido em ${issueTime.slice(0,2)} às ${issueTime.slice(2,4)}:${issueTime.slice(4,6)}Z`;
+  if (validity) headerText += ` | Validade: Dia ${validity.slice(0,2)}/${validity.slice(2,4)}Z até Dia ${validity.slice(5,7)}/${validity.slice(7,9)}Z`;
+  headerDiv.textContent = headerText;
+  container.appendChild(headerDiv);
 
-  const parts = tafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bPROB\d+\b)/);
-  parts.forEach((part, index) => {
-    part = part.trim();
-    if (!part) return;
+  // 2. Separação em blocos (Base + Mudanças: BECMG, TEMPO, FM, PROB)
+  const segments = tafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bFM\b|\bPROB\d+\b)/);
 
-    const pLine = document.createElement('div');
-    if (index === 0) {
-      let desc = [];
-      const vento = part.match(/\b(\d{3}|VRB)(\d{2,3})(G\d{2,3})?KT\b/);
-      if (vento) desc.push(`Vento de ${vento[1]}° a ${vento[2]} nós`);
-      
-      const vis = part.match(/\b(\d{4})\b/);
-      if (vis) {
-        let vMetros = parseInt(vis[1], 10);
-        desc.push(`visibilidade de ${vMetros >= 9999 ? '10 km ou mais' : vMetros + ' metros'}`);
-      }
-      
-      const tempo = part.match(/\b(TSRA|RA|DZ|FG|BR|HZ|VCSH)\b/);
-      if (tempo) desc.push(`condição de ${tempo[1]}`);
+  segments.forEach((seg, idx) => {
+    const segTokens = seg.trim().split(/\s+/);
+    if (segTokens.length === 0) return;
 
-      if (desc.length > 0) {
-        pLine.innerHTML = `• <strong>Início do período:</strong> ${escapeHTML(desc.join(', '))}.`;
-        container.appendChild(pLine);
-      }
+    const blockDiv = document.createElement('div');
+    blockDiv.className = 'taf-block';
+
+    if (idx === 0) {
+      blockDiv.classList.add('taf-base-block');
+      const titleSpan = document.createElement('strong');
+      titleSpan.textContent = "Condições Predominantes (Início): ";
+      blockDiv.appendChild(titleSpan);
+
+      // Remove tokens iniciais do cabeçalho
+      const cleanTokens = segTokens.filter(tok => !tok.startsWith("TAF") && tok !== station && tok !== issueTime && tok !== validity);
+      const decoded = parseTafTokens(cleanTokens);
+      const textSpan = document.createElement('span');
+      textSpan.textContent = decoded.length > 0 ? decoded.join('. ') + '.' : "Condições padrão reportadas.";
+      blockDiv.appendChild(textSpan);
     } else {
-      if (part.startsWith("BECMG")) {
-        const periodMatch = part.match(/BECMG\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
-        const timeStr = periodMatch ? `entre ${periodMatch[1]}h${periodMatch[2]}Z e ${periodMatch[3]}h${periodMatch[4]}Z` : "";
-        pLine.innerHTML = `• <strong>Em transição (${escapeHTML(timeStr)}):</strong> Mudança gradual prevista.`;
-        container.appendChild(pLine);
+      blockDiv.classList.add('taf-change-block');
+      const indicator = segTokens[0];
+      const timeGroup = segTokens[1] || "";
+      const cleanTokens = segTokens.slice(2);
+      const decoded = parseTafTokens(cleanTokens);
 
-        if (part.includes("CAVOK")) {
-          const sub = document.createElement('div');
-          sub.innerHTML = `&nbsp;&nbsp;↳ Condição: <strong>CAVOK</strong> (céu claro).`;
-          container.appendChild(sub);
-        }
-        if (part.includes("FG")) {
-          const sub = document.createElement('div');
-          sub.innerHTML = `&nbsp;&nbsp;↳ Alerta: Previsão de <strong>Nevoeiro (FG)</strong>.`;
-          container.appendChild(sub);
-        }
-      } else if (part.startsWith("PROB")) {
-        const probMatch = part.match(/PROB(\d{2})\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
-        const probVal = probMatch ? probMatch[1] : "30/40";
-        pLine.innerHTML = `• <strong>Probabilidade (${escapeHTML(probVal)}%):</strong> Instabilidade temporária.`;
-        container.appendChild(pLine);
-      } else if (part.startsWith("TEMPO")) {
-        pLine.innerHTML = `• <strong>Temporariamente:</strong> Flutuações nas condições.`;
-        container.appendChild(pLine);
+      const titleSpan = document.createElement('strong');
+      if (indicator === "BECMG") {
+        titleSpan.textContent = `Mudança Gradual (${timeGroup}): `;
+      } else if (indicator === "TEMPO") {
+        titleSpan.textContent = `Temporariamente (${timeGroup}): `;
+      } else if (indicator === "FM") {
+        titleSpan.textContent = `A partir de (${timeGroup}): `;
+      } else if (indicator.startsWith("PROB")) {
+        const probVal = indicator.replace("PROB", "");
+        titleSpan.textContent = `Probabilidade de ${probVal}% (${timeGroup}): `;
+      } else {
+        titleSpan.textContent = `${indicator} (${timeGroup}): `;
       }
+
+      blockDiv.appendChild(titleSpan);
+      const textSpan = document.createElement('span');
+      textSpan.textContent = decoded.length > 0 ? decoded.join('. ') + '.' : "Sem alteração significativa descrita.";
+      blockDiv.appendChild(textSpan);
     }
+
+    container.appendChild(blockDiv);
   });
 
   return container;
 }
+// ==========================================
 
 async function fetchData(isBackground = false) {
   if (State.isLoading) return;
@@ -858,7 +972,6 @@ async function fetchData(isBackground = false) {
 
     const json = await response.json();
     
-    // Validação estrita da versão e armazenamento
     if (json.version && json.version !== "v78-strict") {
       console.warn("Aviso: A versão retornada pelo Worker difere da esperada.");
     }
@@ -888,7 +1001,6 @@ async function fetchData(isBackground = false) {
         };
       }
 
-      // Constrói TAF interpretado via elemento temporário para serializar o HTML seguro
       const tafDom = buildTafInterpretationDOM(item.taf, item.name);
       const processedItem = { ...item, tafInterpretHTML: tafDom.innerHTML };
 
@@ -912,7 +1024,6 @@ async function fetchData(isBackground = false) {
 
     State.lastFetchedDateStr = `${json.fetchedDate || ''} às ${json.fetchedAt}`;
     
-    // Persistência unificada do estado local
     localStorage.setItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE, JSON.stringify({
       airports: State.airports,
       fetchedStr: State.lastFetchedDateStr,
@@ -928,7 +1039,6 @@ async function fetchData(isBackground = false) {
     if (!isBackground) {
       statusEl.innerText = `⚠️ Falha ao carregar: ${error.message}`;
     } else {
-      // Evita acumulação excessiva de mensagens de erro em background: substitui a última menção de erro
       const baseText = State.lastFetchedDateStr ? `Última sincronização bem-sucedida em: ${State.lastFetchedDateStr}` : "Modo offline / Cache ativo";
       statusEl.innerText = `${baseText} | ⚠️ Falha na tentativa automática (${new Date().toLocaleTimeString('pt-BR')})`;
     }
@@ -942,8 +1052,6 @@ function parseMetarAge(item, fetchedAtISO) {
   if (!item.metar) return { text: "", isOutdated: false };
 
   let metarDate = null;
-
-  // observationTime compatível com número (epoch) ou string ISO
   if (item.observationTime !== undefined && item.observationTime !== null) {
     if (typeof item.observationTime === 'number') {
       metarDate = new Date(item.observationTime * 1000);
@@ -972,7 +1080,6 @@ function parseMetarAge(item, fetchedAtISO) {
     return { text: "Horário não mapeado", isOutdated: false };
   }
 
-  // Compara sempre com o momento real atual (Date.now()) para calcular a idade real mesmo em dados recuperados do cache local
   let diffMs = Date.now() - metarDate.getTime();
   if (diffMs < 0) diffMs = 0;
 
@@ -1307,7 +1414,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Suporte a Enter e Barra de Espaço para acessibilidade no título do aeroporto
   document.getElementById('airportGrid').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       const titleEl = e.target.closest('[data-action="open-modal"]');
@@ -1318,7 +1424,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fechar modal com a tecla Escape
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeModal();
