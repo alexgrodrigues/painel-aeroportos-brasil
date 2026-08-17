@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais</title>
+<title>Painel de Aeroportos Globais - v78</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -146,6 +146,22 @@ button:hover {
 background-color: #2563eb;
 }
 
+button:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+
+.btn-danger-soft {
+background-color: rgba(239, 68, 68, 0.2);
+color: #ef4444;
+border: 1px solid #ef4444;
+font-size: 0.8rem;
+padding: 8px 12px;
+}
+.btn-danger-soft:hover {
+background-color: rgba(239, 68, 68, 0.3);
+}
+
 .container-filtro-bases {
     position: relative;
     display: inline-block;
@@ -238,7 +254,6 @@ color: white;
 border-color: #3b82f6;
 }
 
-/* Barra de Subfiltro de Países Dinâmica */
 .country-bar {
 display: none;
 gap: 6px;
@@ -272,15 +287,6 @@ color: var(--text-primary);
 background: #0284c7;
 color: #fff;
 border-color: #0284c7;
-}
-
-.flag-img {
-width: 18px;
-height: 13px;
-border-radius: 2px;
-object-fit: cover;
-display: inline-block;
-vertical-align: middle;
 }
 
 .stats {
@@ -592,14 +598,14 @@ font-family: monospace;
 }
 </style>
 </head>
-<body onload="fetchData()">
+<body>
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 77.0 - Com Subfiltro Dinâmico por País</div>
+<div class="version">VERSÃO 78.0 - Arquitetura Robusta e Segura</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
-  ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
+  ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
 </div>
 
 <div class="legend-bar">
@@ -608,36 +614,38 @@ font-family: monospace;
 <div class="legend-item"><span class="legend-dot" style="background-color: var(--mvfr-color);"></span> MVFR (Marginal)</div>
 <div class="legend-item"><span class="legend-dot" style="background-color: var(--ifr-color);"></span> IFR (Restrito)</div>
 <div class="legend-item"><span class="legend-dot" style="background-color: var(--lifr-color);"></span> LIFR (Crítico)</div>
+<div class="legend-item"><span class="legend-dot" style="background-color: var(--na-color);"></span> N/A (Indefinido)</div>
 </div>
 
 <div class="controls">
 <div class="search-wrapper">
-    <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
-    <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" title="Limpar busca">&times;</button>
+    <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade...">
+    <button class="clear-search" id="clearSearchBtn" title="Limpar busca">&times;</button>
 </div>
-<button onclick="fetchData()">🔄 Atualizar Dados</button>
+<button id="refreshBtn">🔄 Atualizar Dados</button>
+<button class="filter-btn btn-danger-soft" id="clearFavoritesBtn" title="Limpar todos os favoritos">🧹 Limpar Favoritos</button>
 
 <div class="container-filtro-bases">
-    <button id="btnBasesRegiao" class="btn-discreto-bases" onclick="toggleBasesMenu()">
+    <button id="btnBasesRegiao" class="btn-discreto-bases">
         <span>📍 Bases Aéreas</span>
         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
     </button>
     <div id="menuBasesRegiao" class="dropdown-bases">
-        <a href="#" onclick="filtrarBasesRegiao('todas')">Todas as Bases</a>
-        <a href="#" onclick="filtrarBasesRegiao('Norte')">Região Norte</a>
-        <a href="#" onclick="filtrarBasesRegiao('Nordeste')">Região Nordeste</a>
-        <a href="#" onclick="filtrarBasesRegiao('Centro-Oeste')">Região Centro-Oeste</a>
-        <a href="#" onclick="filtrarBasesRegiao('Sudeste')">Região Sudeste</a>
-        <a href="#" onclick="filtrarBasesRegiao('Sul')">Região Sul</a>
+        <a href="#" data-base="todas">Todas as Bases</a>
+        <a href="#" data-base="Norte">Região Norte</a>
+        <a href="#" data-base="Nordeste">Região Nordeste</a>
+        <a href="#" data-base="Centro-Oeste">Região Centro-Oeste</a>
+        <a href="#" data-base="Sudeste">Região Sudeste</a>
+        <a href="#" data-base="Sul">Região Sul</a>
     </div>
 </div>
 
 </div>
 
 <div class="stats" id="statsContainer">
-<span>📊 Total: <strong id="statTotal">0</strong></span>
+<span>📊 Exibidos: <strong id="statVisible">0</strong> / Total: <strong id="statTotal">0</strong></span>
 <span>🟢 VFR: <strong id="statVfr">0</strong></span>
 <span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
 <span>🔴 IFR: <strong id="statIfr">0</strong></span>
@@ -645,38 +653,39 @@ font-family: monospace;
 </div>
 
 <div class="filters" id="regionFilters">
-<button class="filter-btn active" data-region="ALL" onclick="filterRegion('ALL')">🌐 Todos</button>
-<button class="filter-btn" data-region="FAV" onclick="filterRegion('FAV')">⭐ Favoritos</button>
-<button class="filter-btn" data-region="SOUTH_AMERICA" onclick="filterRegion('SOUTH_AMERICA')">🟢 América do Sul</button>
-<button class="filter-btn" data-region="CENTRAL_AMERICA" onclick="filterRegion('CENTRAL_AMERICA')">🟡 América Central</button>
-<button class="filter-btn" data-region="CARIBBEAN" onclick="filterRegion('CARIBBEAN')">🏝️ Caribe</button>
-<button class="filter-btn" data-region="NORTH_AMERICA" onclick="filterRegion('NORTH_AMERICA')">🔵 América do Norte</button>
-<button class="filter-btn" data-region="EUROPE" onclick="filterRegion('EUROPE')"><img src="https://flagcdn.com/w20/eu.png" class="flag-img" alt="EU"> Europa</button>
-<button class="filter-btn" data-region="ASIA_ME" onclick="filterRegion('ASIA_ME')">🌏 Ásia / Oriente Médio / Rússia</button>
-<button class="filter-btn" data-region="AFRICA" onclick="filterRegion('AFRICA')">🌍 África</button>
+<button class="filter-btn active" data-region="ALL">🌐 Todos</button>
+<button class="filter-btn" data-region="FAV">⭐ Favoritos</button>
+<button class="filter-btn" data-region="SOUTH_AMERICA">🟢 América do Sul</button>
+<button class="filter-btn" data-region="CENTRAL_AMERICA">🟡 América Central</button>
+<button class="filter-btn" data-region="CARIBBEAN">🏝️ Caribe</button>
+<button class="filter-btn" data-region="NORTH_AMERICA">🔵 América do Norte</button>
+<button class="filter-btn" data-region="EUROPE">Europa</button>
+<button class="filter-btn" data-region="ASIA_ME">Ásia / Oriente Médio</button>
+<button class="filter-btn" data-region="AFRICA">África</button>
 </div>
 
 <!-- Barra Dinâmica de Seleção de Países da Região -->
 <div class="country-bar" id="countryBar"></div>
 
 <div class="filters" id="categoryFilters">
-<button class="filter-btn active" data-category="ALL" onclick="filterCategory('ALL')">Todas as Condições</button>
-<button class="filter-btn" data-category="VFR" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
-<button class="filter-btn" data-category="MVFR" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
-<button class="filter-btn" data-category="IFR" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
-<button class="filter-btn" data-category="LIFR" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+<button class="filter-btn active" data-category="ALL">Todas as Condições</button>
+<button class="filter-btn" data-category="VFR">🟢 VFR (Visual)</button>
+<button class="filter-btn" data-category="MVFR">🔵 MVFR (Marginal)</button>
+<button class="filter-btn" data-category="IFR">🔴 IFR (Restrito)</button>
+<button class="filter-btn" data-category="LIFR">🟣 LIFR (Crítico)</button>
+<button class="filter-btn" data-category="N/A">⚪ N/A (Sem METAR)</button>
 </div>
 
-<div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
+<div id="updateStatus" class="version">Carregando dados meteorológicos via Aviation Weather...</div>
 </header>
 
 <main class="grid" id="airportGrid">
 <!-- Cartões gerados dinamicamente -->
 </main>
 
-<div class="modal-overlay" id="airportModal" onclick="closeModal(event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <button class="modal-close" onclick="closeModal()">&times;</button>
+<div class="modal-overlay" id="airportModal">
+  <div class="modal-content" id="modalBox">
+    <button class="modal-close" id="modalCloseBtn">&times;</button>
     <div class="modal-title" id="modalName">Nome do Aeroporto</div>
     <div class="modal-subtitle" id="modalCodes">ICAO / IATA / Cidade</div>
 
@@ -702,30 +711,64 @@ font-family: monospace;
 </div>
 
 <script>
-const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
+const CONFIG = {
+  WORKER_URL: "https://weathered-grass-f181.alexgrodrigues.workers.dev",
+  REFRESH_INTERVAL_MS: 300000,
+  STORAGE_KEYS: {
+    FAVORITES: "airport_favorites_v78"
+  }
+};
 
-let airportData = [];
-let airportCache = {};
-let currentRegion = 'ALL';
-let currentCountry = 'ALL';
-let currentCategory = 'ALL';
-let currentSearch = '';
-let selectedBasesRegiao = 'todas';
-let favorites = JSON.parse(localStorage.getItem('airport_favorites') || '[]');
+const State = {
+  airports: [],
+  cache: {},
+  currentRegion: 'ALL',
+  currentCountry: 'ALL',
+  currentCategory: 'ALL',
+  currentSearch: '',
+  selectedBasesRegiao: 'todas',
+  favorites: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'),
+  isLoading: false,
+  lastFetchedDateStr: ''
+};
+
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 async function fetchData(isBackground = false) {
-if (!isBackground) {
-  document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
-}
-try {
-  const response = await fetch(WORKER_URL, { cache: "no-store" });
-  const json = await response.json();
-  if (json.ok) {
-    let hasOutdatedItems = false;
+  if (State.isLoading) return;
+  State.isLoading = true;
 
-    airportData = json.rows.map(item => {
-      if ((!item.metar || item.metar === "") && airportCache[item.icao]) {
-        const cached = airportCache[item.icao];
+  const statusEl = document.getElementById('updateStatus');
+  const refreshBtn = document.getElementById('refreshBtn');
+
+  if (!isBackground) {
+    statusEl.innerText = "Buscando dados atualizados da Aviation Weather...";
+    refreshBtn.disabled = true;
+  }
+
+  try {
+    const response = await fetch(CONFIG.WORKER_URL, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Erro HTTP no Servidor: ${response.status} ${response.statusText}`);
+    }
+
+    const json = await response.json();
+    if (!json.ok || !Array.isArray(json.rows)) {
+      throw new Error("Formato de resposta inválido recebido do Worker.");
+    }
+
+    let hasOutdatedItems = false;
+    State.airports = json.rows.map(item => {
+      if ((!item.metar || item.metar === "") && State.cache[item.icao]) {
+        const cached = State.cache[item.icao];
         return {
           ...item,
           metar: cached.metar,
@@ -736,19 +779,20 @@ try {
           temperature: cached.temperature,
           metarInterpret: cached.metarInterpret,
           tafInterpret: item.tafInterpret || cached.tafInterpret,
-          isCached: true
+          isCached: true,
+          cachedAtText: cached.fetchedAtTime || "Cache anterior"
         };
       }
 
       if (item.metar && item.metar !== "") {
-        airportCache[item.icao] = item;
+        State.cache[item.icao] = { ...item, fetchedAtTime: json.fetchedAt };
       }
       return item;
     });
 
-    airportData.forEach(item => {
+    State.airports.forEach(item => {
       if (item.metar) {
-        const ageInfo = parseMetarAge(item.metar);
+        const ageInfo = parseMetarAge(item.metar, json.fetchedAtISO);
         if (ageInfo.isOutdated) {
           hasOutdatedItems = true;
         }
@@ -756,361 +800,365 @@ try {
     });
 
     const banner = document.getElementById('cacheWarningBanner');
-    if (hasOutdatedItems) {
-      banner.style.display = 'flex';
-    } else {
-      banner.style.display = 'none';
-    }
+    banner.style.display = hasOutdatedItems ? 'flex' : 'none';
 
-    document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
+    State.lastFetchedDateStr = `${json.fetchedDate || ''} às ${json.fetchedAt}`;
+    statusEl.innerText = `Fonte: Aviation Weather | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
     renderGrid();
-  } else {
-    if (!isBackground) document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
+
+  } catch (error) {
+    console.error("Erro de sincronização:", error);
+    if (!isBackground) {
+      statusEl.innerText = `⚠️ Falha ao carregar: ${error.message}`;
+    }
+  } finally {
+    State.isLoading = false;
+    refreshBtn.disabled = false;
   }
-} catch (error) {
-  console.error("Erro de conexão:", error);
-  if (!isBackground) document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
-}
 }
 
-function parseMetarAge(metarStr) {
-if (!metarStr) return { text: "", isOutdated: false };
-const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
-if (!match) return { text: "", isOutdated: false };
+function parseMetarAge(metarStr, fetchedAtISO) {
+  if (!metarStr) return { text: "", isOutdated: false };
+  const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+  if (!match) return { text: "", isOutdated: false };
 
-const day = parseInt(match[1], 10);
-const hour = parseInt(match[2], 10);
-const minute = parseInt(match[3], 10);
+  const day = parseInt(match[1], 10);
+  const hour = parseInt(match[2], 10);
+  const minute = parseInt(match[3], 10);
 
-const now = new Date();
-const metarDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), day, hour, minute));
-let diffMs = now - metarDate;
+  const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
+  let metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), day, hour, minute));
+  
+  // Ajuste de virada de mês se necessário
+  if (baseDate.getUTCDate() === 1 && day > 25) {
+    metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() - 1, day, hour, minute));
+  }
 
-if (diffMs < 0) {
-  return { text: `Emitido às ${match[2]}:${match[3]}Z`, isOutdated: false };
-}
+  let diffMs = baseDate - metarDate;
+  if (diffMs < 0) diffMs = 0;
 
-const diffMins = Math.floor(diffMs / (1000 * 60));
-const diffHours = Math.floor(diffMins / 60);
-const remMins = diffMins % 60;
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMins / 60);
+  const remMins = diffMins % 60;
 
-const isOutdated = diffMins > 60;
+  const isOutdated = diffMins > 60;
+  let text = diffMins < 60 ? `Atualizado há ${diffMins} min` : `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
 
-let text = "";
-if (diffMins < 60) {
-  text = `Atualizado há ${diffMins} min`;
-} else {
-  text = `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
-}
-
-return { text, isOutdated };
+  return { text, isOutdated };
 }
 
 function syncActiveButtons() {
-document.querySelectorAll('#regionFilters .filter-btn').forEach(btn => {
-  if (btn.getAttribute('data-region') === currentRegion) {
-    btn.classList.add('active');
-  } else {
-    btn.classList.remove('active');
-  }
-});
-
-document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
-  if (btn.getAttribute('data-category') === currentCategory) {
-    btn.classList.add('active');
-  } else {
-    btn.classList.remove('active');
-  }
-});
-}
-
-function filterRegion(region) {
-currentRegion = region;
-currentCountry = 'ALL'; // Reseta o país ao trocar de região
-selectedBasesRegiao = 'todas';
-syncActiveButtons();
-renderGrid();
-}
-
-function filterCountry(country) {
-currentCountry = country;
-renderGrid();
-}
-
-function filterCategory(category) {
-currentCategory = category;
-syncActiveButtons();
-renderGrid();
-}
-
-function filterAirports() {
-const searchInput = document.getElementById('searchInput');
-currentSearch = searchInput.value.toLowerCase();
-document.getElementById('clearSearchBtn').style.display = currentSearch ? 'block' : 'none';
-renderGrid();
-}
-
-function clearSearch() {
-document.getElementById('searchInput').value = '';
-currentSearch = '';
-document.getElementById('clearSearchBtn').style.display = 'none';
-renderGrid();
-}
-
-function toggleFavorite(icao) {
-    if (favorites.includes(icao)) {
-        favorites = favorites.filter(item => item !== icao);
-    } else {
-        favorites.push(icao);
-    }
-    localStorage.setItem('airport_favorites', JSON.stringify(favorites));
-    renderGrid();
-}
-
-function toggleBasesMenu() {
-    const menu = document.getElementById('menuBasesRegiao');
-    menu.classList.toggle('ativo');
-}
-
-window.addEventListener('click', function(event) {
-    if (!event.target.closest('.container-filtro-bases')) {
-        const menu = document.getElementById('menuBasesRegiao');
-        if (menu && menu.classList.contains('ativo')) {
-            menu.classList.remove('ativo');
-        }
-    }
-});
-
-function filtrarBasesRegiao(regiao) {
-    selectedBasesRegiao = regiao;
-    if (regiao !== 'todas') {
-        currentRegion = 'SOUTH_AMERICA';
-        currentCountry = 'ALL';
-    }
-    syncActiveButtons();
-    renderGrid();
-    document.getElementById('menuBasesRegiao').classList.remove('ativo');
-}
-
-function getBaseAereaInfo(item) {
-    const nomeU = item.name.toUpperCase();
-    const icaoU = item.icao.toUpperCase();
-    
-    const isBase = nomeU.includes("BASE AÉREA") || 
-                   nomeU.includes("ACADEMIA DA FORÇA AÉREA") ||
-                   ["SBBR", "SBFL", "SBRF", "SBSV", "SBCO", "SBSM", "SBSC", "SBAF", "SBYS", "SBAN", "SBML", "SBBV", "SBST", "SBMT"].includes(icaoU) ||
-                   icaoU.startsWith("SB") && (nomeU.includes("ASA") || nomeU.includes("FORÇA AÉREA"));
-    
-    if (!isBase) return null;
-
-    const norte = ["MANAUS", "BELÉM", "MARABÁ", "PORTO VELHO", "VILHENA", "BOA VISTA", "MACAPÁ", "RIO BRANCO", "SANTARÉM"];
-    const nordeste = ["NATAL", "FORTALEZA", "RECIFE", "SALVADOR", "ARACAJU", "MACEIÓ", "SÃO LUÍS", "TERESINA", "PETROLINA", "CAMPINA GRANDE"];
-    const centroOeste = ["BRASÍLIA", "CAMPO GRANDE", "GOIÂNIA", "CUIABÁ", "ANÁPOLIS"];
-    const sul = ["CANOAS", "SANTA MARIA", "FLORIANÓPOLIS", "CURITIBA", "FOZ DO IGUAÇU", "CHAPECÓ", "PELOTAS", "PORTO ALEGRE", "MARINGÁ"];
-    const sudeste = ["RIO DE JANEIRO", "SÃO PAULO", "SÃO JOSÉ DOS CAMPOS", "CAMPINAS", "BELO HORIZONTE", "VITÓRIA", "SANTA CRUZ", "AFONSOS", "SANTOS DUMONT", "GUARULHOS", "CONGONHAS", "CONFINS", "PIRASSUNUNGA", "GUARUJÁ"];
-
-    const cityU = item.city.toUpperCase();
-
-    if (norte.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Norte";
-    if (nordeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Nordeste";
-    if (centroOeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Centro-Oeste";
-    if (sul.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sul";
-    if (sudeste.some(loc => cityU.includes(loc) || nomeU.includes(loc))) return "Sudeste";
-
-    return "Sudeste";
-}
-
-function openModal(icao) {
-const item = airportData.find(a => a.icao === icao);
-if (!item) return;
-
-document.getElementById('modalName').innerText = item.name;
-document.getElementById('modalCodes').innerText = `ICAO: ${item.icao} • IATA: ${item.iata || 'N/A'} • ${item.city} (${item.country})`;
-
-const freq = item.frequencies || {};
-document.getElementById('modalFreqTower').innerText = freq.tower || '—';
-document.getElementById('modalFreqGround').innerText = freq.ground || '—';
-document.getElementById('modalFreqAtis').innerText = freq.atis || '—';
-
-const runwayList = document.getElementById('modalRunways');
-runwayList.innerHTML = '';
-if (item.runways && item.runways.length > 0) {
-  item.runways.forEach(rwy => {
-    const li = document.createElement('li');
-    li.className = 'runway-item';
-    li.innerText = `Pista ${rwy}`;
-    runwayList.appendChild(li);
+  document.querySelectorAll('#regionFilters .filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-region') === State.currentRegion);
   });
-} else {
-  const li = document.createElement('li');
-  li.className = 'runway-item';
-  li.innerText = 'Informações de pistas não cadastradas.';
-  runwayList.appendChild(li);
-}
-
-document.getElementById('airportModal').style.display = 'flex';
-}
-
-function closeModal(event) {
-document.getElementById('airportModal').style.display = 'none';
-}
-
-function renderCardHeader(item) {
-const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-const iataDisplay = item.iata ? item.iata : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
-const isFav = favorites.includes(item.icao);
-
-return `
-  <div class="card-header">
-    <div>
-      <div class="airport-title" onclick="openModal('${item.icao}')" title="Clique para ver frequências e pistas">${item.name}</div>
-      <div class="airport-codes">ICAO: ${item.icao} &bull; IATA: ${iataDisplay}</div>
-      <div class="airport-sub">${item.city} (${item.country})</div>
-    </div>
-    <div class="header-right">
-      <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${item.icao}')" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
-        ${isFav ? '⭐' : '☆'}
-      </button>
-      <span class="badge ${badgeClass}">${item.category}</span>
-    </div>
-  </div>
-`;
+  document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-category') === State.currentCategory);
+  });
 }
 
 function updateCountryBar() {
-const countryBar = document.getElementById('countryBar');
-
-// Exibe a barra de países apenas se uma região específica estiver selecionada (exceto ALL e FAV)
-if (['SOUTH_AMERICA', 'CENTRAL_AMERICA', 'CARIBBEAN', 'NORTH_AMERICA', 'EUROPE', 'ASIA_ME', 'AFRICA'].includes(currentRegion)) {
-    const countriesInRegion = [...new Set(airportData.filter(a => a.group === currentRegion).map(a => a.country))].sort();
+  const countryBar = document.getElementById('countryBar');
+  if (['SOUTH_AMERICA', 'CENTRAL_AMERICA', 'CARIBBEAN', 'NORTH_AMERICA', 'EUROPE', 'ASIA_ME', 'AFRICA'].includes(State.currentRegion)) {
+    const countriesInRegion = [...new Set(State.airports.filter(a => a.group === State.currentRegion).map(a => a.country))].sort();
     
     if (countriesInRegion.length > 0) {
-        countryBar.style.display = 'flex';
-        let html = `<button class="country-btn ${currentCountry === 'ALL' ? 'active' : ''}" onclick="filterCountry('ALL')">🌐 Todos os Países</button>`;
-        countriesInRegion.forEach(c => {
-            html += `<button class="country-btn ${currentCountry === c ? 'active' : ''}" onclick="filterCountry('${c}')">${c}</button>`;
-        });
-        countryBar.innerHTML = html;
-        return;
+      countryBar.style.display = 'flex';
+      let html = `<button class="country-btn ${State.currentCountry === 'ALL' ? 'active' : ''}" data-country="ALL">🌐 Todos os Países</button>`;
+      countriesInRegion.forEach(c => {
+        html += `<button class="country-btn ${State.currentCountry === c ? 'active' : ''}" data-country="${escapeHTML(c)}">${escapeHTML(c)}</button>`;
+      });
+      countryBar.innerHTML = html;
+      return;
     }
-}
-countryBar.style.display = 'none';
+  }
+  countryBar.style.display = 'none';
 }
 
 function renderGrid() {
-syncActiveButtons();
-updateCountryBar();
+  syncActiveButtons();
+  updateCountryBar();
 
-const grid = document.getElementById('airportGrid');
-grid.innerHTML = '';
+  const grid = document.getElementById('airportGrid');
+  grid.innerHTML = '';
 
-let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
+  let counts = { total: State.airports.length, vfr: 0, mvfr: 0, ifr: 0, lifr: 0, na: 0 };
+  State.airports.forEach(item => {
+    if (item.category === 'VFR') counts.vfr++;
+    else if (item.category === 'MVFR') counts.mvfr++;
+    else if (item.category === 'IFR') counts.ifr++;
+    else if (item.category === 'LIFR') counts.lifr++;
+    else counts.na++;
+  });
 
-const filtered = airportData.filter(item => {
-  let matchRegion = true;
-  if (currentRegion === 'FAV') {
-    matchRegion = favorites.includes(item.icao);
-  } else if (currentRegion !== 'ALL') {
-    matchRegion = item.group === currentRegion;
+  const filtered = State.airports.filter(item => {
+    let matchRegion = true;
+    if (State.currentRegion === 'FAV') {
+      matchRegion = State.favorites.includes(item.icao);
+    } else if (State.currentRegion !== 'ALL') {
+      matchRegion = item.group === State.currentRegion;
+    }
+
+    let matchCountry = (State.currentCountry === 'ALL') || (item.country === State.currentCountry);
+
+    let matchBases = true;
+    if (State.selectedBasesRegiao !== 'todas') {
+      matchBases = (item.isAirBase && item.brazilRegion === State.selectedBasesRegiao);
+    }
+
+    let matchCategory = State.currentCategory === 'ALL' || item.category === State.currentCategory;
+
+    let matchSearch = !State.currentSearch ||
+      item.icao.toLowerCase().includes(State.currentSearch) ||
+      (item.iata && item.iata.toLowerCase().includes(State.currentSearch)) ||
+      item.name.toLowerCase().includes(State.currentSearch) ||
+      item.city.toLowerCase().includes(State.currentSearch);
+
+    return matchRegion && matchCountry && matchBases && matchCategory && matchSearch;
+  });
+
+  document.getElementById('statVisible').innerText = filtered.length;
+  document.getElementById('statTotal').innerText = counts.total;
+  document.getElementById('statVfr').innerText = counts.vfr;
+  document.getElementById('statMvfr').innerText = counts.mvfr;
+  document.getElementById('statIfr').innerText = counts.ifr;
+  document.getElementById('statLifr').innerText = counts.lifr;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto ou base aérea encontrado com os filtros atuais.</div>';
+    return;
   }
 
-  let matchCountry = (currentCountry === 'ALL') || (item.country === currentCountry);
+  const fragment = document.createDocumentFragment();
 
-  let matchBases = true;
-  if (selectedBasesRegiao !== 'todas') {
-    const regiaoBase = getBaseAereaInfo(item);
-    matchBases = (regiaoBase === selectedBasesRegiao);
+  filtered.forEach(item => {
+    const ageInfo = parseMetarAge(item.metar);
+    const badgeClass = `badge-${item.category}`;
+    const iataDisplay = item.iata ? escapeHTML(item.iata) : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
+    const isFav = State.favorites.includes(item.icao);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <div>
+          <div class="airport-title" data-action="open-modal" data-icao="${escapeHTML(item.icao)}" title="Clique para ver frequências e pistas">${escapeHTML(item.name)}</div>
+          <div class="airport-codes">ICAO: ${escapeHTML(item.icao)} &bull; IATA: ${iataDisplay}</div>
+          <div class="airport-sub">${escapeHTML(item.city)} (${escapeHTML(item.country)}) ${item.isCached ? ' <span style="color:#f59e0b; font-size:0.75rem;">(Cache)</span>' : ''}</div>
+        </div>
+        <div class="header-right">
+          <button class="fav-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-icao="${escapeHTML(item.icao)}" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
+            ${isFav ? '⭐' : '☆'}
+          </button>
+          <span class="badge ${badgeClass}">${escapeHTML(item.category)}</span>
+        </div>
+      </div>
+
+      <div class="card-info-grid">
+        <div class="info-item">
+          <span class="info-label">💨 Vento</span>
+          <span><strong>${escapeHTML(item.wind)}</strong></span>
+        </div>
+        <div class="divider"></div>
+        <div class="info-item">
+          <span class="info-label">⚖️ Pressão</span>
+          <span><strong>${escapeHTML(item.pressure)}</strong></span>
+        </div>
+      </div>
+
+      <div class="card-info-grid">
+        <div class="info-item">
+          <span class="info-label">🌡️ Temperatura</span>
+          <span><strong>${item.temperature && item.temperature.current !== null ? escapeHTML(item.temperature.current) + '°C' : '—'}</strong></span>
+        </div>
+        <div class="divider"></div>
+        <div class="info-item">
+          <span class="info-label">💧 Ponto de Orvalho</span>
+          <span><strong>${item.temperature && item.temperature.dewpoint !== null ? escapeHTML(item.temperature.dewpoint) + '°C' : '—'}</strong></span>
+        </div>
+      </div>
+
+      <div class="metar-section">
+        <div class="section-title title-metar">
+          <span>📡 METAR (Condição Atual)</span>
+          <span class="metar-time">${escapeHTML(ageInfo.text)}</span>
+        </div>
+        <div class="weather-box metar-box">${escapeHTML(item.metar || "METAR indisponível")}</div>
+      </div>
+
+      <div>
+        <details class="interpret-details" style="margin-bottom: 6px;">
+          <summary>💡 Ver Interpretação do METAR</summary>
+          <div class="interpret-section">${escapeHTML(item.metarInterpret || "Nenhuma interpretação disponível.")}</div>
+        </details>
+
+        <details class="taf-details" style="margin-top: 6px;">
+          <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
+          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${escapeHTML(item.tafInterpret || "Nenhuma interpretação de TAF disponível.")}</div>
+          <div class="weather-box taf-raw-box" style="margin-top: 6px;">${escapeHTML(item.taf || "TAF indisponível")}</div>
+        </details>
+      </div>
+    `;
+    fragment.appendChild(card);
+  });
+
+  grid.appendChild(fragment);
+}
+
+function openModal(icao) {
+  const item = State.airports.find(a => a.icao === icao);
+  if (!item) return;
+
+  document.getElementById('modalName').innerText = item.name;
+  document.getElementById('modalCodes').innerText = `ICAO: ${item.icao} • IATA: ${item.iata || 'N/A'} • ${item.city} (${item.country})`;
+
+  const freq = item.frequencies || {};
+  document.getElementById('modalFreqTower').innerText = freq.tower || '—';
+  document.getElementById('modalFreqGround').innerText = freq.ground || '—';
+  document.getElementById('modalFreqAtis').innerText = freq.atis || '—';
+
+  const runwayList = document.getElementById('modalRunways');
+  runwayList.innerHTML = '';
+  if (item.runways && item.runways.length > 0) {
+    item.runways.forEach(rwy => {
+      const li = document.createElement('li');
+      li.className = 'runway-item';
+      li.innerText = `Pista ${rwy}`;
+      runwayList.appendChild(li);
+    });
+  } else {
+    const li = document.createElement('li');
+    li.className = 'runway-item';
+    li.innerText = 'Informações de pistas não cadastradas.';
+    runwayList.appendChild(li);
   }
 
-  let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
-
-  let matchSearch = !currentSearch ||
-    item.icao.toLowerCase().includes(currentSearch) ||
-    (item.iata && item.iata.toLowerCase().includes(currentSearch)) ||
-    item.name.toLowerCase().includes(currentSearch) ||
-    item.city.toLowerCase().includes(currentSearch);
-
-  return matchRegion && matchCountry && matchBases && matchCategory && matchSearch;
-});
-
-airportData.forEach(item => {
-  counts.total++;
-  if (item.category === 'VFR') counts.vfr++;
-  else if (item.category === 'MVFR') counts.mvfr++;
-  else if (item.category === 'IFR') counts.ifr++;
-  else if (item.category === 'LIFR') counts.lifr++;
-});
-
-document.getElementById('statTotal').innerText = counts.total;
-document.getElementById('statVfr').innerText = counts.vfr;
-document.getElementById('statMvfr').innerText = counts.mvfr;
-document.getElementById('statIfr').innerText = counts.ifr;
-document.getElementById('statLifr').innerText = counts.lifr;
-
-if (filtered.length === 0) {
-  grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto ou base aérea encontrado com os filtros atuais.</div>';
-  return;
+  document.getElementById('airportModal').style.display = 'flex';
 }
 
-filtered.forEach(item => {
-  const ageInfo = parseMetarAge(item.metar);
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `
-    ${renderCardHeader(item)}
-
-    <div class="card-info-grid">
-      <div class="info-item">
-        <span class="info-label">💨 Vento</span>
-        <span><strong>${item.wind}</strong></span>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <span class="info-label">⚖️ Pressão</span>
-        <span><strong>${item.pressure}</strong></span>
-      </div>
-    </div>
-
-    <div class="card-info-grid">
-      <div class="info-item">
-        <span class="info-label">🌡️ Temperatura</span>
-        <span><strong>${item.temperature && item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <span class="info-label">💧 Ponto de Orvalho</span>
-        <span><strong>${item.temperature && item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
-      </div>
-    </div>
-
-    <div class="metar-section">
-      <div class="section-title title-metar">
-        <span>📡 METAR (Condição Atual)</span>
-        <span class="metar-time">${ageInfo.text}</span>
-      </div>
-      <div class="weather-box metar-box">${item.metar || "METAR indisponível"}</div>
-    </div>
-
-    <div>
-      <details class="interpret-details" style="margin-bottom: 6px;">
-        <summary>💡 Ver Interpretação do METAR</summary>
-        <div class="interpret-section">${item.metarInterpret || "Nenhuma interpretação disponível."}</div>
-      </details>
-
-      <details class="taf-details" style="margin-top: 6px;">
-        <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
-        <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpret || "Nenhuma interpretação de TAF disponível."}</div>
-        <div class="weather-box taf-raw-box" style="margin-top: 6px;">${item.taf || "TAF indisponível"}</div>
-      </details>
-    </div>
-  `;
-  grid.append(card);
-});
+function closeModal() {
+  document.getElementById('airportModal').style.display = 'none';
 }
 
-setInterval(() => {
-  fetchData(true);
-}, 300000);
+// Event Listeners centralizados (sem código inline)
+document.addEventListener('DOMContentLoaded', () => {
+  fetchData();
+  setInterval(() => fetchData(true), CONFIG.REFRESH_INTERVAL_MS);
+
+  document.getElementById('refreshBtn').addEventListener('click', () => fetchData(false));
+  
+  document.getElementById('clearFavoritesBtn').addEventListener('click', () => {
+    if (confirm("Deseja realmente limpar todos os aeroportos favoritos?")) {
+      State.favorites = [];
+      localStorage.removeItem(CONFIG.STORAGE_KEYS.FAVORITES);
+      renderGrid();
+    }
+  });
+
+  const searchInput = document.getElementById('searchInput');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+  searchInput.addEventListener('input', (e) => {
+    State.currentSearch = e.target.value.toLowerCase();
+    clearSearchBtn.style.display = State.currentSearch ? 'block' : 'none';
+    renderGrid();
+  });
+
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    State.currentSearch = '';
+    clearSearchBtn.style.display = 'none';
+    renderGrid();
+  });
+
+  document.getElementById('regionFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    const region = btn.getAttribute('data-region');
+    if (region) {
+      State.currentRegion = region;
+      // Preserva o país se ainda existir na nova região, senão reseta para ALL
+      const availableCountries = [...new Set(State.airports.filter(a => a.group === region).map(a => a.country))];
+      if (!availableCountries.includes(State.currentCountry)) {
+        State.currentCountry = 'ALL';
+      }
+      State.selectedBasesRegiao = 'todas';
+      renderGrid();
+    }
+  });
+
+  document.getElementById('countryBar').addEventListener('click', (e) => {
+    const btn = e.target.closest('.country-btn');
+    if (!btn) return;
+    const country = btn.getAttribute('data-country');
+    if (country) {
+      State.currentCountry = country;
+      renderGrid();
+    }
+  });
+
+  document.getElementById('categoryFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    const cat = btn.getAttribute('data-category');
+    if (cat) {
+      State.currentCategory = cat;
+      renderGrid();
+    }
+  });
+
+  const btnBasesRegiao = document.getElementById('btnBasesRegiao');
+  const menuBasesRegiao = document.getElementById('menuBasesRegiao');
+
+  btnBasesRegiao.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuBasesRegiao.classList.toggle('ativo');
+  });
+
+  menuBasesRegiao.addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetA = e.target.closest('a');
+    if (!targetA) return;
+    const baseReg = targetA.getAttribute('data-base');
+    if (baseReg) {
+      State.selectedBasesRegiao = baseReg;
+      if (baseReg !== 'todas') {
+        State.currentRegion = 'SOUTH_AMERICA';
+        State.currentCountry = 'ALL';
+      }
+      menuBasesRegiao.classList.remove('ativo');
+      renderGrid();
+    }
+  });
+
+  window.addEventListener('click', (event) => {
+    if (!event.target.closest('.container-filtro-bases')) {
+      menuBasesRegiao.classList.remove('ativo');
+    }
+  });
+
+  document.getElementById('airportGrid').addEventListener('click', (e) => {
+    const titleEl = e.target.closest('[data-action="open-modal"]');
+    if (titleEl) {
+      openModal(titleEl.getAttribute('data-icao'));
+      return;
+    }
+    const favEl = e.target.closest('[data-action="toggle-fav"]');
+    if (favEl) {
+      const icao = favEl.getAttribute('data-icao');
+      if (State.favorites.includes(icao)) {
+        State.favorites = State.favorites.filter(i => i !== icao);
+      } else {
+        State.favorites.push(icao);
+      }
+      localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(State.favorites));
+      renderGrid();
+    }
+  });
+
+  document.getElementById('airportModal').addEventListener('click', closeModal);
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  document.getElementById('modalBox').addEventListener('click', (e) => e.stopPropagation());
+});
 </script>
 </body>
 </html>
