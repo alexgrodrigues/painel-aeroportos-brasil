@@ -85,13 +85,13 @@
             color: var(--text-main);
         }
 
-        .filter-buttons, .country-buttons {
+        .filter-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
         }
 
-        button.filter-btn, button.country-btn {
+        button.filter-btn {
             background: var(--bg-main);
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -102,22 +102,14 @@
             transition: all 0.2s;
         }
 
-        button.filter-btn:hover, button.country-btn:hover {
+        button.filter-btn:hover {
             border-color: var(--accent);
         }
 
-        button.filter-btn.active, button.country-btn.active {
+        button.filter-btn.active {
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
-        }
-
-        .country-bar {
-            display: none;
-            gap: 6px;
-            flex-wrap: wrap;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border-color);
         }
 
         .grid {
@@ -206,7 +198,7 @@
 
     <header>
         <h1>Painel de Aeroportos Globais</h1>
-        <div class="version">VERSÃO 76.0 - Com Favoritos e Subfiltro por País</div>
+        <div class="version">VERSÃO 76.0 - Com Favoritos e Subfiltro</div>
     </header>
 
     <div class="controls">
@@ -226,9 +218,6 @@
             <button class="filter-btn" data-region="ASIA_ME">🌏 Ásia / Oriente Médio</button>
             <button class="filter-btn" data-region="AFRICA">🌍 África</button>
         </div>
-
-        <!-- Barra dinâmica de países da região selecionada -->
-        <div class="country-bar" id="countryBar"></div>
     </div>
 
     <div class="grid" id="airportGrid">
@@ -236,21 +225,22 @@
     </div>
 
     <script>
+        // URL exata do Worker no Cloudflare com o subdomínio correto
+        const WORKER_URL = 'https://weathered-grass-f181.alexgrodrigues.workers.dev';
+
         let allAirports = [];
         let currentRegion = 'ALL';
-        let currentCountry = 'ALL';
         let favorites = JSON.parse(localStorage.getItem('airport_favorites') || '[]');
 
         async function loadData() {
             try {
-                // URL correta do Cloudflare Worker (weathered-grass-f181)
-                const res = await fetch('https://weathered-grass-f181.alex-rodrigues1973.workers.dev');
+                const res = await fetch(WORKER_URL);
                 const data = await res.json();
-                if (data.ok) {
+                if (data.ok && Array.isArray(data.rows)) {
                     allAirports = data.rows;
                     render();
                 } else {
-                    document.getElementById('airportGrid').innerHTML = `<div class="loading">Erro ao carregar dados do servidor.</div>`;
+                    document.getElementById('airportGrid').innerHTML = `<div class="loading">Erro: formato de resposta inválido do servidor.</div>`;
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
@@ -275,41 +265,18 @@
 
             clearBtn.style.display = searchVal ? 'block' : 'none';
 
-            // Atualizar barra de países com base na região selecionada
-            const countryBar = document.getElementById('countryBar');
-            if (['SOUTH_AMERICA', 'CENTRAL_AMERICA', 'NORTH_AMERICA', 'EUROPE', 'ASIA_ME', 'AFRICA', 'CARIBBEAN'].includes(currentRegion)) {
-                const countriesInRegion = [...new Set(allAirports.filter(a => a.group === currentRegion).map(a => a.country))].sort();
-                if (countriesInRegion.length > 1) {
-                    countryBar.style.display = 'flex';
-                    let countryHtml = `<button class="country-btn ${currentCountry === 'ALL' ? 'active' : ''}" data-country="ALL">Todos os Países</button>`;
-                    countriesInRegion.forEach(c => {
-                        countryHtml += `<button class="country-btn ${currentCountry === c ? 'active' : ''}" data-country="${c}">${c}</button>`;
-                    });
-                    countryBar.innerHTML = countryHtml;
-                } else {
-                    countryBar.style.display = 'none';
-                    currentCountry = 'ALL';
-                }
-            } else {
-                countryBar.style.display = 'none';
-                currentCountry = 'ALL';
-            }
-
-            // Filtragem
             const filtered = allAirports.filter(airport => {
                 const matchesRegion = currentRegion === 'ALL' || 
                                       (currentRegion === 'FAV' && favorites.includes(airport.icao)) || 
                                       airport.group === currentRegion;
                 
-                const matchesCountry = currentCountry === 'ALL' || airport.country === currentCountry;
-
                 const matchesSearch = !searchVal || 
                     airport.icao.toLowerCase().includes(searchVal) || 
                     (airport.iata && airport.iata.toLowerCase().includes(searchVal)) || 
                     airport.name.toLowerCase().includes(searchVal) || 
                     airport.city.toLowerCase().includes(searchVal);
 
-                return matchesRegion && matchesCountry && matchesSearch;
+                return matchesRegion && matchesSearch;
             });
 
             if (filtered.length === 0) {
@@ -317,7 +284,6 @@
                 return;
             }
 
-            // Renderizar Cards
             grid.innerHTML = filtered.map(airport => {
                 const isFav = favorites.includes(airport.icao);
                 const badgeClass = `badge badge-${airport.category.toLowerCase()}`;
@@ -345,7 +311,6 @@
             }).join('');
         }
 
-        // Event Listeners
         document.getElementById('searchInput').addEventListener('input', render);
         
         document.getElementById('clearSearchBtn').addEventListener('click', () => {
@@ -358,21 +323,10 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentRegion = e.target.getAttribute('data-region');
-                currentCountry = 'ALL';
                 render();
             }
         });
 
-        document.getElementById('countryBar').addEventListener('click', (e) => {
-            if (e.target.classList.contains('country-btn')) {
-                document.querySelectorAll('.country-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentCountry = e.target.getAttribute('data-country');
-                render();
-            }
-        });
-
-        // Inicializar
         loadData();
     </script>
 </body>
