@@ -96,7 +96,7 @@ flex-wrap: wrap;
 gap: 15px;
 justify-content: center;
 align-items: center;
-margin-bottom: 20px;
+margin-bottom: 15px;
 position: relative;
 }
 
@@ -215,7 +215,7 @@ display: flex;
 flex-wrap: wrap;
 gap: 8px;
 justify-content: center;
-margin-bottom: 15px;
+margin-bottom: 10px;
 }
 
 .filter-btn {
@@ -236,6 +236,42 @@ gap: 6px;
 background-color: #3b82f6;
 color: white;
 border-color: #3b82f6;
+}
+
+/* Barra de Subfiltro de Países Dinâmica */
+.country-bar {
+display: none;
+gap: 6px;
+flex-wrap: wrap;
+justify-content: center;
+padding: 10px;
+background: rgba(30, 41, 59, 0.4);
+border: 1px dashed var(--border-color);
+border-radius: 8px;
+max-width: 900px;
+margin: 0 auto 15px auto;
+}
+
+.country-btn {
+background: var(--bg-color);
+border: 1px solid var(--border-color);
+color: var(--text-secondary);
+padding: 5px 10px;
+border-radius: 6px;
+font-size: 0.8rem;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.country-btn:hover {
+border-color: #38bdf8;
+color: var(--text-primary);
+}
+
+.country-btn.active {
+background: #0284c7;
+color: #fff;
+border-color: #0284c7;
 }
 
 .flag-img {
@@ -560,7 +596,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 76.0 - Com Favoritos e Painel Completo</div>
+<div class="version">VERSÃO 77.0 - Com Subfiltro Dinâmico por País</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso.
@@ -620,6 +656,9 @@ font-family: monospace;
 <button class="filter-btn" data-region="AFRICA" onclick="filterRegion('AFRICA')">🌍 África</button>
 </div>
 
+<!-- Barra Dinâmica de Seleção de Países da Região -->
+<div class="country-bar" id="countryBar"></div>
+
 <div class="filters" id="categoryFilters">
 <button class="filter-btn active" data-category="ALL" onclick="filterCategory('ALL')">Todas as Condições</button>
 <button class="filter-btn" data-category="VFR" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
@@ -668,6 +707,7 @@ const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev";
 let airportData = [];
 let airportCache = {};
 let currentRegion = 'ALL';
+let currentCountry = 'ALL';
 let currentCategory = 'ALL';
 let currentSearch = '';
 let selectedBasesRegiao = 'todas';
@@ -786,8 +826,14 @@ document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
 
 function filterRegion(region) {
 currentRegion = region;
+currentCountry = 'ALL'; // Reseta o país ao trocar de região
 selectedBasesRegiao = 'todas';
 syncActiveButtons();
+renderGrid();
+}
+
+function filterCountry(country) {
+currentCountry = country;
 renderGrid();
 }
 
@@ -839,6 +885,7 @@ function filtrarBasesRegiao(regiao) {
     selectedBasesRegiao = regiao;
     if (regiao !== 'todas') {
         currentRegion = 'SOUTH_AMERICA';
+        currentCountry = 'ALL';
     }
     syncActiveButtons();
     renderGrid();
@@ -930,8 +977,29 @@ return `
 `;
 }
 
+function updateCountryBar() {
+const countryBar = document.getElementById('countryBar');
+
+// Exibe a barra de países apenas se uma região específica estiver selecionada (exceto ALL e FAV)
+if (['SOUTH_AMERICA', 'CENTRAL_AMERICA', 'CARIBBEAN', 'NORTH_AMERICA', 'EUROPE', 'ASIA_ME', 'AFRICA'].includes(currentRegion)) {
+    const countriesInRegion = [...new Set(airportData.filter(a => a.group === currentRegion).map(a => a.country))].sort();
+    
+    if (countriesInRegion.length > 0) {
+        countryBar.style.display = 'flex';
+        let html = `<button class="country-btn ${currentCountry === 'ALL' ? 'active' : ''}" onclick="filterCountry('ALL')">🌐 Todos os Países</button>`;
+        countriesInRegion.forEach(c => {
+            html += `<button class="country-btn ${currentCountry === c ? 'active' : ''}" onclick="filterCountry('${c}')">${c}</button>`;
+        });
+        countryBar.innerHTML = html;
+        return;
+    }
+}
+countryBar.style.display = 'none';
+}
+
 function renderGrid() {
 syncActiveButtons();
+updateCountryBar();
 
 const grid = document.getElementById('airportGrid');
 grid.innerHTML = '';
@@ -945,6 +1013,8 @@ const filtered = airportData.filter(item => {
   } else if (currentRegion !== 'ALL') {
     matchRegion = item.group === currentRegion;
   }
+
+  let matchCountry = (currentCountry === 'ALL') || (item.country === currentCountry);
 
   let matchBases = true;
   if (selectedBasesRegiao !== 'todas') {
@@ -960,7 +1030,7 @@ const filtered = airportData.filter(item => {
     item.name.toLowerCase().includes(currentSearch) ||
     item.city.toLowerCase().includes(currentSearch);
 
-  return matchRegion && matchBases && matchCategory && matchSearch;
+  return matchRegion && matchCountry && matchBases && matchCategory && matchSearch;
 });
 
 airportData.forEach(item => {
