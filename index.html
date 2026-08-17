@@ -91,7 +91,7 @@
             gap: 8px;
         }
 
-        button.filter-btn, button.country-btn, button.action-btn {
+        button.filter-btn, button.country-btn {
             background: var(--bg-main);
             border: 1px solid var(--border-color);
             color: var(--text-main);
@@ -102,7 +102,7 @@
             transition: all 0.2s;
         }
 
-        button.filter-btn:hover, button.country-btn:hover, button.action-btn:hover {
+        button.filter-btn:hover, button.country-btn:hover {
             border-color: var(--accent);
         }
 
@@ -192,6 +192,14 @@
             display: flex;
             justify-content: space-between;
         }
+
+        .loading {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -224,7 +232,7 @@
     </div>
 
     <div class="grid" id="airportGrid">
-        <!-- Preenchido via JavaScript -->
+        <div class="loading">Carregando dados meteorológicos do Worker...</div>
     </div>
 
     <script>
@@ -235,14 +243,18 @@
 
         async function loadData() {
             try {
-                const res = await fetch('https://SEU_WORKER_URL.workers.dev'); // Substitua pela URL do seu Worker se necessário ou mantenha relativa
+                // URL correta do Cloudflare Worker (weathered-grass-f181)
+                const res = await fetch('https://weathered-grass-f181.alex-rodrigues1973.workers.dev');
                 const data = await res.json();
                 if (data.ok) {
                     allAirports = data.rows;
                     render();
+                } else {
+                    document.getElementById('airportGrid').innerHTML = `<div class="loading">Erro ao carregar dados do servidor.</div>`;
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados:", err);
+                document.getElementById('airportGrid').innerHTML = `<div class="loading">Erro de conexão com o Worker. Verifique o console.</div>`;
             }
         }
 
@@ -300,6 +312,11 @@
                 return matchesRegion && matchesCountry && matchesSearch;
             });
 
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="loading">Nenhum aeroporto encontrado.</div>`;
+                return;
+            }
+
             // Renderizar Cards
             grid.innerHTML = filtered.map(airport => {
                 const isFav = favorites.includes(airport.icao);
@@ -341,7 +358,7 @@
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
                 currentRegion = e.target.getAttribute('data-region');
-                currentCountry = 'ALL'; // Resetar país ao trocar de região
+                currentCountry = 'ALL';
                 render();
             }
         });
