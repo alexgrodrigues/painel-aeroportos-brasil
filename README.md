@@ -1,34 +1,28 @@
-# Painel de Aeroportos Globais & Bases Aéreas (v75.0)
+# ✈️ Painel de Aeroportos Globais (Global Airports Dashboard)
 
-Sistema avançado de monitoramento meteorológico aeronáutico (METAR/TAF) voltado para aviação comercial, unidades militares da FAB e estações meteorológicas em **ilhas estratégicas do Oceano Atlântico** (como Fernando de Noronha, Açores e Cabo Verde).
-
-## 🚀 Principais Atualizações da Versão 75.0
-- **Limpeza Arquitetural (*Zero Dívida Técnica*):** A lógica de classificação de bases aéreas e regiões brasileiras foi totalmente descentralizada do front-end. O backend agora injeta propriedades nativas (`isAirBase: true/false` e `brazilRegion`), tornando o código do painel limpo, modular e altamente escalável.
-- **Ilhas Estratégicas do Atlântico:** Adicionadas estações essenciais para monitoramento oceânico e transatlântico:
-  - **SBFN** (Fernando de Noronha, Brasil)
-  - **LPAZ** (Santa Maria - Açores, Portugal)
-  - **LPPD** (Ponta Delgada - Açores, Portugal)
-  - **GVAC** (Boa Vista, Cabo Verde)
-  - **GVNP** (São Vicente, Cabo Verde)
-- **Padronização Oficial:** Nomes de instalações civis/militares unificados e validação robusta de cache e tratamento de cold starts.
+Painel web em tempo real para monitoramento de condições meteorológicas de aeroportos e bases aéreas ao redor do mundo, consumindo dados oficiais de METAR e TAF.
 
 ---
 
-## 📂 Estrutura de Arquivos
+## 🚀 Novidades da Versão 76.0
 
-1. **`worker.js`** (Backend - Cloudflare Worker)
-   - Executa buscas assíncronas em lotes na API oficial de meteorologia.
-   - Processa METAR e TAF gerando descrições legíveis em linguagem natural.
-   - Armazena dados no Cloudflare KV (`WEATHER_KV`) com TTL otimizado de 15 minutos e suporte completo a CORS.
-
-2. **`index.html`** (Frontend)
-   - Interface web responsiva em tema escuro profissional (`Dark Theme`).
-   - Cards dinâmicos com categorias visuais de voo (`VFR`, `MVFR`, `IFR`, `LIFR`).
-   - Modais interativos contendo frequências oficiais (TWR, GND, ATIS) e dimensões das pistas.
+* **⭐ Sistema de Favoritos:** Marque seus aeroportos ou bases prediletas com uma estrela diretamente no card para acessá-los rapidamente através do filtro dedicado. Os favoritos ficam salvos no navegador (`localStorage`).
+* **🏳️ Subfiltro por País:** Ao selecionar uma região global (como *América do Sul* ou *Europa*), uma barra secundária aparece automaticamente permitindo filtrar os aeroportos por país específico.
+* **❌ Limpeza Rápida na Busca:** Adicionado um botão "X" interativo dentro do campo de pesquisa para limpar o texto digitado instantaneamente com um clique.
+* **🏝️ Inclusão de Ilhas do Atlântico:** Adicionadas ilhas estratégicas e bases regionais (como Fernando de Noronha `SBFN`, Mount Pleasant / Falklands `EGYP`, Açores `LPAZ`/`LPPD` e Cabo Verde `GVAC`/`GVNP`).
 
 ---
 
-## 🛠️ Como Implantar
+## 🛠️ Tecnologias Utilizadas
 
-1. **Cloudflare Worker:** Cole o código atualizado em `worker.js`, configure o binding do KV Namespace (`WEATHER_KV`) e publique.
-2. **Frontend:** Atualize a constante `WORKER_URL` no arquivo `index.html` com a nova URL do seu Worker e hospede estaticamente.
+* **Front-end:** HTML5, CSS3 e JavaScript Moderno (Vanilla JS com layout responsivo em Grid).
+* **Back-end:** Cloudflare Workers (`worker.js`) para cache de requisições, tratamento assíncrono de chunks e traduções/interpretações de METAR/TAF.
+* **APIs de Dados:** [Aviation Weather Center API](https://aviationweather.gov/).
+
+---
+
+## 📦 Estruturação do Projeto
+
+```text
+├── index.html        # Interface de usuário completa (Painel, Favoritos, Filtros e Busca)
+└── worker.js         # Cloudflare Worker responsável por buscar, estruturar e processar os dados
