@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v78</title>
+<title>Painel de Aeroportos Globais - v79</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -521,6 +521,7 @@ max-width: 500px;
 padding: 24px;
 box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 position: relative;
+outline: none;
 }
 
 .modal-close {
@@ -602,7 +603,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 78.0 - Arquitetura Robusta e Segura</div>
+<div class="version">VERSÃO 79.0 - Alta Robustez e Acessibilidade</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
@@ -626,7 +627,7 @@ font-family: monospace;
 <button class="filter-btn btn-danger-soft" id="clearFavoritesBtn" title="Limpar todos os favoritos">🧹 Limpar Favoritos</button>
 
 <div class="container-filtro-bases">
-    <button id="btnBasesRegiao" class="btn-discreto-bases">
+    <button id="btnBasesRegiao" class="btn-discreto-bases" aria-expanded="false" aria-controls="menuBasesRegiao">
         <span>📍 Bases Aéreas</span>
         <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -673,7 +674,7 @@ font-family: monospace;
 <button class="filter-btn" data-category="MVFR">🔵 MVFR (Marginal)</button>
 <button class="filter-btn" data-category="IFR">🔴 IFR (Restrito)</button>
 <button class="filter-btn" data-category="LIFR">🟣 LIFR (Crítico)</button>
-<button class="filter-btn" data-category="N/A">⚪ N/A (Sem METAR)</button>
+<button class="filter-btn" data-category="N/A">⚪ N/A (Indefinido)</button>
 </div>
 
 <div id="updateStatus" class="version">Carregando dados meteorológicos via Aviation Weather...</div>
@@ -683,9 +684,9 @@ font-family: monospace;
 <!-- Cartões gerados dinamicamente -->
 </main>
 
-<div class="modal-overlay" id="airportModal">
-  <div class="modal-content" id="modalBox">
-    <button class="modal-close" id="modalCloseBtn">&times;</button>
+<div class="modal-overlay" id="airportModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="modal-content" id="modalBox" tabindex="-1">
+    <button class="modal-close" id="modalCloseBtn" aria-label="Fechar modal">&times;</button>
     <div class="modal-title" id="modalName">Nome do Aeroporto</div>
     <div class="modal-subtitle" id="modalCodes">ICAO / IATA / Cidade</div>
 
@@ -715,12 +716,15 @@ const CONFIG = {
   WORKER_URL: "https://weathered-grass-f181.alexgrodrigues.workers.dev",
   REFRESH_INTERVAL_MS: 300000,
   STORAGE_KEYS: {
-    FAVORITES: "airport_favorites_v78"
+    FAVORITES: "airport_favorites_v78",
+    PERSISTED_STATE: "airport_weather_persisted_state_v79"
   }
 };
 
+const savedPersistedState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE) || 'null');
+
 const State = {
-  airports: [],
+  airports: savedPersistedState ? savedPersistedState.airports : [],
   cache: {},
   currentRegion: 'ALL',
   currentCountry: 'ALL',
@@ -729,7 +733,7 @@ const State = {
   selectedBasesRegiao: 'todas',
   favorites: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'),
   isLoading: false,
-  lastFetchedDateStr: ''
+  lastFetchedDateStr: savedPersistedState ? savedPersistedState.fetchedStr : ''
 };
 
 function escapeHTML(str) {
@@ -740,6 +744,60 @@ function escapeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function interpretTaf(tafStr, airportName) {
+  if (!tafStr) return "Nenhuma interpretação disponível.";
+  
+  let lines = [`Previsão de Aeródromo (TAF) para ${airportName}:`];
+  const headerMatch = tafStr.match(/TAF\s+([A-Z]{4})\s+(\d{6}Z)\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
+  if (headerMatch) {
+    lines.push(`• <strong>Emissão:</strong> Dia ${headerMatch[2].slice(0,2)} às ${headerMatch[2].slice(2,4)}:${headerMatch[2].slice(4,6)}Z.`);
+    lines.push(`• <strong>Validade:</strong> Do dia ${headerMatch[3]} às ${headerMatch[4]}Z até o dia ${headerMatch[5]} às ${headerMatch[6]}Z.`);
+  }
+
+  const parts = tafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bPROB\d+\b)/);
+  parts.forEach((part, index) => {
+    part = part.trim();
+    if (!part) return;
+
+    if (index === 0) {
+      let desc = [];
+      const vento = part.match(/\b(\d{3}|VRB)(\d{2,3})(G\d{2,3})?KT\b/);
+      if (vento) desc.push(`Vento de ${vento[1]}° a ${vento[2]} nós`);
+      
+      const vis = part.match(/\b(\d{4})\b/);
+      if (vis) {
+        let vMetros = parseInt(vis[1], 10);
+        desc.push(`visibilidade de ${vMetros >= 9999 ? '10 km ou mais' : vMetros + ' metros'}`);
+      }
+      
+      const tempo = part.match(/\b(TSRA|RA|DZ|FG|BR|HZ|VCSH)\b/);
+      if (tempo) desc.push(`condição de ${tempo[1]}`);
+
+      if (desc.length > 0) {
+        lines.push(`• <strong>Início do período:</strong> ${desc.join(', ')}.`);
+      }
+    } else {
+      if (part.startsWith("BECMG")) {
+        const periodMatch = part.match(/BECMG\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
+        const timeStr = periodMatch ? `entre ${periodMatch[1]}h${periodMatch[2]}Z e ${periodMatch[3]}h${periodMatch[4]}Z` : "";
+        lines.push(`• <strong>Em transição (${timeStr}):</strong> Mudança gradual prevista.`);
+        
+        if (part.includes("CAVOK")) lines.push(`  ↳ Condição prevista: <strong>CAVOK</strong> (céu claro).`);
+        if (part.includes("FG")) lines.push(`  ↳ Alerta: Previsão de <strong>Nevoeiro (FG)</strong>.`);
+        if (part.includes("BKN")) lines.push(`  ↳ Céu nubulado (BKN) previsto.`);
+      } else if (part.startsWith("PROB")) {
+        const probMatch = part.match(/PROB(\d{2})\s+(\d{2})(\d{2})\/(\d{2})(\d{2})/);
+        const probVal = probMatch ? probMatch[1] : "30/40";
+        lines.push(`• <strong>Probabilidade (${probVal}%):</strong> Instabilidade temporária.`);
+      } else if (part.startsWith("TEMPO")) {
+        lines.push(`• <strong>Temporariamente:</strong> Flutuações nas condições.`);
+      }
+    }
+  });
+
+  return lines.join("<br>");
 }
 
 async function fetchData(isBackground = false) {
@@ -761,6 +819,12 @@ async function fetchData(isBackground = false) {
     }
 
     const json = await response.json();
+    
+    // Validação estrita da versão do Worker
+    if (json.version !== "v78-strict") {
+      console.warn("Aviso: A versão retornada pelo Worker difere da esperada.");
+    }
+
     if (!json.ok || !Array.isArray(json.rows)) {
       throw new Error("Formato de resposta inválido recebido do Worker.");
     }
@@ -778,21 +842,24 @@ async function fetchData(isBackground = false) {
           pressure: cached.pressure,
           temperature: cached.temperature,
           metarInterpret: cached.metarInterpret,
-          tafInterpret: item.tafInterpret || cached.tafInterpret,
+          tafInterpret: interpretTaf(item.taf || cached.taf, item.name),
           isCached: true,
           cachedAtText: cached.fetchedAtTime || "Cache anterior"
         };
       }
 
+      const interpretedTafText = interpretTaf(item.taf, item.name);
+      const processedItem = { ...item, tafInterpret: interpretedTafText };
+
       if (item.metar && item.metar !== "") {
-        State.cache[item.icao] = { ...item, fetchedAtTime: json.fetchedAt };
+        State.cache[item.icao] = { ...processedItem, fetchedAtTime: json.fetchedAt };
       }
-      return item;
+      return processedItem;
     });
 
     State.airports.forEach(item => {
       if (item.metar) {
-        const ageInfo = parseMetarAge(item.metar, json.fetchedAtISO);
+        const ageInfo = parseMetarAge(item, json.fetchedAtISO);
         if (ageInfo.isOutdated) {
           hasOutdatedItems = true;
         }
@@ -803,6 +870,13 @@ async function fetchData(isBackground = false) {
     banner.style.display = hasOutdatedItems ? 'flex' : 'none';
 
     State.lastFetchedDateStr = `${json.fetchedDate || ''} às ${json.fetchedAt}`;
+    
+    // Persistência do estado local
+    localStorage.setItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE, JSON.stringify({
+      airports: State.airports,
+      fetchedStr: State.lastFetchedDateStr
+    }));
+
     statusEl.innerText = `Fonte: Aviation Weather | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
     renderGrid();
 
@@ -810,6 +884,8 @@ async function fetchData(isBackground = false) {
     console.error("Erro de sincronização:", error);
     if (!isBackground) {
       statusEl.innerText = `⚠️ Falha ao carregar: ${error.message}`;
+    } else {
+      statusEl.innerText += ` | ⚠️ Falha na atualização automática (${new Date().toLocaleTimeString('pt-BR')})`;
     }
   } finally {
     State.isLoading = false;
@@ -817,23 +893,35 @@ async function fetchData(isBackground = false) {
   }
 }
 
-function parseMetarAge(metarStr, fetchedAtISO) {
-  if (!metarStr) return { text: "", isOutdated: false };
-  const match = metarStr.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
-  if (!match) return { text: "", isOutdated: false };
+function parseMetarAge(item, fetchedAtISO) {
+  if (!item.metar) return { text: "", isOutdated: false };
 
-  const day = parseInt(match[1], 10);
-  const hour = parseInt(match[2], 10);
-  const minute = parseInt(match[3], 10);
+  let metarDate = null;
 
-  const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
-  let metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), day, hour, minute));
-  
-  // Ajuste de virada de mês se necessário
-  if (baseDate.getUTCDate() === 1 && day > 25) {
-    metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() - 1, day, hour, minute));
+  // Prioriza o observationTime oficial fornecido pelo Worker/API
+  if (item.observationTime) {
+    metarDate = new Date(item.observationTime * 1000);
+  } else {
+    const match = item.metar.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const hour = parseInt(match[2], 10);
+      const minute = parseInt(match[3], 10);
+
+      const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
+      metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), day, hour, minute));
+      
+      if (baseDate.getUTCDate() === 1 && day > 25) {
+        metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() - 1, day, hour, minute));
+      }
+    }
   }
 
+  if (!metarDate || isNaN(metarDate.getTime())) {
+    return { text: "Horário não mapeado", isOutdated: false };
+  }
+
+  const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
   let diffMs = baseDate - metarDate;
   if (diffMs < 0) diffMs = 0;
 
@@ -931,7 +1019,7 @@ function renderGrid() {
   const fragment = document.createDocumentFragment();
 
   filtered.forEach(item => {
-    const ageInfo = parseMetarAge(item.metar);
+    const ageInfo = parseMetarAge(item);
     const badgeClass = `badge-${item.category}`;
     const iataDisplay = item.iata ? escapeHTML(item.iata) : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
     const isFav = State.favorites.includes(item.icao);
@@ -941,7 +1029,7 @@ function renderGrid() {
     card.innerHTML = `
       <div class="card-header">
         <div>
-          <div class="airport-title" data-action="open-modal" data-icao="${escapeHTML(item.icao)}" title="Clique para ver frequências e pistas">${escapeHTML(item.name)}</div>
+          <div class="airport-title" data-action="open-modal" data-icao="${escapeHTML(item.icao)}" title="Clique para ver frequências e pistas" role="button" tabindex="0">${escapeHTML(item.name)}</div>
           <div class="airport-codes">ICAO: ${escapeHTML(item.icao)} &bull; IATA: ${iataDisplay}</div>
           <div class="airport-sub">${escapeHTML(item.city)} (${escapeHTML(item.country)}) ${item.isCached ? ' <span style="color:#f59e0b; font-size:0.75rem;">(Cache)</span>' : ''}</div>
         </div>
@@ -993,7 +1081,7 @@ function renderGrid() {
 
         <details class="taf-details" style="margin-top: 6px;">
           <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
-          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${escapeHTML(item.tafInterpret || "Nenhuma interpretação de TAF disponível.")}</div>
+          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpret}</div>
           <div class="weather-box taf-raw-box" style="margin-top: 6px;">${escapeHTML(item.taf || "TAF indisponível")}</div>
         </details>
       </div>
@@ -1032,15 +1120,21 @@ function openModal(icao) {
     runwayList.appendChild(li);
   }
 
-  document.getElementById('airportModal').style.display = 'flex';
+  const modalOverlay = document.getElementById('airportModal');
+  modalOverlay.style.display = 'flex';
+  document.getElementById('modalBox').focus();
 }
 
 function closeModal() {
   document.getElementById('airportModal').style.display = 'none';
 }
 
-// Event Listeners centralizados (sem código inline)
 document.addEventListener('DOMContentLoaded', () => {
+  if (State.airports.length > 0) {
+    renderGrid();
+    document.getElementById('updateStatus').innerText = `Restaurado do cache local | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
+  }
+  
   fetchData();
   setInterval(() => fetchData(true), CONFIG.REFRESH_INTERVAL_MS);
 
@@ -1076,7 +1170,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const region = btn.getAttribute('data-region');
     if (region) {
       State.currentRegion = region;
-      // Preserva o país se ainda existir na nova região, senão reseta para ALL
       const availableCountries = [...new Set(State.airports.filter(a => a.group === region).map(a => a.country))];
       if (!availableCountries.includes(State.currentCountry)) {
         State.currentCountry = 'ALL';
@@ -1111,7 +1204,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnBasesRegiao.addEventListener('click', (e) => {
     e.stopPropagation();
-    menuBasesRegiao.classList.toggle('ativo');
+    const isOpen = menuBasesRegiao.classList.toggle('ativo');
+    btnBasesRegiao.setAttribute('aria-expanded', isOpen);
   });
 
   menuBasesRegiao.addEventListener('click', (e) => {
@@ -1126,6 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         State.currentCountry = 'ALL';
       }
       menuBasesRegiao.classList.remove('ativo');
+      btnBasesRegiao.setAttribute('aria-expanded', 'false');
       renderGrid();
     }
   });
@@ -1133,6 +1228,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('click', (event) => {
     if (!event.target.closest('.container-filtro-bases')) {
       menuBasesRegiao.classList.remove('ativo');
+      btnBasesRegiao.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -1152,6 +1248,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(State.favorites));
       renderGrid();
+    }
+  });
+
+  // Acessibilidade: Fechar modal com a tecla Escape
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
     }
   });
 
