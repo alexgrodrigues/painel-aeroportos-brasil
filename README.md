@@ -1,38 +1,46 @@
-# ✈️ Painel de Aeroportos Globais (Versão 78.0)
+# ✈️ Painel de Aeroportos Globais (Versão 83.0)
 
-Painel web avançado, responsivo e em tempo real para monitoramento de condições meteorológicas de aviação (**METAR** e **TAF**), desenvolvido com arquitetura robusta para pilotos, operadores de tráfego aéreo e entusiastas da aviação.
-
----
-
-## 🚀 Novidades e Melhorias da Versão 78.0
-
-* **Validação Estrita no Back-end:** O Worker valida rigorosamente a integridade das respostas HTTP, status code e formato JSON da Aviation Weather API, evitando falhas silenciosas.
-* **Versionamento de Cache Inteligente (`v78-strict`):** Previne que dados desatualizados continuem sendo servidos após novos deploys na Cloudflare.
-* **Horário Oficial e Data Completa:** Registro temporal unificado por timestamp ISO e fuso horário oficial (`America/Sao_Paulo`), calculando com precisão a idade dos relatórios.
-* **Segurança Reforçada (Anti-XSS):** Sanitização e escape automático de todos os textos dinâmicos vindos de APIs externas inseridos no DOM.
-* **Remoção de Eventos Inline:** Total desacoplamento entre marcação HTML e lógica JavaScript, garantindo alta manutenibilidade.
-* **Contadores Separados (Total vs. Filtrados):** Exibição clara e simultânea da quantidade de aeroportos exibidos na tela em relação ao total global monitorado.
-* **Gerenciamento Avançado de Favoritos:** Inclusão de botão dedicado para limpar todos os favoritos instantaneamente.
-* **Preservação de Contexto:** Manutenção rigorosa do país selecionado e dos filtros ativos durante as atualizações automáticas e manuais.
+Painel web progressivo para monitoramento meteorológico aeronáutico em tempo real (METAR e TAF) de aeroportos globais e bases aéreas, desenvolvido com foco em precisão temporal, rigor gramatical aeronáutico e segurança de interface.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🚀 Principais Atualizações e Histórico de Evolução (v79 a v83)
 
-* **Front-end:** HTML5, CSS3 Customizado (Dark Theme responsivo) e JavaScript Puro (*Vanilla JS*) em módulos organizados.
-* **Back-end / Proxy:** Cloudflare Workers com KV Storage e tratamento de erros detalhado.
-* **Armazenamento Local (`localStorage`):** Persistência segura da lista de aeroportos favoritos do usuário.
+### 📌 Versão 83.0 — Motor Gramatical Avançado de TAF e Grupos Compostos
+* **Parser de Cabeçalho via RegEx:** Identificação flexível de `TAF`, emendas (`AMD`) e correções (`COR`) independentemente de índices fixos ou formatações inconsistentes.
+* **Grupos Compostos (`PROB30/40 TEMPO`):** Tratamento combinatório exato entre probabilidades estatísticas e flutuações temporárias de vento, visibilidade e fenômenos.
+* **Variação Direcional do Vento:** Decodificação e tradução de faixas de variação direcional (ex: `150V210`).
+* **Segurança Total com `textContent`:** Substituição de injeções via `innerHTML` em blocos interpretados por construção nativa de nós DOM (`textContent`), eliminando vetores de injeção.
+* **Validação de Versão do Parser no Cache:** Auto-limpeza de cache local quando detectada divergência no `parserVersion`, forçando o re-processamento com o motor mais recente.
+
+### ⏱️ Versão 82.0 — Motor Parser de TAF de Alta Fidelidade
+* **Decodificador de Intensidade e Descritores:** Mapeamento gramatical de intensidade (`-`, moderada, `+`), descritores (`TS`, `SH`, `FZ`, `BL`, etc.) e fenômenos (`RA`, `SN`, `DZ`, `FG`, `BR`, `HZ`, etc.).
+* **Tratamento Rigoroso do Grupo FM:** Conversão exata de `FM171200` para *"A partir do dia 17 às 12:00 UTC"*, herdando descontinuidades de forma isolada.
+* **Identificação de Teto Mínimo:** Extração automática da camada restritiva mais baixa (`BKN`, `OVC` ou `VV`) para cada período da previsão.
+* **Separação Estrutural de Dados:** Geração de árvores de modelos puros desacoplados da apresentação visual.
+
+### 🛡️ Versão 81.0 — Parser Estruturado por Blocos
+* Substituição de buscas textuais genéricas por divisão estrutural do TAF (Cabeçalho, Condições Predominantes, Grupos de Mudança e Temperaturas).
+* Estilização visual dedicada por categoria de alteração e aviso nativo de grupos não interpretados.
+
+### ⏳ Versão 80.0 — Rigor Temporal, Persistência e Acessibilidade
+* **Compatibilidade Dupla de `observationTime`:** Suporte simultâneo a timestamps numéricos (Epoch) e strings ISO.
+* **Idade Real de Dados:** Cálculo dinâmico da idade do METAR em relacão ao momento atual (`Date.now()`), mesmo para cartões restaurados do cache local.
+* **Acessibilidade de Teclado:** Suporte completo a `Enter` e `Barra de Espaço` no título do aeroporto para abertura do modal, com devolução automática de foco ao elemento de origem.
+* **Limpeza de Alertas de Erro:** Substituição de avisos repetitivos em segundo plano por notificações consolidadas.
 
 ---
 
-## 📋 Funcionalidades Principais
+## 🛠️ Tecnologias e Arquitetura
 
-1. **Filtros por Categoria de Voo:** Classificação baseada nas regras visuais e instrumentais:
-   * 🟢 **VFR** (Visual Flight Rules)
-   * 🔵 **MVFR** (Marginal VFR)
-   * 🔴 **IFR** (Instrument Flight Rules)
-   * 🟣 **LIFR** (Low IFR / Crítico)
-   * ⚪ **N/A** (Sem METAR disponível no momento)
-2. **Subfiltro Dinâmico por País:** Permite filtrar os aeroportos por nações específicas dentro de cada grande continente ou região geográfica.
-3. **Filtro Nativo de Bases Aéreas do Brasil:** Utiliza dados estruturados para separar rapidamente as bases militares por regiões do país.
-4. **Modal Técnico:** Clicando no nome de qualquer aeroporto, abre-se um painel de frequências (TWR, GND, ATIS) e dimensões de pistas.
+* **Front-end:** HTML5, CSS3 Moderno (Variáveis Customizadas, Grid/Flexbox), JavaScript Vanilla (ES6+).
+* **Back-end / Proxy:** Cloudflare Workers integrado à API da Aviation Weather.
+* **Armazenamento:** `localStorage` com controle estrito de versão de estado e parser (`v83-taf-pro`).
+
+---
+
+## 📦 Como Executar Localmente
+
+1. Clone o repositório ou salve o código em um arquivo `index.html`.
+2. Certifique-se de que o endpoint do Worker (`CONFIG.WORKER_URL`) está ativo.
+3. Abra o arquivo diretamente em qualquer navegador moderno ou utilize um servidor local (Live Server).

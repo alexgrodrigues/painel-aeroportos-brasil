@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v82</title>
+<title>Painel de Aeroportos Globais - v83</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -448,7 +448,7 @@ line-height: 1.4;
 margin-top: 6px;
 }
 
-/* Estilos estruturados para blocos do TAF v82 */
+/* Estilos estruturados para blocos do TAF v83 */
 .taf-block {
 margin-bottom: 8px;
 padding: 6px 8px;
@@ -618,7 +618,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 82.0 - Parser Gramatical Profissional de TAF</div>
+<div class="version">VERSÃO 83.0 - Parser Gramatical Avançado e Grupos Compostos</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
@@ -730,21 +730,21 @@ font-family: monospace;
 const CONFIG = {
   WORKER_URL: "https://weathered-grass-f181.alexgrodrigues.workers.dev",
   REFRESH_INTERVAL_MS: 300000,
-  PARSER_VERSION: "v82-taf-professional",
+  PARSER_VERSION: "v83-taf-pro",
   STORAGE_KEYS: {
     FAVORITES: "airport_favorites_v78",
-    PERSISTED_STATE: "airport_weather_persisted_state_v82"
+    PERSISTED_STATE: "airport_weather_persisted_state_v83"
   }
 };
 
 const savedPersistedState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE) || 'null');
 
 const State = {
-  airports: savedPersistedState ? savedPersistedState.airports : [],
+  airports: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.airports : [],
   cache: {},
-  fetchedAtISO: savedPersistedState ? savedPersistedState.fetchedAtISO : null,
-  version: savedPersistedState ? savedPersistedState.version : null,
-  parserVersion: savedPersistedState ? savedPersistedState.parserVersion : null,
+  fetchedAtISO: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.fetchedAtISO : null,
+  version: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.version : null,
+  parserVersion: CONFIG.PARSER_VERSION,
   currentRegion: 'ALL',
   currentCountry: 'ALL',
   currentCategory: 'ALL',
@@ -752,11 +752,11 @@ const State = {
   selectedBasesRegiao: 'todas',
   favorites: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'),
   isLoading: false,
-  lastFetchedDateStr: savedPersistedState ? savedPersistedState.fetchedStr : '',
+  lastFetchedDateStr: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.fetchedStr : '',
   lastTriggeredElement: null
 };
 
-if (savedPersistedState && Array.isArray(savedPersistedState.airports)) {
+if (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION && Array.isArray(savedPersistedState.airports)) {
   savedPersistedState.airports.forEach(item => {
     if (item.metar) {
       State.cache[item.icao] = { ...item };
@@ -775,7 +775,7 @@ function escapeHTML(str) {
 }
 
 // ==========================================
-// MOTOR PARSER PROFISSIONAL DE TAF (v82)
+// MOTOR PARSER DE TAF PROFISSIONAL (v83)
 // ==========================================
 function decodeWindDetailed(token) {
   if (token === "00000KT") return { text: "Vento calmo", isCalm: true };
@@ -793,6 +793,12 @@ function decodeWindDetailed(token) {
   return { text, speed };
 }
 
+function decodeWindVariation(token) {
+  const match = token.match(/^(\d{3})V(\d{3})$/);
+  if (!match) return null;
+  return `com variação direcional entre ${match[1]}° e ${match[2]}°`;
+}
+
 function decodeVisibilityDetailed(token) {
   if (token === "CAVOK") return "Visibilidade superior a 10 km, céu claro e sem nuvens abaixo de 5.000 pés (CAVOK)";
   if (/^\d{4}$/.test(token)) {
@@ -803,6 +809,8 @@ function decodeVisibilityDetailed(token) {
 }
 
 function decodePhenomenonDetailed(token) {
+  if (token === "NSW") return "Fim dos fenômenos meteorológicos significativos anteriormente previstos (NSW)";
+
   const intensities = { "-": "leve", "+": "forte", "": "moderada" };
   const intensity = intensities[token[0]] || "";
   const cleanTok = token.replace(/^[-+]/, "");
@@ -819,11 +827,8 @@ function decodePhenomenonDetailed(token) {
     "FU": "fumaça", "VA": "cinza vulcânica", "DU": "poeira ampla", "SA": "areia",
     "HZ": "névoa seca", "PY": "neblina", "PO": "redemoinhos de poeira/areia",
     "SQ": "linha de instabilidade (squall)", "FC": "funil / tornado / tromba d'água",
-    "SS": "tempestade de areia", "DS": "tempestade de poeira",
-    "NSW": "Fim dos fenômenos significativos anteriores"
+    "SS": "tempestade de areia", "DS": "tempestade de poeira"
   };
-
-  if (token === "NSW") return "Fim dos fenômenos meteorológicos significativos anteriormente previstos (NSW)";
 
   let descStr = "";
   let typeStr = types[cleanTok] || "";
@@ -892,23 +897,24 @@ function parseStructuredPeriod(tokens) {
     let t = tokens[i];
     let matched = false;
 
-    // Vento
     let wind = decodeWindDetailed(t);
     if (wind) { decodedItems.push(wind.text); matched = true; }
 
-    // Visibilidade
+    if (!matched) {
+      let windVar = decodeWindVariation(t);
+      if (windVar) { decodedItems.push(windVar); matched = true; }
+    }
+
     if (!matched) {
       let vis = decodeVisibilityDetailed(t);
       if (vis) { decodedItems.push(vis); matched = true; }
     }
 
-    // Fenômenos
     if (!matched) {
       let phen = decodePhenomenonDetailed(t);
       if (phen) { decodedItems.push(phen); matched = true; }
     }
 
-    // Nuvens
     if (!matched) {
       let cld = decodeCloudDetailed(t);
       if (cld) {
@@ -920,14 +926,12 @@ function parseStructuredPeriod(tokens) {
       }
     }
 
-    // Temperaturas
     if (!matched) {
       let tmp = decodeTempDetailed(t);
       if (tmp) { decodedItems.push(tmp); matched = true; }
     }
 
     if (!matched) {
-      // Ignora tokens de transição pura já tratados no split, mas captura outros desconhecidos
       if (!["TAF", "BECMG", "TEMPO", "FM", "PROB30", "PROB40"].includes(t) && !/^\d{6}Z$/.test(t) && !/^\d{4}\/\d{4}$/.test(t)) {
         unparsedTokens.push(t);
       }
@@ -936,7 +940,7 @@ function parseStructuredPeriod(tokens) {
 
   let textSummary = decodedItems.length > 0 ? decodedItems.join('. ') + '.' : "Condições mantidas sem alterações.";
   if (ceilingMin !== null) {
-    textSummary += ` [Teto mínimo: ${ceilingMin} pés]`;
+    textSummary += ` [Teto operacional mínimo: ${ceilingMin} pés]`;
   }
 
   return { textSummary, unparsedTokens };
@@ -949,15 +953,25 @@ function buildTafInterpretationDOM(tafStr, airportName) {
     return container;
   }
 
-  const rawTokens = tafStr.trim().split(/\s+/);
-  if (rawTokens.length === 0) return container;
+  // Parser de cabeçalho robusto via RegEx sem índices fixos
+  const headerRegex = /^TAF\s+(AMD|COR)?\s*([A-Z]{4})\s+(\d{6}Z)\s+(\d{4}\/\d{4})/;
+  const headerMatch = tafStr.match(headerRegex);
 
-  // 1. Cabeçalho Estrutural
-  let station = rawTokens[1] || airportName;
-  let issueTime = rawTokens[2] || "";
-  let validity = rawTokens[3] || "";
-  let isAmend = tafStr.includes("AMD");
-  let isCorr = tafStr.includes("COR");
+  let station = airportName;
+  let issueTime = "";
+  let validity = "";
+  let isAmend = false;
+  let isCorr = false;
+  let cleanedTafStr = tafStr;
+
+  if (headerMatch) {
+    isAmend = headerMatch[1] === "AMD";
+    isCorr = headerMatch[1] === "COR";
+    station = headerMatch[2];
+    issueTime = headerMatch[3];
+    validity = headerMatch[4];
+    cleanedTafStr = tafStr.replace(headerMatch[0], "").trim();
+  }
 
   const headerDiv = document.createElement('div');
   headerDiv.className = 'taf-block taf-header-block';
@@ -966,66 +980,83 @@ function buildTafInterpretationDOM(tafStr, airportName) {
   if (isCorr) headerTitle += " — [CORRIGIDA / COR]";
   
   if (issueTime) {
-    headerTitle += `<br>• Emissão: Dia ${issueTime.slice(0,2)} às ${issueTime.slice(2,4)}:${issueTime.slice(4,6)}Z`;
+    headerTitle += `\n• Emissão: Dia ${issueTime.slice(0,2)} às ${issueTime.slice(2,4)}:${issueTime.slice(4,6)}Z`;
   }
   if (validity) {
-    headerTitle += `<br>• Validade: Do dia ${validity.slice(0,2)} às ${validity.slice(2,4)}Z até o dia ${validity.slice(5,7)} às ${validity.slice(7,9)}Z`;
+    headerTitle += `\n• Validade: Do dia ${validity.slice(0,2)} às ${validity.slice(2,4)}Z até o dia ${validity.slice(5,7)} às ${validity.slice(7,9)}Z`;
   }
-  headerDiv.innerHTML = headerTitle;
+  headerDiv.textContent = headerTitle;
   container.appendChild(headerDiv);
 
-  // 2. Separação por Períodos de Mudança (BECMG, TEMPO, FM, PROB30/40)
-  const segments = tafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bFM\b|\bPROB30\b|\bPROB40\b)/);
+  // Segmentação inteligente de grupos compostos e transições
+  // Regex para capturar blocos iniciados por BECMG, TEMPO, FM, PROB30/40 TEMPO
+  const segments = cleanedTafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bFM\b|\bPROB30\s+TEMPO\b|\bPROB40\s+TEMPO\b|\bPROB30\b|\bPROB40\b)/);
 
   let hasUnparsedOverall = false;
 
   segments.forEach((seg, idx) => {
-    const segTokens = seg.trim().split(/\s+/);
-    if (segTokens.length === 0) return;
+    const segTrim = seg.trim();
+    if (!segTrim) return;
+    const segTokens = segTrim.split(/\s+/);
 
     const blockDiv = document.createElement('div');
     blockDiv.className = 'taf-block';
 
-    if (idx === 0) {
+    if (idx === 0 && !["BECMG", "TEMPO", "FM", "PROB30", "PROB40"].some(ind => segTrim.startsWith(ind))) {
       blockDiv.classList.add('taf-base-block');
-      const cleanTokens = segTokens.filter(tok => !tok.startsWith("TAF") && tok !== station && tok !== issueTime && tok !== validity);
-      const parsed = parseStructuredPeriod(cleanTokens);
+      const parsed = parseStructuredPeriod(segTokens);
 
       const titleP = document.createElement('div');
-      titleP.innerHTML = `<strong>Condições Predominantes (Início):</strong>`;
+      titleP.textContent = "Condições Predominantes (Início):";
+      titleP.style.fontWeight = "bold";
       blockDiv.appendChild(titleP);
 
       const textP = document.createElement('div');
       textP.textContent = parsed.textSummary;
       blockDiv.appendChild(textP);
 
-      if (parsed.unparsedTokens.length > 0) {
-        hasUnparsedOverall = true;
-      }
+      if (parsed.unparsedTokens.length > 0) hasUnparsedOverall = true;
     } else {
       blockDiv.classList.add('taf-change-block');
-      const indicator = segTokens[0];
-      const timeGroup = segTokens[1] || "";
-      const cleanTokens = segTokens.slice(2);
+      let indicator = segTokens[0];
+      let timeGroupIdx = 1;
+
+      // Tratamento de Grupo Composto PROB30/40 TEMPO
+      if ((indicator === "PROB30" || indicator === "PROB40") && segTokens[1] === "TEMPO") {
+        indicator = `${segTokens[0]} ${segTokens[1]}`;
+        timeGroupIdx = 2;
+      }
+
+      const timeGroup = segTokens[timeGroupIdx] || "";
+      const cleanTokens = segTokens.slice(timeGroupIdx + 1);
       const parsed = parseStructuredPeriod(cleanTokens);
 
       const titleP = document.createElement('div');
+      titleP.style.fontWeight = "bold";
       let label = indicator;
-      if (indicator === "BECMG") label = `Mudança gradual (${timeGroup})`;
-      else if (indicator === "TEMPO") label = `Flutuação temporária (${timeGroup})`;
-      else if (indicator === "FM") label = `A partir de (dia ${timeGroup.slice(0,2)} às ${timeGroup.slice(2,4)}:${timeGroup.slice(4,6)} UTC)`;
-      else if (indicator.startsWith("PROB")) label = `Probabilidade de ${indicator.replace("PROB", "")}% (${timeGroup})`;
 
-      titleP.innerHTML = `<strong>${label}:</strong>`;
+      if (indicator === "BECMG") {
+        label = `Mudança gradual (${timeGroup})`;
+      } else if (indicator === "TEMPO") {
+        label = `Flutuação temporária (${timeGroup})`;
+      } else if (indicator === "FM") {
+        const dia = timeGroup.slice(0,2);
+        const hora = timeGroup.slice(2,4);
+        const min = timeGroup.slice(4,6);
+        label = `A partir de (dia ${dia} às ${hora}:${min} UTC)`;
+      } else if (indicator.startsWith("PROB")) {
+        const probVal = indicator.replace("PROB", "").replace(" TEMPO", " (com flutuação temporária)");
+        label = `Probabilidade de ${probVal}% (${timeGroup})`;
+      }
+
+      titleP.textContent = `${label}:`;
       blockDiv.appendChild(titleP);
 
       const textP = document.createElement('div');
       textP.textContent = parsed.textSummary;
       blockDiv.appendChild(textP);
 
-      if (parsed.unparsedTokens.length > 0) {
-        hasUnparsedOverall = true;
-      }
+      if (parsed.unparsedTokens.length > 0) hasUnparsedOverall = true;
     }
 
     container.appendChild(blockDiv);
@@ -1087,13 +1118,13 @@ async function fetchData(isBackground = false) {
           pressure: cached.pressure,
           temperature: cached.temperature,
           metarInterpret: cached.metarInterpret,
-          tafInterpretHTML: cached.tafInterpretHTML || "",
+          tafInterpretDOMNode: cached.tafInterpretDOMNode || null,
           isCached: true
         };
       }
 
-      const tafDom = buildTafInterpretationDOM(item.taf, item.name);
-      const processedItem = { ...item, tafInterpretHTML: tafDom.innerHTML };
+      const tafDomNode = buildTafInterpretationDOM(item.taf, item.name);
+      const processedItem = { ...item, tafInterpretDOMNode: tafDomNode };
 
       if (item.metar && item.metar !== "") {
         State.cache[item.icao] = { ...processedItem };
@@ -1331,11 +1362,20 @@ function renderGrid() {
 
         <details class="taf-details" style="margin-top: 6px;">
           <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
-          <div class="interpret-section" style="margin-top: 6px; margin-bottom: 8px;">${item.tafInterpretHTML || "Nenhuma interpretação de TAF disponível."}</div>
+          <div class="interpret-section taf-container-target" style="margin-top: 6px; margin-bottom: 8px;"></div>
           <div class="weather-box taf-raw-box" style="margin-top: 6px;">${escapeHTML(item.taf || "TAF indisponível")}</div>
         </details>
       </div>
     `;
+
+    // Inserção segura do nó DOM interpretado utilizando textContent (sem innerHTML vulnerável)
+    const tafTarget = card.querySelector('.taf-container-target');
+    if (item.tafInterpretDOMNode && tafTarget) {
+      tafTarget.appendChild(item.tafInterpretDOMNode.cloneNode(true));
+    } else if (tafTarget) {
+      tafTarget.textContent = "Nenhuma interpretação de TAF disponível.";
+    }
+
     fragment.appendChild(card);
   });
 
