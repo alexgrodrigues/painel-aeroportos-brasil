@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v83</title>
+<title>Painel de Aeroportos Globais - v83.1</title>
 <style>
 :root {
 --bg-color: #0f172a;
@@ -448,18 +448,17 @@ line-height: 1.4;
 margin-top: 6px;
 }
 
-/* Estilos estruturados para blocos do TAF v83 */
 .taf-block {
 margin-bottom: 8px;
 padding: 6px 8px;
 border-radius: 4px;
 background: rgba(15, 23, 42, 0.3);
 border-left: 3px solid #38bdf8;
+white-space: pre-line;
 }
 .taf-header-block { border-left-color: #facc15; font-weight: bold; color: #facc15; }
 .taf-base-block { border-left-color: #22c55e; }
 .taf-change-block { border-left-color: #3b82f6; }
-.taf-temp-block { border-left-color: #c084fc; color: #c084fc; }
 .taf-warning-unparsed { border-left-color: #f59e0b; color: #fbbf24; font-size: 0.78rem; font-style: italic; }
 
 .taf-raw-box {
@@ -513,7 +512,6 @@ details.taf-details summary {
 color: #c084fc;
 }
 
-/* Modal Styles */
 .modal-overlay {
 position: fixed;
 top: 0;
@@ -618,7 +616,7 @@ font-family: monospace;
 
 <header>
 <h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 83.0 - Parser Gramatical Avançado e Grupos Compostos</div>
+<div class="version">VERSÃO 83.1 - Parser Gramatical Avançado e Renderização Segura</div>
 
 <div id="cacheWarningBanner" class="cache-warning-banner">
   ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
@@ -680,7 +678,6 @@ font-family: monospace;
 <button class="filter-btn" data-region="AFRICA">África</button>
 </div>
 
-<!-- Barra Dinâmica de Seleção de Países da Região -->
 <div class="country-bar" id="countryBar"></div>
 
 <div class="filters" id="categoryFilters">
@@ -695,9 +692,7 @@ font-family: monospace;
 <div id="updateStatus" class="version">Carregando dados meteorológicos via Aviation Weather...</div>
 </header>
 
-<main class="grid" id="airportGrid">
-<!-- Cartões gerados dinamicamente -->
-</main>
+<main class="grid" id="airportGrid"></main>
 
 <div class="modal-overlay" id="airportModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
   <div class="modal-content" id="modalBox" tabindex="-1">
@@ -730,10 +725,10 @@ font-family: monospace;
 const CONFIG = {
   WORKER_URL: "https://weathered-grass-f181.alexgrodrigues.workers.dev",
   REFRESH_INTERVAL_MS: 300000,
-  PARSER_VERSION: "v83-taf-pro",
+  PARSER_VERSION: "v83.1-taf-pro",
   STORAGE_KEYS: {
     FAVORITES: "airport_favorites_v78",
-    PERSISTED_STATE: "airport_weather_persisted_state_v83"
+    PERSISTED_STATE: "airport_weather_persisted_state_v83.1"
   }
 };
 
@@ -775,7 +770,7 @@ function escapeHTML(str) {
 }
 
 // ==========================================
-// MOTOR PARSER DE TAF PROFISSIONAL (v83)
+// MOTOR PARSER DE TAF PROFISSIONAL (v83.1)
 // ==========================================
 function decodeWindDetailed(token) {
   if (token === "00000KT") return { text: "Vento calmo", isCalm: true };
@@ -949,11 +944,12 @@ function parseStructuredPeriod(tokens) {
 function buildTafInterpretationDOM(tafStr, airportName) {
   const container = document.createElement('div');
   if (!tafStr) {
-    container.textContent = "Nenhuma interpretação disponível.";
+    const errorDiv = document.createElement('div');
+    errorDiv.textContent = "Nenhuma interpretação disponível.";
+    container.appendChild(errorDiv);
     return container;
   }
 
-  // Parser de cabeçalho robusto via RegEx sem índices fixos
   const headerRegex = /^TAF\s+(AMD|COR)?\s*([A-Z]{4})\s+(\d{6}Z)\s+(\d{4}\/\d{4})/;
   const headerMatch = tafStr.match(headerRegex);
 
@@ -988,8 +984,6 @@ function buildTafInterpretationDOM(tafStr, airportName) {
   headerDiv.textContent = headerTitle;
   container.appendChild(headerDiv);
 
-  // Segmentação inteligente de grupos compostos e transições
-  // Regex para capturar blocos iniciados por BECMG, TEMPO, FM, PROB30/40 TEMPO
   const segments = cleanedTafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bFM\b|\bPROB30\s+TEMPO\b|\bPROB40\s+TEMPO\b|\bPROB30\b|\bPROB40\b)/);
 
   let hasUnparsedOverall = false;
@@ -1021,7 +1015,6 @@ function buildTafInterpretationDOM(tafStr, airportName) {
       let indicator = segTokens[0];
       let timeGroupIdx = 1;
 
-      // Tratamento de Grupo Composto PROB30/40 TEMPO
       if ((indicator === "PROB30" || indicator === "PROB40") && segTokens[1] === "TEMPO") {
         indicator = `${segTokens[0]} ${segTokens[1]}`;
         timeGroupIdx = 2;
@@ -1093,10 +1086,6 @@ async function fetchData(isBackground = false) {
 
     const json = await response.json();
     
-    if (json.version && json.version !== "v78-strict") {
-      console.warn("Aviso: A versão retornada pelo Worker difere da esperada.");
-    }
-
     if (!json.ok || !Array.isArray(json.rows)) {
       throw new Error("Formato de resposta inválido recebido do Worker.");
     }
@@ -1118,13 +1107,14 @@ async function fetchData(isBackground = false) {
           pressure: cached.pressure,
           temperature: cached.temperature,
           metarInterpret: cached.metarInterpret,
-          tafInterpretDOMNode: cached.tafInterpretDOMNode || null,
+          tafInterpretHTML: cached.tafInterpretHTML || "",
           isCached: true
         };
       }
 
       const tafDomNode = buildTafInterpretationDOM(item.taf, item.name);
-      const processedItem = { ...item, tafInterpretDOMNode: tafDomNode };
+      // Serializa o DOM gerado para string HTML segura para persistência no localStorage
+      const processedItem = { ...item, tafInterpretHTML: tafDomNode.innerHTML };
 
       if (item.metar && item.metar !== "") {
         State.cache[item.icao] = { ...processedItem };
@@ -1368,10 +1358,9 @@ function renderGrid() {
       </div>
     `;
 
-    // Inserção segura do nó DOM interpretado utilizando textContent (sem innerHTML vulnerável)
     const tafTarget = card.querySelector('.taf-container-target');
-    if (item.tafInterpretDOMNode && tafTarget) {
-      tafTarget.appendChild(item.tafInterpretDOMNode.cloneNode(true));
+    if (item.tafInterpretHTML && tafTarget) {
+      tafTarget.innerHTML = item.tafInterpretHTML;
     } else if (tafTarget) {
       tafTarget.textContent = "Nenhuma interpretação de TAF disponível.";
     }
