@@ -8,7 +8,7 @@ Painel web progressivo para monitoramento meteorológico aeronáutico em tempo r
 
 * **Monitoramento em Tempo Real:** Consulta otimizada por blocos de aeroportos na API oficial da [Aviation Weather](https://aviationweather.gov/).
 * **Decodificador Gramatical Avançado:** Tradução automática de METAR e TAF em linguagem natural para facilitar a leitura operacional por pilotos, operadores e entusiastas.
-* **Filtros Geográficos e de Categoria:** Suporte a favoritos, bases aéreas, continentes (América do Sul, América do Norte, Europa, Ásia/Oriente Médio, África) e categorias de voo (`VFR`, `MVFR`, `IFR`, `LIFR`).
+* **Filtros Regionais com Seleção de Países:** Suporte a favoritos, bases aéreas, continentes e subfiltro interativo de países com bandeiras amigáveis.
 * **Resiliência e Cache (Cloudflare KV):** Backend rodando em Cloudflare Workers com TTL de 15 minutos e gatilhos agendados (Cron Trigger) para evitar estouro de requisições na API externa.
 * **Identificador Visual Único:** Favicon SVG integrado otimizado para abas de navegadores modernos.
 

@@ -54,6 +54,12 @@
         <button onclick="setGroupFilter('AFRICA')" id="filter-af" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌍 África</button>
       </div>
 
+      <!-- Sub-filtro de Países (Aparece dinamicamente ao selecionar uma região) -->
+      <div id="country-filter-bar" class="hidden flex flex-wrap gap-2 items-center text-xs pt-3 border-t border-slate-800">
+        <span class="text-sky-400 font-semibold mr-1">Filtrar por País:</span>
+        <div id="country-buttons" class="flex flex-wrap gap-2"></div>
+      </div>
+
       <!-- Estatísticas Rápidas -->
       <div id="stats-bar" class="text-xs text-slate-400 flex flex-wrap gap-4 pt-2 border-t border-slate-800">
         <span>Carregando estatísticas...</span>
@@ -77,6 +83,7 @@
     const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev/";
     let globalData = { rows: [] };
     let currentGroupFilter = "ALL";
+    let currentCountryFilter = "ALL";
     let favorites = JSON.parse(localStorage.getItem("fav_airports") || "[]");
 
     const COUNTRY_MAP = {
@@ -112,6 +119,8 @@
 
     function setGroupFilter(group) {
       currentGroupFilter = group;
+      currentCountryFilter = "ALL"; // Reseta o país ao mudar de região
+
       document.querySelectorAll(".region-btn").forEach(btn => {
         btn.classList.remove("bg-sky-600", "text-white");
         btn.classList.add("bg-slate-800", "text-slate-300");
@@ -120,6 +129,36 @@
       const activeBtn = event.target;
       activeBtn.classList.remove("bg-slate-800", "text-slate-300");
       activeBtn.classList.add("bg-sky-600", "text-white");
+      
+      // Gerenciamento do sub-filtro de países
+      const countryBar = document.getElementById("country-filter-bar");
+      const countryButtonsContainer = document.getElementById("country-buttons");
+      
+      const regionalAirports = globalData.rows.filter(r => r.group === group);
+      const uniqueCountries = [...new Set(regionalAirports.map(r => r.country))];
+
+      if ((group === "SOUTH_AMERICA" || group === "EUROPE" || group === "NORTH_AMERICA") && uniqueCountries.length > 1) {
+        countryBar.classList.remove("hidden");
+        let html = `<button onclick="setCountryFilter('ALL')" class="country-btn px-2.5 py-1 rounded bg-sky-700 text-white transition cursor-pointer">🌐 Todos</button>`;
+        uniqueCountries.forEach(code => {
+          html += `<button onclick="setCountryFilter('${code}')" class="country-btn px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">${formatCountry(code)}</button>`;
+        });
+        countryButtonsContainer.innerHTML = html;
+      } else {
+        countryBar.classList.add("hidden");
+      }
+
+      filterAirports();
+    }
+
+    function setCountryFilter(countryCode) {
+      currentCountryFilter = countryCode;
+      document.querySelectorAll(".country-btn").forEach(btn => {
+        btn.classList.remove("bg-sky-700", "text-white");
+        btn.classList.add("bg-slate-800", "text-slate-300");
+      });
+      event.target.classList.remove("bg-slate-800", "text-slate-300");
+      event.target.classList.add("bg-sky-700", "text-white");
       
       filterAirports();
     }
@@ -155,7 +194,11 @@
 
         if (currentGroupFilter === "FAVS") return favorites.includes(item.icao);
         if (currentGroupFilter === "AIRBASE") return item.isAirBase === true;
-        if (currentGroupFilter !== "ALL") return item.group === currentGroupFilter;
+        
+        if (currentGroupFilter !== "ALL") {
+          if (item.group !== currentGroupFilter) return false;
+          if (currentCountryFilter !== "ALL" && item.country !== currentCountryFilter) return false;
+        }
 
         return true;
       });
