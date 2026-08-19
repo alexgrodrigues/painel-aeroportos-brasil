@@ -1,1560 +1,263 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Aeroportos Globais - v83.1</title>
-<style>
-:root {
---bg-color: #0f172a;
---card-bg: #1e293b;
---text-primary: #f8fafc;
---text-secondary: #94a3b8;
---border-color: #334155;
---vfr-color: #22c55e;
---mvfr-color: #3b82f6;
---ifr-color: #ef4444;
---lifr-color: #a855f7;
---na-color: #64748b;
-}
-
-body {
-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-background-color: var(--bg-color);
-color: var(--text-primary);
-margin: 0;
-padding: 20px;
-}
-
-header {
-max-width: 1200px;
-margin: 0 auto 25px auto;
-text-align: center;
-}
-
-h1 {
-margin-bottom: 5px;
-font-size: 1.8rem;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 10px;
-}
-
-.version {
-font-size: 0.85rem;
-color: var(--text-secondary);
-margin-bottom: 15px;
-}
-
-.cache-warning-banner {
-background-color: rgba(245, 158, 11, 0.15);
-border: 1px solid #f59e0b;
-color: #fbbf24;
-padding: 8px 15px;
-border-radius: 8px;
-font-size: 0.85rem;
-margin-bottom: 15px;
-display: none;
-align-items: center;
-justify-content: center;
-gap: 8px;
-font-weight: 500;
-}
-
-.legend-bar {
-display: flex;
-flex-wrap: wrap;
-gap: 12px;
-justify-content: center;
-align-items: center;
-font-size: 0.78rem;
-color: var(--text-secondary);
-background: rgba(30, 41, 59, 0.6);
-padding: 6px 12px;
-border-radius: 6px;
-max-width: 650px;
-margin: 0 auto 15px auto;
-border: 1px solid var(--border-color);
-}
-
-.legend-item {
-display: flex;
-align-items: center;
-gap: 4px;
-}
-
-.legend-dot {
-width: 8px;
-height: 8px;
-border-radius: 50%;
-}
-
-.controls {
-display: flex;
-flex-wrap: wrap;
-gap: 15px;
-justify-content: center;
-align-items: center;
-margin-bottom: 15px;
-position: relative;
-}
-
-.search-wrapper {
-position: relative;
-display: flex;
-align-items: center;
-}
-
-.search-wrapper input {
-padding: 10px 35px 10px 15px;
-border-radius: 8px;
-border: 1px solid var(--border-color);
-background-color: var(--card-bg);
-color: var(--text-primary);
-width: 300px;
-font-size: 0.95rem;
-}
-
-.clear-search {
-position: absolute;
-right: 12px;
-background: none;
-border: none;
-color: var(--text-secondary);
-cursor: pointer;
-font-size: 1.2rem;
-display: none;
-}
-
-.clear-search:hover {
-color: var(--text-primary);
-}
-
-button {
-padding: 10px 16px;
-border-radius: 8px;
-border: none;
-background-color: #3b82f6;
-color: white;
-cursor: pointer;
-font-weight: 600;
-transition: background 0.2s;
-}
-
-button:hover {
-background-color: #2563eb;
-}
-
-button:disabled {
-opacity: 0.6;
-cursor: not-allowed;
-}
-
-.btn-danger-soft {
-background-color: rgba(239, 68, 68, 0.2);
-color: #ef4444;
-border: 1px solid #ef4444;
-font-size: 0.8rem;
-padding: 8px 12px;
-}
-.btn-danger-soft:hover {
-background-color: rgba(239, 68, 68, 0.3);
-}
-
-.container-filtro-bases {
-    position: relative;
-    display: inline-block;
-}
-
-.btn-discreto-bases {
-    background: transparent;
-    border: 1px solid #475569;
-    color: #94a3b8;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.btn-discreto-bases:hover {
-    background-color: rgba(51, 65, 85, 0.5);
-    color: #f8fafc;
-    border-color: #64748b;
-}
-
-.dropdown-bases {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 110%;
-    background-color: var(--card-bg);
-    min-width: 220px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    z-index: 200;
-    overflow: hidden;
-    text-align: left;
-}
-
-.dropdown-bases a {
-    color: var(--text-secondary);
-    padding: 10px 14px;
-    text-decoration: none;
-    display: block;
-    font-size: 0.85rem;
-    transition: background 0.1s, color 0.1s;
-    border-bottom: 1px solid rgba(51, 65, 85, 0.3);
-}
-
-.dropdown-bases a:last-child {
-    border-bottom: none;
-}
-
-.dropdown-bases a:hover {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: #38bdf8;
-}
-
-.dropdown-bases.ativo {
-    display: block;
-}
-
-.filters {
-display: flex;
-flex-wrap: wrap;
-gap: 8px;
-justify-content: center;
-margin-bottom: 10px;
-}
-
-.filter-btn {
-background-color: var(--card-bg);
-color: var(--text-secondary);
-border: 1px solid var(--border-color);
-padding: 6px 12px;
-font-size: 0.85rem;
-border-radius: 6px;
-cursor: pointer;
-transition: background 0.2s, color 0.2s;
-display: inline-flex;
-align-items: center;
-gap: 6px;
-}
-
-.filter-btn.active {
-background-color: #3b82f6;
-color: white;
-border-color: #3b82f6;
-}
-
-.country-bar {
-display: none;
-gap: 6px;
-flex-wrap: wrap;
-justify-content: center;
-padding: 10px;
-background: rgba(30, 41, 59, 0.4);
-border: 1px dashed var(--border-color);
-border-radius: 8px;
-max-width: 900px;
-margin: 0 auto 15px auto;
-}
-
-.country-btn {
-background: var(--bg-color);
-border: 1px solid var(--border-color);
-color: var(--text-secondary);
-padding: 5px 10px;
-border-radius: 6px;
-font-size: 0.8rem;
-cursor: pointer;
-transition: all 0.2s;
-}
-
-.country-btn:hover {
-border-color: #38bdf8;
-color: var(--text-primary);
-}
-
-.country-btn.active {
-background: #0284c7;
-color: #fff;
-border-color: #0284c7;
-}
-
-.stats {
-display: flex;
-flex-wrap: wrap;
-gap: 15px;
-justify-content: center;
-font-size: 0.9rem;
-color: var(--text-secondary);
-margin-bottom: 20px;
-}
-
-.stats span strong {
-color: var(--text-primary);
-}
-
-.grid {
-max-width: 1200px;
-margin: 0 auto;
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-gap: 20px;
-}
-
-.card {
-background-color: var(--card-bg);
-border: 1px solid var(--border-color);
-border-radius: 12px;
-padding: 18px;
-display: flex;
-flex-direction: column;
-gap: 14px;
-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-}
-
-.airport-title {
-font-size: 1.05rem;
-font-weight: bold;
-cursor: pointer;
-color: #38bdf8;
-transition: opacity 0.2s;
-outline: none;
-}
-
-.airport-title:hover, .airport-title:focus {
-opacity: 0.8;
-text-decoration: underline;
-}
-
-.airport-codes {
-font-size: 0.8rem;
-color: #38bdf8;
-font-family: monospace;
-font-weight: bold;
-margin-top: 2px;
-}
-
-.airport-sub {
-font-size: 0.8rem;
-color: var(--text-secondary);
-margin-top: 2px;
-}
-
-.header-right {
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-.fav-btn {
-background: none;
-border: none;
-cursor: pointer;
-font-size: 1.25rem;
-color: var(--text-secondary);
-padding: 0;
-line-height: 1;
-transition: transform 0.1s ease;
-}
-
-.fav-btn:hover {
-transform: scale(1.1);
-}
-
-.fav-btn.active {
-color: #e3b341;
-}
-
-.badge {
-padding: 4px 8px;
-border-radius: 6px;
-font-size: 0.75rem;
-font-weight: bold;
-text-transform: uppercase;
-}
-
-.badge-VFR { background-color: rgba(34, 197, 94, 0.2); color: var(--vfr-color); border: 1px solid var(--vfr-color); }
-.badge-MVFR { background-color: rgba(59, 130, 246, 0.2); color: var(--mvfr-color); border: 1px solid var(--mvfr-color); }
-.badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
-.badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
-.badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
-
-.card-info-grid {
-display: grid;
-grid-template-columns: 1fr 1px 1fr;
-gap: 10px;
-background: rgba(15, 23, 42, 0.4);
-padding: 10px;
-border-radius: 8px;
-font-size: 0.85rem;
-}
-
-.divider {
-background-color: var(--border-color);
-}
-
-.info-item {
-display: flex;
-flex-direction: column;
-gap: 2px;
-}
-
-.info-label {
-color: var(--text-secondary);
-font-size: 0.75rem;
-}
-
-.weather-box {
-background: #0b0f19;
-padding: 10px;
-border-radius: 8px;
-font-size: 0.78rem;
-font-family: monospace;
-word-break: break-all;
-}
-
-.metar-section {
-border-left: 3px solid #38bdf8;
-}
-.metar-box {
-color: #38bdf8;
-border: 1px solid rgba(56, 189, 248, 0.2);
-}
-
-.interpret-section {
-background: rgba(56, 189, 248, 0.08);
-border-left: 3px solid #2dd4bf;
-padding: 9px 12px;
-border-radius: 6px;
-font-size: 0.82rem;
-color: #2dd4bf;
-line-height: 1.4;
-margin-top: 6px;
-}
-
-.taf-block {
-margin-bottom: 8px;
-padding: 6px 8px;
-border-radius: 4px;
-background: rgba(15, 23, 42, 0.3);
-border-left: 3px solid #38bdf8;
-white-space: pre-line;
-}
-.taf-header-block { border-left-color: #facc15; font-weight: bold; color: #facc15; }
-.taf-base-block { border-left-color: #22c55e; }
-.taf-change-block { border-left-color: #3b82f6; }
-.taf-warning-unparsed { border-left-color: #f59e0b; color: #fbbf24; font-size: 0.78rem; font-style: italic; }
-
-.taf-raw-box {
-color: #c084fc;
-border: 1px solid rgba(192, 132, 252, 0.2);
-}
-
-.section-title {
-font-size: 0.75rem;
-font-weight: bold;
-margin-bottom: 4px;
-text-transform: uppercase;
-display: flex;
-align-items: center;
-justify-content: space-between;
-gap: 6px;
-}
-
-.title-metar { color: #38bdf8; }
-.title-interpret { color: #2dd4bf; }
-.title-taf { color: #c084fc; }
-
-.metar-time {
-font-size: 0.7rem;
-color: var(--text-secondary);
-font-family: monospace;
-font-weight: normal;
-}
-
-details summary {
-font-size: 0.75rem;
-font-weight: bold;
-text-transform: uppercase;
-cursor: pointer;
-user-select: none;
-outline: none;
-display: flex;
-align-items: center;
-gap: 6px;
-}
-
-details summary:hover {
-opacity: 0.8;
-}
-
-details.interpret-details summary {
-color: #2dd4bf;
-}
-
-details.taf-details summary {
-color: #c084fc;
-}
-
-.modal-overlay {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0, 0, 0, 0.7);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 1000;
-}
-
-.modal-content {
-background-color: var(--card-bg);
-border: 1px solid var(--border-color);
-border-radius: 12px;
-width: 90%;
-max-width: 500px;
-padding: 24px;
-box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-position: relative;
-outline: none;
-}
-
-.modal-close {
-position: absolute;
-top: 15px;
-right: 20px;
-background: none;
-border: none;
-color: var(--text-secondary);
-font-size: 1.5rem;
-cursor: pointer;
-padding: 0;
-}
-
-.modal-close:hover {
-color: var(--text-primary);
-background: none;
-}
-
-.modal-title {
-font-size: 1.2rem;
-font-weight: bold;
-margin-bottom: 5px;
-color: #38bdf8;
-}
-
-.modal-subtitle {
-font-size: 0.85rem;
-color: var(--text-secondary);
-margin-bottom: 20px;
-}
-
-.modal-section-title {
-font-size: 0.8rem;
-font-weight: bold;
-text-transform: uppercase;
-color: var(--text-secondary);
-margin: 15px 0 8px 0;
-border-bottom: 1px solid var(--border-color);
-padding-bottom: 4px;
-}
-
-.freq-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 10px;
-text-align: center;
-}
-
-.freq-box {
-background: rgba(15, 23, 42, 0.5);
-padding: 8px;
-border-radius: 6px;
-font-size: 0.85rem;
-}
-
-.freq-label {
-font-size: 0.7rem;
-color: var(--text-secondary);
-}
-
-.runway-list {
-list-style: none;
-padding: 0;
-margin: 0;
-font-size: 0.9rem;
-}
-
-.runway-item {
-background: rgba(15, 23, 42, 0.5);
-padding: 8px 12px;
-border-radius: 6px;
-margin-bottom: 6px;
-font-family: monospace;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Aeroportos Globais</title>
+  <!-- Favicon Único e Identificador da Aba (Radar / Aviação) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2338bdf8%22><path d=%22M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z%22/></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+    .card-bg { background-color: #1e293b; border: 1px solid #334155; }
+    .badge-vfr { background-color: #22c55e; color: #fff; }
+    .badge-mvfr { background-color: #3b82f6; color: #fff; }
+    .badge-ifr { background-color: #ef4444; color: #fff; }
+    .badge-lifr { background-color: #a855f7; color: #fff; }
+    .badge-na { background-color: #64748b; color: #fff; }
+  </style>
 </head>
-<body>
-
-<header>
-<h1>✈️ Painel de Aeroportos Globais</h1>
-<div class="version">VERSÃO 83.1 - Parser Gramatical Avançado e Renderização Segura</div>
-
-<div id="cacheWarningBanner" class="cache-warning-banner">
-  ⚠️ Alguns aeroportos possuem dados meteorológicos com mais de 1 hora de atraso em relação à observação oficial.
-</div>
-
-<div class="legend-bar">
-<span><strong>Legenda:</strong></span>
-<div class="legend-item"><span class="legend-dot" style="background-color: var(--vfr-color);"></span> VFR (Bom)</div>
-<div class="legend-item"><span class="legend-dot" style="background-color: var(--mvfr-color);"></span> MVFR (Marginal)</div>
-<div class="legend-item"><span class="legend-dot" style="background-color: var(--ifr-color);"></span> IFR (Restrito)</div>
-<div class="legend-item"><span class="legend-dot" style="background-color: var(--lifr-color);"></span> LIFR (Crítico)</div>
-<div class="legend-item"><span class="legend-dot" style="background-color: var(--na-color);"></span> N/A (Indefinido)</div>
-</div>
-
-<div class="controls">
-<div class="search-wrapper">
-    <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade...">
-    <button class="clear-search" id="clearSearchBtn" title="Limpar busca">&times;</button>
-</div>
-<button id="refreshBtn">🔄 Atualizar Dados</button>
-<button class="filter-btn btn-danger-soft" id="clearFavoritesBtn" title="Limpar todos os favoritos">🧹 Limpar Favoritos</button>
-
-<div class="container-filtro-bases">
-    <button id="btnBasesRegiao" class="btn-discreto-bases" aria-expanded="false" aria-controls="menuBasesRegiao">
-        <span>📍 Bases Aéreas</span>
-        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-    </button>
-    <div id="menuBasesRegiao" class="dropdown-bases">
-        <a href="#" data-base="todas">Todas as Bases</a>
-        <a href="#" data-base="Norte">Região Norte</a>
-        <a href="#" data-base="Nordeste">Região Nordeste</a>
-        <a href="#" data-base="Centro-Oeste">Região Centro-Oeste</a>
-        <a href="#" data-base="Sudeste">Região Sudeste</a>
-        <a href="#" data-base="Sul">Região Sul</a>
-    </div>
-</div>
-
-</div>
-
-<div class="stats" id="statsContainer">
-<span>📊 Exibidos: <strong id="statVisible">0</strong> / Total: <strong id="statTotal">0</strong></span>
-<span>🟢 VFR: <strong id="statVfr">0</strong></span>
-<span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
-<span>🔴 IFR: <strong id="statIfr">0</strong></span>
-<span>🟣 LIFR: <strong id="statLifr">0</strong></span>
-</div>
-
-<div class="filters" id="regionFilters">
-<button class="filter-btn active" data-region="ALL">🌐 Todos</button>
-<button class="filter-btn" data-region="FAV">⭐ Favoritos</button>
-<button class="filter-btn" data-region="SOUTH_AMERICA">🟢 América do Sul</button>
-<button class="filter-btn" data-region="CENTRAL_AMERICA">🟡 América Central</button>
-<button class="filter-btn" data-region="CARIBBEAN">🏝️ Caribe</button>
-<button class="filter-btn" data-region="NORTH_AMERICA">🔵 América do Norte</button>
-<button class="filter-btn" data-region="EUROPE">Europa</button>
-<button class="filter-btn" data-region="ASIA_ME">Ásia / Oriente Médio</button>
-<button class="filter-btn" data-region="AFRICA">África</button>
-</div>
-
-<div class="country-bar" id="countryBar"></div>
-
-<div class="filters" id="categoryFilters">
-<button class="filter-btn active" data-category="ALL">Todas as Condições</button>
-<button class="filter-btn" data-category="VFR">🟢 VFR (Visual)</button>
-<button class="filter-btn" data-category="MVFR">🔵 MVFR (Marginal)</button>
-<button class="filter-btn" data-category="IFR">🔴 IFR (Restrito)</button>
-<button class="filter-btn" data-category="LIFR">🟣 LIFR (Crítico)</button>
-<button class="filter-btn" data-category="N/A">⚪ N/A (Indefinido)</button>
-</div>
-
-<div id="updateStatus" class="version">Carregando dados meteorológicos via Aviation Weather...</div>
-</header>
-
-<main class="grid" id="airportGrid"></main>
-
-<div class="modal-overlay" id="airportModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
-  <div class="modal-content" id="modalBox" tabindex="-1">
-    <button class="modal-close" id="modalCloseBtn" aria-label="Fechar modal">&times;</button>
-    <div class="modal-title" id="modalName">Nome do Aeroporto</div>
-    <div class="modal-subtitle" id="modalCodes">ICAO / IATA / Cidade</div>
-
-    <div class="modal-section-title">📡 Frequências de Comunicação</div>
-    <div class="freq-grid">
-      <div class="freq-box">
-        <div class="freq-label">Torre (TWR)</div>
-        <strong id="modalFreqTower">—</strong>
-      </div>
-      <div class="freq-box">
-        <div class="freq-label">Solo (GND)</div>
-        <strong id="modalFreqGround">—</strong>
-      </div>
-      <div class="freq-box">
-        <div class="freq-label">ATIS</div>
-        <strong id="modalFreqAtis">—</strong>
-      </div>
-    </div>
-
-    <div class="modal-section-title">🛫 Pistas Disponíveis</div>
-    <ul class="runway-list" id="modalRunways"></ul>
-  </div>
-</div>
-
-<script>
-const CONFIG = {
-  WORKER_URL: "https://weathered-grass-f181.alexgrodrigues.workers.dev",
-  REFRESH_INTERVAL_MS: 300000,
-  PARSER_VERSION: "v83.1-taf-pro",
-  STORAGE_KEYS: {
-    FAVORITES: "airport_favorites_v78",
-    PERSISTED_STATE: "airport_weather_persisted_state_v83.1"
-  }
-};
-
-const savedPersistedState = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE) || 'null');
-
-const State = {
-  airports: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.airports : [],
-  cache: {},
-  fetchedAtISO: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.fetchedAtISO : null,
-  version: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.version : null,
-  parserVersion: CONFIG.PARSER_VERSION,
-  currentRegion: 'ALL',
-  currentCountry: 'ALL',
-  currentCategory: 'ALL',
-  currentSearch: '',
-  selectedBasesRegiao: 'todas',
-  favorites: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVORITES) || '[]'),
-  isLoading: false,
-  lastFetchedDateStr: (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION) ? savedPersistedState.fetchedStr : '',
-  lastTriggeredElement: null
-};
-
-if (savedPersistedState && savedPersistedState.parserVersion === CONFIG.PARSER_VERSION && Array.isArray(savedPersistedState.airports)) {
-  savedPersistedState.airports.forEach(item => {
-    if (item.metar) {
-      State.cache[item.icao] = { ...item };
-    }
-  });
-}
-
-function escapeHTML(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
-// ==========================================
-// MOTOR PARSER DE TAF PROFISSIONAL (v83.1)
-// ==========================================
-function decodeWindDetailed(token) {
-  if (token === "00000KT") return { text: "Vento calmo", isCalm: true };
-  const match = token.match(/\b(VRB|\d{3})(\d{2,3})(G\d{2,3})?(KT|MPS)\b/);
-  if (!match) return null;
-
-  const dir = match[1] === "VRB" ? "variável" : `${match[1]}°`;
-  const speed = parseInt(match[2], 10);
-  const unit = match[4] === "KT" ? "nós" : "m/s";
-  let text = `Vento de ${dir} a ${speed} ${unit}`;
-  if (match[3]) {
-    const gust = parseInt(match[3].slice(1), 10);
-    text += `, com rajadas de ${gust} ${unit}`;
-  }
-  return { text, speed };
-}
-
-function decodeWindVariation(token) {
-  const match = token.match(/^(\d{3})V(\d{3})$/);
-  if (!match) return null;
-  return `com variação direcional entre ${match[1]}° e ${match[2]}°`;
-}
-
-function decodeVisibilityDetailed(token) {
-  if (token === "CAVOK") return "Visibilidade superior a 10 km, céu claro e sem nuvens abaixo de 5.000 pés (CAVOK)";
-  if (/^\d{4}$/.test(token)) {
-    const meters = parseInt(token, 10);
-    return meters >= 9999 ? "Visibilidade de 10 km ou mais" : `Visibilidade de ${meters} metros`;
-  }
-  return null;
-}
-
-function decodePhenomenonDetailed(token) {
-  if (token === "NSW") return "Fim dos fenômenos meteorológicos significativos anteriormente previstos (NSW)";
-
-  const intensities = { "-": "leve", "+": "forte", "": "moderada" };
-  const intensity = intensities[token[0]] || "";
-  const cleanTok = token.replace(/^[-+]/, "");
-
-  const descriptors = {
-    "MI": "baixo", "PR": "parcial", "BC": "em bancos", "DR": "baixa rajada",
-    "BL": "soprado alto", "SH": "pancada(s)", "TS": "trovoada", "FZ": "congelante"
-  };
-
-  const types = {
-    "RA": "chuva", "SN": "neve", "DZ": "garoa", "SG": "neve em grãos",
-    "IC": "cristais de gelo", "PL": "pelotas de gelo", "GR": "granizo", "GS": "granizo pequeno",
-    "UP": "precipitação desconhecida", "BR": "névoa úmida", "FG": "nevoeiro",
-    "FU": "fumaça", "VA": "cinza vulcânica", "DU": "poeira ampla", "SA": "areia",
-    "HZ": "névoa seca", "PY": "neblina", "PO": "redemoinhos de poeira/areia",
-    "SQ": "linha de instabilidade (squall)", "FC": "funil / tornado / tromba d'água",
-    "SS": "tempestade de areia", "DS": "tempestade de poeira"
-  };
-
-  let descStr = "";
-  let typeStr = types[cleanTok] || "";
-
-  for (let code in descriptors) {
-    if (cleanTok.startsWith(code)) {
-      descStr = descriptors[code];
-      typeStr = types[cleanTok.slice(code.length)] || cleanTok.slice(code.length);
-      break;
-    }
-  }
-
-  if (!typeStr) return null;
-
-  let parts = [];
-  if (intensity && intensity !== "moderada") parts.push(intensity);
-  if (descStr) parts.push(descStr);
-  parts.push(typeStr);
-
-  return parts.join(" ");
-}
-
-function decodeCloudDetailed(token) {
-  if (token === "NSC" || token === "SKC" || token === "CLR") return { text: "Céu limpo / Sem nuvens significativas", height: 99999, isCeiling: false };
-  const match = token.match(/^(FEW|SCT|BKN|OVC|VV)(\d{3})(CB|TCU)?$/);
-  if (!match) return null;
-
-  const code = match[1];
-  const height = parseInt(match[2], 10) * 100;
-  const modifier = match[3];
-
-  let name = "";
-  if (code === "FEW") name = `Poucas nuvens a ${height} pés`;
-  if (code === "SCT") name = `Nuvens esparsas a ${height} pés`;
-  if (code === "BKN") name = `Teto nublado a ${height} pés`;
-  if (code === "OVC") name = `Céu encoberto a ${height} pés`;
-  if (code === "VV") name = `Visibilidade vertical de ${height} pés`;
-
-  if (modifier === "CB") name += " com Cumulonimbus (CB)";
-  if (modifier === "TCU") name += " com Towering Cumulus (TCU)";
-
-  const isCeiling = (code === "BKN" || code === "OVC" || code === "VV");
-  return { text: name, height, isCeiling };
-}
-
-function decodeTempDetailed(token) {
-  const matchMax = token.match(/^TX(M?\d{2})\/(\d{2})(\d{2})Z$/);
-  if (matchMax) {
-    const temp = matchMax[1].replace('M', '-');
-    return `Temperatura máxima prevista de ${temp} °C no dia ${matchMax[2]} às ${matchMax[3]}:00 UTC`;
-  }
-  const matchMin = token.match(/^TN(M?\d{2})\/(\d{2})(\d{2})Z$/);
-  if (matchMin) {
-    const temp = matchMin[1].replace('M', '-');
-    return `Temperatura mínima prevista de ${temp} °C no dia ${matchMin[2]} às ${matchMin[3]}:00 UTC`;
-  }
-  return null;
-}
-
-function parseStructuredPeriod(tokens) {
-  let decodedItems = [];
-  let unparsedTokens = [];
-  let ceilingMin = null;
-
-  for (let i = 0; i < tokens.length; i++) {
-    let t = tokens[i];
-    let matched = false;
-
-    let wind = decodeWindDetailed(t);
-    if (wind) { decodedItems.push(wind.text); matched = true; }
-
-    if (!matched) {
-      let windVar = decodeWindVariation(t);
-      if (windVar) { decodedItems.push(windVar); matched = true; }
-    }
-
-    if (!matched) {
-      let vis = decodeVisibilityDetailed(t);
-      if (vis) { decodedItems.push(vis); matched = true; }
-    }
-
-    if (!matched) {
-      let phen = decodePhenomenonDetailed(t);
-      if (phen) { decodedItems.push(phen); matched = true; }
-    }
-
-    if (!matched) {
-      let cld = decodeCloudDetailed(t);
-      if (cld) {
-        decodedItems.push(cld.text);
-        if (cld.isCeiling && (ceilingMin === null || cld.height < ceilingMin)) {
-          ceilingMin = cld.height;
-        }
-        matched = true;
-      }
-    }
-
-    if (!matched) {
-      let tmp = decodeTempDetailed(t);
-      if (tmp) { decodedItems.push(tmp); matched = true; }
-    }
-
-    if (!matched) {
-      if (!["TAF", "BECMG", "TEMPO", "FM", "PROB30", "PROB40"].includes(t) && !/^\d{6}Z$/.test(t) && !/^\d{4}\/\d{4}$/.test(t)) {
-        unparsedTokens.push(t);
-      }
-    }
-  }
-
-  let textSummary = decodedItems.length > 0 ? decodedItems.join('. ') + '.' : "Condições mantidas sem alterações.";
-  if (ceilingMin !== null) {
-    textSummary += ` [Teto operacional mínimo: ${ceilingMin} pés]`;
-  }
-
-  return { textSummary, unparsedTokens };
-}
-
-function buildTafInterpretationDOM(tafStr, airportName) {
-  const container = document.createElement('div');
-  if (!tafStr) {
-    const errorDiv = document.createElement('div');
-    errorDiv.textContent = "Nenhuma interpretação disponível.";
-    container.appendChild(errorDiv);
-    return container;
-  }
-
-  const headerRegex = /^TAF\s+(AMD|COR)?\s*([A-Z]{4})\s+(\d{6}Z)\s+(\d{4}\/\d{4})/;
-  const headerMatch = tafStr.match(headerRegex);
-
-  let station = airportName;
-  let issueTime = "";
-  let validity = "";
-  let isAmend = false;
-  let isCorr = false;
-  let cleanedTafStr = tafStr;
-
-  if (headerMatch) {
-    isAmend = headerMatch[1] === "AMD";
-    isCorr = headerMatch[1] === "COR";
-    station = headerMatch[2];
-    issueTime = headerMatch[3];
-    validity = headerMatch[4];
-    cleanedTafStr = tafStr.replace(headerMatch[0], "").trim();
-  }
-
-  const headerDiv = document.createElement('div');
-  headerDiv.className = 'taf-block taf-header-block';
-  let headerTitle = `Previsão de Aeródromo (${station})`;
-  if (isAmend) headerTitle += " — [EMENDA / AMD]";
-  if (isCorr) headerTitle += " — [CORRIGIDA / COR]";
-  
-  if (issueTime) {
-    headerTitle += `\n• Emissão: Dia ${issueTime.slice(0,2)} às ${issueTime.slice(2,4)}:${issueTime.slice(4,6)}Z`;
-  }
-  if (validity) {
-    headerTitle += `\n• Validade: Do dia ${validity.slice(0,2)} às ${validity.slice(2,4)}Z até o dia ${validity.slice(5,7)} às ${validity.slice(7,9)}Z`;
-  }
-  headerDiv.textContent = headerTitle;
-  container.appendChild(headerDiv);
-
-  const segments = cleanedTafStr.split(/(?=\bBECMG\b|\bTEMPO\b|\bFM\b|\bPROB30\s+TEMPO\b|\bPROB40\s+TEMPO\b|\bPROB30\b|\bPROB40\b)/);
-
-  let hasUnparsedOverall = false;
-
-  segments.forEach((seg, idx) => {
-    const segTrim = seg.trim();
-    if (!segTrim) return;
-    const segTokens = segTrim.split(/\s+/);
-
-    const blockDiv = document.createElement('div');
-    blockDiv.className = 'taf-block';
-
-    if (idx === 0 && !["BECMG", "TEMPO", "FM", "PROB30", "PROB40"].some(ind => segTrim.startsWith(ind))) {
-      blockDiv.classList.add('taf-base-block');
-      const parsed = parseStructuredPeriod(segTokens);
-
-      const titleP = document.createElement('div');
-      titleP.textContent = "Condições Predominantes (Início):";
-      titleP.style.fontWeight = "bold";
-      blockDiv.appendChild(titleP);
-
-      const textP = document.createElement('div');
-      textP.textContent = parsed.textSummary;
-      blockDiv.appendChild(textP);
-
-      if (parsed.unparsedTokens.length > 0) hasUnparsedOverall = true;
-    } else {
-      blockDiv.classList.add('taf-change-block');
-      let indicator = segTokens[0];
-      let timeGroupIdx = 1;
-
-      if ((indicator === "PROB30" || indicator === "PROB40") && segTokens[1] === "TEMPO") {
-        indicator = `${segTokens[0]} ${segTokens[1]}`;
-        timeGroupIdx = 2;
-      }
-
-      const timeGroup = segTokens[timeGroupIdx] || "";
-      const cleanTokens = segTokens.slice(timeGroupIdx + 1);
-      const parsed = parseStructuredPeriod(cleanTokens);
-
-      const titleP = document.createElement('div');
-      titleP.style.fontWeight = "bold";
-      let label = indicator;
-
-      if (indicator === "BECMG") {
-        label = `Mudança gradual (${timeGroup})`;
-      } else if (indicator === "TEMPO") {
-        label = `Flutuação temporária (${timeGroup})`;
-      } else if (indicator === "FM") {
-        const dia = timeGroup.slice(0,2);
-        const hora = timeGroup.slice(2,4);
-        const min = timeGroup.slice(4,6);
-        label = `A partir de (dia ${dia} às ${hora}:${min} UTC)`;
-      } else if (indicator.startsWith("PROB")) {
-        const probVal = indicator.replace("PROB", "").replace(" TEMPO", " (com flutuação temporária)");
-        label = `Probabilidade de ${probVal}% (${timeGroup})`;
-      }
-
-      titleP.textContent = `${label}:`;
-      blockDiv.appendChild(titleP);
-
-      const textP = document.createElement('div');
-      textP.textContent = parsed.textSummary;
-      blockDiv.appendChild(textP);
-
-      if (parsed.unparsedTokens.length > 0) hasUnparsedOverall = true;
-    }
-
-    container.appendChild(blockDiv);
-  });
-
-  if (hasUnparsedOverall) {
-    const warningDiv = document.createElement('div');
-    warningDiv.className = 'taf-block taf-warning-unparsed';
-    warningDiv.textContent = "⚠️ Alguns grupos do TAF não foram decodificados integralmente. Consulte o TAF bruto para conferência técnica.";
-    container.appendChild(warningDiv);
-  }
-
-  return container;
-}
-// ==========================================
-
-async function fetchData(isBackground = false) {
-  if (State.isLoading) return;
-  State.isLoading = true;
-
-  const statusEl = document.getElementById('updateStatus');
-  const refreshBtn = document.getElementById('refreshBtn');
-
-  if (!isBackground) {
-    statusEl.innerText = "Buscando dados atualizados da Aviation Weather...";
-    refreshBtn.disabled = true;
-  }
-
-  try {
-    const response = await fetch(CONFIG.WORKER_URL, { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error(`Erro HTTP no Servidor: ${response.status} ${response.statusText}`);
-    }
-
-    const json = await response.json();
-    
-    if (!json.ok || !Array.isArray(json.rows)) {
-      throw new Error("Formato de resposta inválido recebido do Worker.");
-    }
-
-    State.fetchedAtISO = json.fetchedAtISO;
-    State.version = json.version;
-    State.parserVersion = CONFIG.PARSER_VERSION;
-
-    let hasOutdatedItems = false;
-    State.airports = json.rows.map(item => {
-      if ((!item.metar || item.metar === "") && State.cache[item.icao]) {
-        const cached = State.cache[item.icao];
-        return {
-          ...item,
-          metar: cached.metar,
-          taf: item.taf || cached.taf,
-          category: cached.category,
-          wind: cached.wind,
-          pressure: cached.pressure,
-          temperature: cached.temperature,
-          metarInterpret: cached.metarInterpret,
-          tafInterpretHTML: cached.tafInterpretHTML || "",
-          isCached: true
-        };
-      }
-
-      const tafDomNode = buildTafInterpretationDOM(item.taf, item.name);
-      // Serializa o DOM gerado para string HTML segura para persistência no localStorage
-      const processedItem = { ...item, tafInterpretHTML: tafDomNode.innerHTML };
-
-      if (item.metar && item.metar !== "") {
-        State.cache[item.icao] = { ...processedItem };
-      }
-      return processedItem;
-    });
-
-    State.airports.forEach(item => {
-      if (item.metar) {
-        const ageInfo = parseMetarAge(item, State.fetchedAtISO);
-        if (ageInfo.isOutdated) {
-          hasOutdatedItems = true;
-        }
-      }
-    });
-
-    const banner = document.getElementById('cacheWarningBanner');
-    banner.style.display = hasOutdatedItems ? 'flex' : 'none';
-
-    State.lastFetchedDateStr = `${json.fetchedDate || ''} às ${json.fetchedAt}`;
-    
-    localStorage.setItem(CONFIG.STORAGE_KEYS.PERSISTED_STATE, JSON.stringify({
-      airports: State.airports,
-      fetchedStr: State.lastFetchedDateStr,
-      fetchedAtISO: State.fetchedAtISO,
-      version: State.version,
-      parserVersion: State.parserVersion
-    }));
-
-    statusEl.innerText = `Fonte: Aviation Weather | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
-    renderGrid();
-
-  } catch (error) {
-    console.error("Erro de sincronização:", error);
-    if (!isBackground) {
-      statusEl.innerText = `⚠️ Falha ao carregar: ${error.message}`;
-    } else {
-      const baseText = State.lastFetchedDateStr ? `Última sincronização bem-sucedida em: ${State.lastFetchedDateStr}` : "Modo offline / Cache ativo";
-      statusEl.innerText = `${baseText} | ⚠️ Falha na tentativa automática (${new Date().toLocaleTimeString('pt-BR')})`;
-    }
-  } finally {
-    State.isLoading = false;
-    refreshBtn.disabled = false;
-  }
-}
-
-function parseMetarAge(item, fetchedAtISO) {
-  if (!item.metar) return { text: "", isOutdated: false };
-
-  let metarDate = null;
-  if (item.observationTime !== undefined && item.observationTime !== null) {
-    if (typeof item.observationTime === 'number') {
-      metarDate = new Date(item.observationTime * 1000);
-    } else if (typeof item.observationTime === 'string') {
-      metarDate = new Date(item.observationTime);
-    }
-  }
-
-  if (!metarDate || isNaN(metarDate.getTime())) {
-    const match = item.metar.match(/\b(\d{2})(\d{2})(\d{2})Z\b/);
-    if (match) {
-      const day = parseInt(match[1], 10);
-      const hour = parseInt(match[2], 10);
-      const minute = parseInt(match[3], 10);
-
-      const baseDate = fetchedAtISO ? new Date(fetchedAtISO) : new Date();
-      metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth(), day, hour, minute));
-      
-      if (baseDate.getUTCDate() === 1 && day > 25) {
-        metarDate = new Date(Date.UTC(baseDate.getUTCFullYear(), baseDate.getUTCMonth() - 1, day, hour, minute));
-      }
-    }
-  }
-
-  if (!metarDate || isNaN(metarDate.getTime())) {
-    return { text: "Horário não mapeado", isOutdated: false };
-  }
-
-  let diffMs = Date.now() - metarDate.getTime();
-  if (diffMs < 0) diffMs = 0;
-
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMins / 60);
-  const remMins = diffMins % 60;
-
-  const isOutdated = diffMins > 60;
-  let text = diffMins < 60 ? `Atualizado há ${diffMins} min` : `⚠️ Desatualizado (${diffHours}h ${remMins}m atrás)`;
-
-  return { text, isOutdated };
-}
-
-function syncActiveButtons() {
-  document.querySelectorAll('#regionFilters .filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-region') === State.currentRegion);
-  });
-  document.querySelectorAll('#categoryFilters .filter-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-category') === State.currentCategory);
-  });
-}
-
-function updateCountryBar() {
-  const countryBar = document.getElementById('countryBar');
-  if (['SOUTH_AMERICA', 'CENTRAL_AMERICA', 'CARIBBEAN', 'NORTH_AMERICA', 'EUROPE', 'ASIA_ME', 'AFRICA'].includes(State.currentRegion)) {
-    const countriesInRegion = [...new Set(State.airports.filter(a => a.group === State.currentRegion).map(a => a.country))].sort();
-    
-    if (countriesInRegion.length > 0) {
-      countryBar.style.display = 'flex';
-      let html = `<button class="country-btn ${State.currentCountry === 'ALL' ? 'active' : ''}" data-country="ALL">🌐 Todos os Países</button>`;
-      countriesInRegion.forEach(c => {
-        html += `<button class="country-btn ${State.currentCountry === c ? 'active' : ''}" data-country="${escapeHTML(c)}">${escapeHTML(c)}</button>`;
-      });
-      countryBar.innerHTML = html;
-      return;
-    }
-  }
-  countryBar.style.display = 'none';
-}
-
-function renderGrid() {
-  syncActiveButtons();
-  updateCountryBar();
-
-  const grid = document.getElementById('airportGrid');
-  grid.innerHTML = '';
-
-  let counts = { total: State.airports.length, vfr: 0, mvfr: 0, ifr: 0, lifr: 0, na: 0 };
-  State.airports.forEach(item => {
-    if (item.category === 'VFR') counts.vfr++;
-    else if (item.category === 'MVFR') counts.mvfr++;
-    else if (item.category === 'IFR') counts.ifr++;
-    else if (item.category === 'LIFR') counts.lifr++;
-    else counts.na++;
-  });
-
-  const filtered = State.airports.filter(item => {
-    let matchRegion = true;
-    if (State.currentRegion === 'FAV') {
-      matchRegion = State.favorites.includes(item.icao);
-    } else if (State.currentRegion !== 'ALL') {
-      matchRegion = item.group === State.currentRegion;
-    }
-
-    let matchCountry = (State.currentCountry === 'ALL') || (item.country === State.currentCountry);
-
-    let matchBases = true;
-    if (State.selectedBasesRegiao !== 'todas') {
-      matchBases = (item.isAirBase && item.brazilRegion === State.selectedBasesRegiao);
-    }
-
-    let matchCategory = State.currentCategory === 'ALL' || item.category === State.currentCategory;
-
-    let matchSearch = !State.currentSearch ||
-      item.icao.toLowerCase().includes(State.currentSearch) ||
-      (item.iata && item.iata.toLowerCase().includes(State.currentSearch)) ||
-      item.name.toLowerCase().includes(State.currentSearch) ||
-      item.city.toLowerCase().includes(State.currentSearch);
-
-    return matchRegion && matchCountry && matchBases && matchCategory && matchSearch;
-  });
-
-  document.getElementById('statVisible').innerText = filtered.length;
-  document.getElementById('statTotal').innerText = counts.total;
-  document.getElementById('statVfr').innerText = counts.vfr;
-  document.getElementById('statMvfr').innerText = counts.mvfr;
-  document.getElementById('statIfr').innerText = counts.ifr;
-  document.getElementById('statLifr').innerText = counts.lifr;
-
-  if (filtered.length === 0) {
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto ou base aérea encontrado com os filtros atuais.</div>';
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-
-  filtered.forEach(item => {
-    const ageInfo = parseMetarAge(item, State.fetchedAtISO);
-    const badgeClass = `badge-${item.category}`;
-    const iataDisplay = item.iata ? escapeHTML(item.iata) : '<span style="color: var(--text-secondary); font-weight: normal;">sem IATA</span>';
-    const isFav = State.favorites.includes(item.icao);
-
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-header">
-        <div>
-          <div class="airport-title" data-action="open-modal" data-icao="${escapeHTML(item.icao)}" title="Clique para ver frequências e pistas" role="button" tabindex="0">${escapeHTML(item.name)}</div>
-          <div class="airport-codes">ICAO: ${escapeHTML(item.icao)} &bull; IATA: ${iataDisplay}</div>
-          <div class="airport-sub">${escapeHTML(item.city)} (${escapeHTML(item.country)}) ${item.isCached ? ' <span style="color:#f59e0b; font-size:0.75rem;">(Cache)</span>' : ''}</div>
-        </div>
-        <div class="header-right">
-          <button class="fav-btn ${isFav ? 'active' : ''}" data-action="toggle-fav" data-icao="${escapeHTML(item.icao)}" title="${isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
-            ${isFav ? '⭐' : '☆'}
-          </button>
-          <span class="badge ${badgeClass}">${escapeHTML(item.category)}</span>
-        </div>
-      </div>
-
-      <div class="card-info-grid">
-        <div class="info-item">
-          <span class="info-label">💨 Vento</span>
-          <span><strong>${escapeHTML(item.wind)}</strong></span>
-        </div>
-        <div class="divider"></div>
-        <div class="info-item">
-          <span class="info-label">⚖️ Pressão</span>
-          <span><strong>${escapeHTML(item.pressure)}</strong></span>
-        </div>
-      </div>
-
-      <div class="card-info-grid">
-        <div class="info-item">
-          <span class="info-label">🌡️ Temperatura</span>
-          <span><strong>${item.temperature && item.temperature.current !== null ? escapeHTML(item.temperature.current) + '°C' : '—'}</strong></span>
-        </div>
-        <div class="divider"></div>
-        <div class="info-item">
-          <span class="info-label">💧 Ponto de Orvalho</span>
-          <span><strong>${item.temperature && item.temperature.dewpoint !== null ? escapeHTML(item.temperature.dewpoint) + '°C' : '—'}</strong></span>
-        </div>
-      </div>
-
-      <div class="metar-section">
-        <div class="section-title title-metar">
-          <span>📡 METAR (Condição Atual)</span>
-          <span class="metar-time">${escapeHTML(ageInfo.text)}</span>
-        </div>
-        <div class="weather-box metar-box">${escapeHTML(item.metar || "METAR indisponível")}</div>
-      </div>
-
+<body class="min-h-screen p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Cabeçalho -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-700 gap-4">
       <div>
-        <details class="interpret-details" style="margin-bottom: 6px;">
-          <summary>💡 Ver Interpretação do METAR</summary>
-          <div class="interpret-section">${escapeHTML(item.metarInterpret || "Nenhuma interpretação disponível.")}</div>
-        </details>
-
-        <details class="taf-details" style="margin-top: 6px;">
-          <summary>⏱️ Ver TAF (Previsão / Bruto)</summary>
-          <div class="interpret-section taf-container-target" style="margin-top: 6px; margin-bottom: 8px;"></div>
-          <div class="weather-box taf-raw-box" style="margin-top: 6px;">${escapeHTML(item.taf || "TAF indisponível")}</div>
-        </details>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-sky-400">✈️ Painel de Aeroportos Globais</h1>
+        <p class="text-xs md:text-sm text-slate-400 mt-1">Monitoramento meteorológico aeronáutico (METAR e TAF) em tempo real</p>
       </div>
-    `;
+      <div class="flex items-center gap-3">
+        <button onclick="loadWeatherData()" id="refresh-btn" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 cursor-pointer shadow-md">
+          🔄 Atualizar Dados
+        </button>
+        <button onclick="clearFavorites()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
+          🧹 Limpar Favoritos
+        </button>
+      </div>
+    </header>
 
-    const tafTarget = card.querySelector('.taf-container-target');
-    if (item.tafInterpretHTML && tafTarget) {
-      tafTarget.innerHTML = item.tafInterpretHTML;
-    } else if (tafTarget) {
-      tafTarget.textContent = "Nenhuma interpretação de TAF disponível.";
+    <!-- Barra de Pesquisa e Filtros -->
+    <div class="card-bg p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
+      <div class="relative">
+        <input type="text" id="search-input" oninput="filterAirports()" placeholder="🔍 Pesquisar por ICAO, IATA, Cidade ou Nome do Aeroporto..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition">
+      </div>
+
+      <!-- Filtros de Região e Grupo -->
+      <div class="flex flex-wrap gap-2 items-center text-xs">
+        <span class="text-slate-400 font-semibold mr-1">Região:</span>
+        <button onclick="setGroupFilter('ALL')" id="filter-all" class="region-btn px-3 py-1.5 rounded-lg bg-sky-600 text-white font-medium transition cursor-pointer">🌐 Todos</button>
+        <button onclick="setGroupFilter('FAVS')" id="filter-favs" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">⭐ Favoritos</button>
+        <button onclick="setGroupFilter('AIRBASE')" id="filter-airbase" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">📍 Bases Aéreas</button>
+        <button onclick="setGroupFilter('SOUTH_AMERICA')" id="filter-sa" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🟢 América do Sul</button>
+        <button onclick="setGroupFilter('NORTH_AMERICA')" id="filter-na" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🔵 América do Norte</button>
+        <button onclick="setGroupFilter('EUROPE')" id="filter-eu" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🇪🇺 Europa</button>
+        <button onclick="setGroupFilter('ASIA_ME')" id="filter-as" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌏 Ásia / Oriente Médio</button>
+        <button onclick="setGroupFilter('AFRICA')" id="filter-af" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌍 África</button>
+      </div>
+
+      <!-- Estatísticas Rápidas -->
+      <div id="stats-bar" class="text-xs text-slate-400 flex flex-wrap gap-4 pt-2 border-t border-slate-800">
+        <span>Carregando estatísticas...</span>
+      </div>
+    </div>
+
+    <!-- Container dos Cards de Aeroportos -->
+    <div id="airports-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="col-span-full text-center py-12 text-slate-400">
+        Carregando dados meteorológicos do Worker...
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <footer class="mt-12 pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
+      <p id="footer-info">Fonte: Aviation Weather | Painel de Aeroportos Globais</p>
+    </footer>
+  </div>
+
+  <script>
+    const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev/";
+    let globalData = { rows: [] };
+    let currentGroupFilter = "ALL";
+    let favorites = JSON.parse(localStorage.getItem("fav_airports") || "[]");
+
+    const COUNTRY_MAP = {
+      "BR": "🇧🇷 Brasil", "AR": "🇦🇷 Argentina", "CL": "🇨🇱 Chile", "PE": "🇵🇪 Peru",
+      "CO": "🇨🇴 Colômbia", "UY": "🇺🇾 Uruguai", "PY": "🇵🇾 Paraguai", "US": "🇺🇸 Estados Unidos",
+      "MX": "🇲🇽 México", "PT": "🇵🇹 Portugal", "ES": "🇪🇸 Espanha", "FR": "🇫🇷 França",
+      "GB": "🇬🇧 Reino Unido", "DE": "🇩🇪 Alemanha", "TR": "🇹🇷 Turquia", "GI": "🇬🇮 Gibraltar",
+      "RU": "🇷🇺 Rússia", "AE": "🇦🇪 Emirados Árabes", "JP": "🇯🇵 Japão", "CN": "🇨🇳 China",
+      "SG": "🇸🇬 Cingapura", "KR": "🇰🇷 Coreia do Sul", "ZA": "🇿🇦 África do Sul", "EG": "🇪🇬 Egito", "MA": "🇲🇦 Marrocos"
+    };
+
+    function formatCountry(code) {
+      return COUNTRY_MAP[code] || code || "BR";
     }
 
-    fragment.appendChild(card);
-  });
-
-  grid.appendChild(fragment);
-}
-
-function openModal(icao, triggerElement = null) {
-  State.lastTriggeredElement = triggerElement;
-  const item = State.airports.find(a => a.icao === icao);
-  if (!item) return;
-
-  document.getElementById('modalName').innerText = item.name;
-  document.getElementById('modalCodes').innerText = `ICAO: ${item.icao} • IATA: ${item.iata || 'N/A'} • ${item.city} (${item.country})`;
-
-  const freq = item.frequencies || {};
-  document.getElementById('modalFreqTower').innerText = freq.tower || '—';
-  document.getElementById('modalFreqGround').innerText = freq.ground || '—';
-  document.getElementById('modalFreqAtis').innerText = freq.atis || '—';
-
-  const runwayList = document.getElementById('modalRunways');
-  runwayList.innerHTML = '';
-  if (item.runways && item.runways.length > 0) {
-    item.runways.forEach(rwy => {
-      const li = document.createElement('li');
-      li.className = 'runway-item';
-      li.innerText = `Pista ${rwy}`;
-      runwayList.appendChild(li);
-    });
-  } else {
-    const li = document.createElement('li');
-    li.className = 'runway-item';
-    li.innerText = 'Informações de pistas não cadastradas.';
-    runwayList.appendChild(li);
-  }
-
-  const modalOverlay = document.getElementById('airportModal');
-  modalOverlay.style.display = 'flex';
-  document.getElementById('modalBox').focus();
-}
-
-function closeModal() {
-  document.getElementById('airportModal').style.display = 'none';
-  if (State.lastTriggeredElement && typeof State.lastTriggeredElement.focus === 'function') {
-    State.lastTriggeredElement.focus();
-    State.lastTriggeredElement = null;
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (State.airports.length > 0) {
-    renderGrid();
-    document.getElementById('updateStatus').innerText = `Restaurado do cache local | Atualizado em: ${State.lastFetchedDateStr} (${State.airports.length} aeroportos)`;
-  }
-  
-  fetchData();
-  setInterval(() => fetchData(true), CONFIG.REFRESH_INTERVAL_MS);
-
-  document.getElementById('refreshBtn').addEventListener('click', () => fetchData(false));
-  
-  document.getElementById('clearFavoritesBtn').addEventListener('click', () => {
-    if (confirm("Deseja realmente limpar todos os aeroportos favoritos?")) {
-      State.favorites = [];
-      localStorage.removeItem(CONFIG.STORAGE_KEYS.FAVORITES);
-      renderGrid();
-    }
-  });
-
-  const searchInput = document.getElementById('searchInput');
-  const clearSearchBtn = document.getElementById('clearSearchBtn');
-
-  searchInput.addEventListener('input', (e) => {
-    State.currentSearch = e.target.value.toLowerCase();
-    clearSearchBtn.style.display = State.currentSearch ? 'block' : 'none';
-    renderGrid();
-  });
-
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    State.currentSearch = '';
-    clearSearchBtn.style.display = 'none';
-    renderGrid();
-  });
-
-  document.getElementById('regionFilters').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    const region = btn.getAttribute('data-region');
-    if (region) {
-      State.currentRegion = region;
-      const availableCountries = [...new Set(State.airports.filter(a => a.group === region).map(a => a.country))];
-      if (!availableCountries.includes(State.currentCountry)) {
-        State.currentCountry = 'ALL';
+    async function loadWeatherData() {
+      const container = document.getElementById("airports-container");
+      container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Atualizando dados meteorológicos...</div>`;
+      
+      try {
+        const response = await fetch(WORKER_URL);
+        const json = await response.json();
+        if (json.ok && Array.isArray(json.rows)) {
+          globalData = json;
+          renderUI();
+        } else {
+          throw new Error("Formato de resposta inválido do Worker.");
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-red-400">Erro ao carregar dados do Worker: ${err.message}</div>`;
       }
-      State.selectedBasesRegiao = 'todas';
-      renderGrid();
     }
-  });
 
-  document.getElementById('countryBar').addEventListener('click', (e) => {
-    const btn = e.target.closest('.country-btn');
-    if (!btn) return;
-    const country = btn.getAttribute('data-country');
-    if (country) {
-      State.currentCountry = country;
-      renderGrid();
+    function setGroupFilter(group) {
+      currentGroupFilter = group;
+      document.querySelectorAll(".region-btn").forEach(btn => {
+        btn.classList.remove("bg-sky-600", "text-white");
+        btn.classList.add("bg-slate-800", "text-slate-300");
+      });
+      
+      const activeBtn = event.target;
+      activeBtn.classList.remove("bg-slate-800", "text-slate-300");
+      activeBtn.classList.add("bg-sky-600", "text-white");
+      
+      filterAirports();
     }
-  });
 
-  document.getElementById('categoryFilters').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    const cat = btn.getAttribute('data-category');
-    if (cat) {
-      State.currentCategory = cat;
-      renderGrid();
-    }
-  });
-
-  const btnBasesRegiao = document.getElementById('btnBasesRegiao');
-  const menuBasesRegiao = document.getElementById('menuBasesRegiao');
-
-  btnBasesRegiao.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = menuBasesRegiao.classList.toggle('ativo');
-    btnBasesRegiao.setAttribute('aria-expanded', isOpen);
-  });
-
-  menuBasesRegiao.addEventListener('click', (e) => {
-    e.preventDefault();
-    const targetA = e.target.closest('a');
-    if (!targetA) return;
-    const baseReg = targetA.getAttribute('data-base');
-    if (baseReg) {
-      State.selectedBasesRegiao = baseReg;
-      if (baseReg !== 'todas') {
-        State.currentRegion = 'SOUTH_AMERICA';
-        State.currentCountry = 'ALL';
-      }
-      menuBasesRegiao.classList.remove('ativo');
-      btnBasesRegiao.setAttribute('aria-expanded', 'false');
-      renderGrid();
-    }
-  });
-
-  window.addEventListener('click', (event) => {
-    if (!event.target.closest('.container-filtro-bases')) {
-      menuBasesRegiao.classList.remove('ativo');
-      btnBasesRegiao.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  document.getElementById('airportGrid').addEventListener('click', (e) => {
-    const titleEl = e.target.closest('[data-action="open-modal"]');
-    if (titleEl) {
-      openModal(titleEl.getAttribute('data-icao'), titleEl);
-      return;
-    }
-    const favEl = e.target.closest('[data-action="toggle-fav"]');
-    if (favEl) {
-      const icao = favEl.getAttribute('data-icao');
-      if (State.favorites.includes(icao)) {
-        State.favorites = State.favorites.filter(i => i !== icao);
+    function toggleFavorite(icao) {
+      if (favorites.includes(icao)) {
+        favorites = favorites.filter(f => f !== icao);
       } else {
-        State.favorites.push(icao);
+        favorites.push(icao);
       }
-      localStorage.setItem(CONFIG.STORAGE_KEYS.FAVORITES, JSON.stringify(State.favorites));
-      renderGrid();
+      localStorage.setItem("fav_airports", JSON.stringify(favorites));
+      filterAirports();
     }
-  });
 
-  document.getElementById('airportGrid').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      const titleEl = e.target.closest('[data-action="open-modal"]');
-      if (titleEl) {
-        e.preventDefault();
-        openModal(titleEl.getAttribute('data-icao'), titleEl);
+    function clearFavorites() {
+      favorites = [];
+      localStorage.removeItem("fav_airports");
+      filterAirports();
+    }
+
+    function filterAirports() {
+      const searchTerm = document.getElementById("search-input").value.toLowerCase();
+      const rows = globalData.rows || [];
+
+      const filtered = rows.filter(item => {
+        const matchesSearch = 
+          item.icao.toLowerCase().includes(searchTerm) ||
+          (item.iata && item.iata.toLowerCase().includes(searchTerm)) ||
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.city.toLowerCase().includes(searchTerm);
+
+        if (!matchesSearch) return false;
+
+        if (currentGroupFilter === "FAVS") return favorites.includes(item.icao);
+        if (currentGroupFilter === "AIRBASE") return item.isAirBase === true;
+        if (currentGroupFilter !== "ALL") return item.group === currentGroupFilter;
+
+        return true;
+      });
+
+      renderCards(filtered);
+      updateStats(rows, filtered);
+    }
+
+    function updateStats(allRows, filteredRows) {
+      const statsBar = document.getElementById("stats-bar");
+      const vfr = allRows.filter(r => r.category === "VFR").length;
+      const mvfr = allRows.filter(r => r.category === "MVFR").length;
+      const ifr = allRows.filter(r => r.category === "IFR").length;
+      const lifr = allRows.filter(r => r.category === "LIFR").length;
+
+      statsBar.innerHTML = `
+        <span>📊 Exibidos: <strong>${filteredRows.length}</strong> / Total: <strong>${allRows.length}</strong></span>
+        <span class="text-green-400">🟢 VFR: ${vfr}</span>
+        <span class="text-blue-400">🔵 MVFR: ${mvfr}</span>
+        <span class="text-red-400">🔴 IFR: ${ifr}</span>
+        <span class="text-purple-400">🟣 LIFR: ${lifr}</span>
+      `;
+      
+      if (globalData.fetchedAt) {
+        document.getElementById("footer-info").innerText = `Fonte: Aviation Weather | Atualizado às ${globalData.fetchedAt} (${allRows.length} aeroportos)`;
       }
     }
-  });
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
+    function renderCards(rows) {
+      const container = document.getElementById("airports-container");
+      if (rows.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Nenhum aeroporto encontrado com os filtros atuais.</div>`;
+        return;
+      }
+
+      container.innerHTML = rows.map(item => {
+        const isFav = favorites.includes(item.icao);
+        const catClass = item.category === "VFR" ? "badge-vfr" : item.category === "MVFR" ? "badge-mvfr" : item.category === "IFR" ? "badge-ifr" : item.category === "LIFR" ? "badge-lifr" : "badge-na";
+        const countryFormatted = formatCountry(item.country);
+        const runwaysStr = item.runways ? item.runways.join(" • ") : "Não informada";
+        const towerFreq = item.frequencies?.tower ? `Torre: ${item.frequencies.tower}` : "";
+        const atisFreq = item.frequencies?.atis ? `ATIS: ${item.frequencies.atis}` : "";
+        const freqStr = [towerFreq, atisFreq].filter(Boolean).join(" | ");
+
+        return `
+          <div class="card-bg rounded-xl p-5 shadow-md flex flex-col justify-between transition hover:border-slate-500">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h3 class="font-bold text-slate-100 text-base leading-snug">${item.name}</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">ICAO: <span class="text-sky-400 font-mono font-bold">${item.icao}</span> ${item.iata ? `• IATA: <span class="text-slate-200 font-mono">${item.iata}</span>` : ""} • ${item.city} (${countryFormatted})</p>
+                </div>
+                <button onclick="toggleFavorite('${item.icao}')" class="text-xl text-amber-400 hover:scale-110 transition cursor-pointer" title="Favoritar">${isFav ? "★" : "☆"}</button>
+              </div>
+
+              <div class="flex flex-wrap gap-2 my-3 items-center">
+                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${catClass}">${item.category}</span>
+                ${item.isAirBase ? '<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-700">📍 Base Aérea</span>' : ''}
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 text-xs bg-slate-900/50 p-2.5 rounded-lg mb-3 border border-slate-800">
+                <div>
+                  <span class="block text-slate-500">Vento</span>
+                  <strong class="text-slate-200">${item.wind}</strong>
+                </div>
+                <div>
+                  <span class="block text-slate-500">Pressão</span>
+                  <strong class="text-slate-200">${item.pressure}</strong>
+                </div>
+                <div>
+                  <span class="block text-slate-500">Temperatura</span>
+                  <strong class="text-slate-200">${item.temperature?.current !== null ? item.temperature.current + '°C' : '—'}</strong>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <p class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">📡 METAR (Condição Atual)</p>
+                <div class="bg-slate-900 p-2.5 rounded-lg font-mono text-xs text-slate-300 border border-slate-800 break-all">${item.metar || "METAR indisponível no momento."}</div>
+                <p class="text-xs text-slate-400 mt-1.5 italic">${item.metarInterpret}</p>
+              </div>
+
+              <div>
+                <p class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">⏱️ TAF (Previsão)</p>
+                <div class="bg-slate-900 p-2.5 rounded-lg font-mono text-xs text-slate-300 border border-slate-800 break-all">${item.taf || "TAF indisponível no momento."}</div>
+                <p class="text-xs text-slate-400 mt-1.5">${item.tafInterpret}</p>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col gap-1">
+              ${freqStr ? `<div>📡 <strong>Frequências:</strong> ${freqStr}</div>` : ""}
+              <div>🛫 <strong>Pistas:</strong> ${runwaysStr}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
-  });
 
-  document.getElementById('airportModal').addEventListener('click', closeModal);
-  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
-  document.getElementById('modalBox').addEventListener('click', (e) => e.stopPropagation());
-});
-</script>
+    function renderUI() {
+      filterAirports();
+    }
+
+    loadWeatherData();
+  </script>
 </body>
 </html>
