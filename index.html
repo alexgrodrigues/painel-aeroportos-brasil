@@ -100,6 +100,11 @@
             border-color: #3b82f6;
         }
 
+        .clear-btn {
+            background-color: #475569 !important;
+            color: #f8fafc !important;
+        }
+
         .stats {
             display: flex;
             flex-wrap: wrap;
@@ -272,6 +277,7 @@
             <button class="filter-btn" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
             <button class="filter-btn" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
             <button class="filter-btn" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+            <button class="filter-btn clear-btn" onclick="clearAllFilters()">❌ Limpar Filtros</button>
         </div>
 
         <div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
@@ -334,6 +340,23 @@
 
         function filterAirports() {
             currentSearch = document.getElementById('searchInput').value.toLowerCase();
+            renderGrid();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            currentSearch = '';
+
+            currentGroup = 'ALL';
+            const groupContainer = document.getElementById('groupFilters');
+            groupContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            groupContainer.querySelector("button[onclick=\"filterGroup('ALL')\"]").classList.add('active');
+
+            currentCategory = 'ALL';
+            const catContainer = document.getElementById('categoryFilters');
+            catContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            catContainer.querySelector("button[onclick=\"filterCategory('ALL')\"]").classList.add('active');
+
             renderGrid();
         }
 
