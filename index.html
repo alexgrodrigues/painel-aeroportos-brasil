@@ -38,7 +38,7 @@
         <input type="text" id="search-input" oninput="filterAirports()" placeholder="🔍 Pesquisar por ICAO, IATA, Cidade ou Nome do Aeroporto..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition">
       </div>
 
-      <!-- Filtros de Região (com validação e desativação se vazio) -->
+      <!-- Filtros de Região -->
       <div class="flex flex-wrap gap-2 items-center text-xs">
         <span class="text-slate-400 font-semibold mr-1">Região:</span>
         <button onclick="setGroupFilter('ALL', this)" id="filter-all" class="region-btn px-3 py-1.5 rounded-lg bg-sky-600 text-white font-medium transition cursor-pointer">🌐 Todos</button>
@@ -49,6 +49,7 @@
         <button onclick="setGroupFilter('EUROPE', this)" id="filter-eu" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🇪🇺 Europa</button>
         <button onclick="setGroupFilter('ASIA_ME', this)" id="filter-as" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌏 Ásia / Oriente Médio</button>
         <button onclick="setGroupFilter('AFRICA', this)" id="filter-af" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌍 África</button>
+        <button onclick="setGroupFilter('OCEANIA', this)" id="filter-oc" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🦘 Oceania / Austrália</button>
       </div>
 
       <div id="country-filter-bar" class="hidden flex flex-wrap gap-2 items-center text-xs pt-3 border-t border-slate-800">
@@ -86,7 +87,8 @@
       "MX": "🇲🇽 México", "PT": "🇵🇹 Portugal", "ES": "🇪🇸 Espanha", "FR": "🇫🇷 França",
       "GB": "🇬🇧 Reino Unido", "DE": "🇩🇪 Alemanha", "TR": "🇹🇷 Turquia", "GI": "🇬🇮 Gibraltar",
       "RU": "🇷🇺 Rússia", "AE": "🇦🇪 Emirados Árabes", "JP": "🇯🇵 Japão", "CN": "🇨🇳 China",
-      "SG": "🇸🇬 Cingapura", "KR": "🇰🇷 Coreia do Sul", "ZA": "🇿🇦 África do Sul", "EG": "🇪🇬 Egito", "MA": "🇲🇦 Marrocos"
+      "SG": "🇸🇬 Cingapura", "KR": "🇰🇷 Coreia do Sul", "ZA": "🇿🇦 África do Sul", "EG": "🇪🇬 Egito", "MA": "🇲🇦 Marrocos",
+      "AU": "🇦🇺 Austrália"
     };
 
     function escapeHTML(str) {
@@ -101,7 +103,7 @@
     }
 
     async function loadWeatherData() {
-      if (isLoading) return; // Bloqueia múltiplos carregamentos simultâneos
+      if (isLoading) return;
       isLoading = true;
       const refreshBtn = document.getElementById("refresh-btn");
       refreshBtn.disabled = true;
@@ -117,7 +119,6 @@
         
         if (json.ok && Array.isArray(json.rows)) {
           globalData = json;
-          validateAndToggleGroupButtons();
           renderUI();
         } else {
           throw new Error("Formato de resposta inválido do Worker.");
@@ -129,17 +130,6 @@
         refreshBtn.disabled = false;
         refreshBtn.classList.remove("opacity-50");
       }
-    }
-
-    function validateAndToggleGroupButtons() {
-      const rows = globalData.rows || [];
-      // Desabilita grupos que não possuem aeroportos carregados
-      const groups = ["SOUTH_AMERICA", "NORTH_AMERICA", "EUROPE", "ASIA_ME", "AFRICA"];
-      groups.forEach(g => {
-        const count = rows.filter(r => r.group === g).length;
-        // Se houver necessidade de desativar visualmente botões vazios:
-        // Exemplo: se count === 0, aplicar classe disabled no botão correspondente.
-      });
     }
 
     function setGroupFilter(group, btnElement) {
@@ -162,7 +152,7 @@
       const regionalAirports = globalData.rows.filter(r => r.group === group);
       const uniqueCountries = [...new Set(regionalAirports.map(r => r.country))];
 
-      if ((group === "SOUTH_AMERICA" || group === "EUROPE" || group === "NORTH_AMERICA") && uniqueCountries.length > 1) {
+      if ((group === "SOUTH_AMERICA" || group === "EUROPE" || group === "NORTH_AMERICA" || group === "OCEANIA") && uniqueCountries.length > 1) {
         countryBar.classList.remove("hidden");
         let html = `<button onclick="setCountryFilter('ALL', this)" class="country-btn px-2.5 py-1 rounded bg-sky-700 text-white transition cursor-pointer">🌐 Todos</button>`;
         uniqueCountries.forEach(code => {
@@ -241,6 +231,13 @@
         return true;
       });
 
+      // ORDENAÇÃO: Garante que os aeroportos favoritos apareçam sempre no topo da listagem
+      filtered.sort((a, b) => {
+        const aFav = favorites.includes(a.icao) ? 1 : 0;
+        const bFav = favorites.includes(b.icao) ? 1 : 0;
+        return bFav - aFav;
+      });
+
       renderCards(filtered);
       updateStats(rows, filtered);
     }
@@ -264,7 +261,7 @@
       
       let partialWarning = globalData.apiErrorsCount > 0 ? ` | ⚠️ Dados Parciais (${globalData.apiErrorsCount} falhas)` : "";
       if (globalData.fetchedAt) {
-        document.getElementById("footer-info").innerText = `Fonte: Aviation Weather | Atualizado às ${globalData.fetchedAt} (${allRows.length} aeroportos)${partialWarning}`;
+        document.getElementById("footer-info").innerText = `Fonte: Aviation Weather | Painel Global (v4) | Atualizado às ${globalData.fetchedAt} (${allRows.length} aeroportos)${partialWarning}`;
       }
     }
 
