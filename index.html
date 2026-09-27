@@ -38,7 +38,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        h1 svg {
+            fill: #38bdf8;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
 
         .version {
@@ -77,8 +82,13 @@
             transition: background 0.2s;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             background-color: #2563eb;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .filters {
@@ -226,6 +236,8 @@
             color: #38bdf8;
             word-break: break-all;
             border: 1px solid rgba(56, 189, 248, 0.2);
+            max-height: 120px;
+            overflow-y: auto;
         }
 
         .taf-box {
@@ -233,12 +245,39 @@
             border-color: rgba(192, 132, 252, 0.2);
         }
 
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .section-title {
             font-size: 0.75rem;
             color: var(--text-secondary);
             font-weight: bold;
-            margin-bottom: 2px;
             text-transform: uppercase;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .tag-military {
+            display: inline-block;
+            background-color: rgba(234, 179, 8, 0.15);
+            color: #eab308;
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -246,46 +285,48 @@
 
     <header>
         <h1>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
                 <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
             </svg>
             Painel de Aeroportos Globais
         </h1>
-        <div class="version">VERSÃO 47</div>
+        <div class="version">VERSÃO 47 (Esquema v7)</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
-            <button onclick="fetchData()">🔄 Atualizar Dados</button>
+            <button id="refreshBtn" onclick="fetchData()">🔄 Atualizar Dados</button>
         </div>
 
         <div class="stats" id="statsContainer">
-            <span>📊 Total: <strong id="statTotal">0</strong></span>
+            <span>📊 Total Global: <strong id="statTotalGlobal">0</strong> | Exibidos: <strong id="statTotalFiltered">0</strong></span>
             <span>🟢 VFR: <strong id="statVfr">0</strong></span>
             <span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
             <span>🔴 IFR: <strong id="statIfr">0</strong></span>
             <span>🟣 LIFR: <strong id="statLifr">0</strong></span>
+            <span>⚪ N/A: <strong id="statNa">0</strong></span>
         </div>
 
         <div class="filters" id="groupFilters">
             <span style="align-self: center; font-size: 0.85rem; color: var(--text-secondary); margin-right: 5px;">Região:</span>
-            <button class="filter-btn active" onclick="filterGroup('ALL')">🌐 Todos</button>
-            <button class="filter-btn" onclick="filterGroup('FAVS')">⭐ Favoritos</button>
-            <button class="filter-btn" onclick="filterGroup('SOUTH_AMERICA')">🟢 América do Sul / Antártida</button>
-            <button class="filter-btn" onclick="filterGroup('NORTH_AMERICA')">🔵 América do Norte</button>
-            <button class="filter-btn" onclick="filterGroup('EUROPE')">🇪🇺 Europa</button>
-            <button class="filter-btn" onclick="filterGroup('ASIA')">🌏 Ásia</button>
-            <button class="filter-btn" onclick="filterGroup('MIDDLE_EAST')">🕌 Oriente Médio</button>
-            <button class="filter-btn" onclick="filterGroup('AFRICA')">🌍 África</button>
-            <button class="filter-btn" onclick="filterGroup('OCEANIA')">🇦🇺 Oceania / Austrália</button>
-            <button class="filter-btn" onclick="filterGroup('AIRBASES')">🛡️ Bases Aéreas</button>
+            <button class="filter-btn active" data-group="ALL" onclick="filterGroup('ALL', this)">🌐 Todos</button>
+            <button class="filter-btn" data-group="FAVS" onclick="filterGroup('FAVS', this)">⭐ Favoritos</button>
+            <button class="filter-btn" data-group="SOUTH_AMERICA" onclick="filterGroup('SOUTH_AMERICA', this)">🟢 América do Sul / Antártida</button>
+            <button class="filter-btn" data-group="NORTH_AMERICA" onclick="filterGroup('NORTH_AMERICA', this)">🔵 América do Norte</button>
+            <button class="filter-btn" data-group="EUROPE" onclick="filterGroup('EUROPE', this)">🇪🇺 Europa</button>
+            <button class="filter-btn" data-group="ASIA" onclick="filterGroup('ASIA', this)">🌏 Ásia</button>
+            <button class="filter-btn" data-group="MIDDLE_EAST" onclick="filterGroup('MIDDLE_EAST', this)">🕌 Oriente Médio</button>
+            <button class="filter-btn" data-group="AFRICA" onclick="filterGroup('AFRICA', this)">🌍 África</button>
+            <button class="filter-btn" data-group="OCEANIA" onclick="filterGroup('OCEANIA', this)">🇦🇺 Oceania / Austrália</button>
+            <button class="filter-btn" data-group="AIRBASES" onclick="filterGroup('AIRBASES', this)">🛡️ Bases Aéreas</button>
         </div>
 
         <div class="filters" id="categoryFilters">
-            <button class="filter-btn active" onclick="filterCategory('ALL')">Todas as Condições</button>
-            <button class="filter-btn" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
-            <button class="filter-btn" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
-            <button class="filter-btn" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
-            <button class="filter-btn" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+            <button class="filter-btn active" data-cat="ALL" onclick="filterCategory('ALL', this)">Todas as Condições</button>
+            <button class="filter-btn" data-cat="VFR" onclick="filterCategory('VFR', this)">🟢 VFR</button>
+            <button class="filter-btn" data-cat="MVFR" onclick="filterCategory('MVFR', this)">🔵 MVFR</button>
+            <button class="filter-btn" data-cat="IFR" onclick="filterCategory('IFR', this)">🔴 IFR</button>
+            <button class="filter-btn" data-cat="LIFR" onclick="filterCategory('LIFR', this)">🟣 LIFR</button>
+            <button class="filter-btn" data-cat="NA" onclick="filterCategory('NA', this)">⚪ N/A</button>
             <button class="filter-btn clear-btn" onclick="clearAllFilters()">❌ Limpar Filtros</button>
         </div>
 
@@ -293,7 +334,7 @@
     </header>
 
     <main class="grid" id="airportGrid">
-        <!-- Os cartões serão injetados dinamicamente via JavaScript -->
+        <!-- Cartões renderizados via DOM seguro -->
     </main>
 
     <script>
@@ -303,128 +344,376 @@
         let currentGroup = 'ALL';
         let currentCategory = 'ALL';
         let currentSearch = '';
-        
-        let favorites = JSON.parse(localStorage.getItem('weather_favorites') || '[]');
+        let isFetching = false;
+        let tafVisibility = {};
+
+        // Proteção blindada do localStorage
+        let favorites = [];
+        try {
+            const rawFavs = localStorage.getItem('weather_favorites');
+            if (rawFavs) {
+                const parsed = JSON.parse(rawFavs);
+                if (Array.isArray(parsed)) {
+                    favorites = parsed.filter(item => typeof item === 'string' && item.length === 4).map(i => i.toUpperCase());
+                }
+            }
+        } catch (e) {
+            console.warn("localStorage indisponível ou corrompido.", e);
+            favorites = [];
+        }
 
         function toggleFavorite(icao, event) {
-            event.stopPropagation();
-            if (favorites.includes(icao)) {
-                favorites = favorites.filter(fav => fav !== icao);
+            if (event) event.stopPropagation();
+            const cleanIcao = String(icao || "").trim().toUpperCase();
+            if (!cleanIcao) return;
+
+            if (favorites.includes(cleanIcao)) {
+                favorites = favorites.filter(fav => fav !== cleanIcao);
             } else {
-                favorites.push(icao);
+                favorites.push(cleanIcao);
             }
-            localStorage.setItem('weather_favorites', JSON.stringify(favorites));
+
+            try {
+                localStorage.setItem('weather_favorites', JSON.stringify(favorites));
+            } catch (e) {
+                console.warn("Falha ao salvar favorito no localStorage", e);
+            }
             renderGrid();
         }
 
         async function fetchData() {
-            document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
+            if (isFetching) return;
+            isFetching = true;
+            
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = "⏳ Atualizando...";
+            }
+
+            document.getElementById('updateStatus').innerText = "Buscando dados atualizados da API...";
+            
             try {
-                const response = await fetch(WORKER_URL);
-                const json = await response.json();
-                if (json.ok) {
-                    airportData = json.rows;
-                    document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
-                    renderGrid();
-                } else {
-                    document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
+                const response = await fetch(WORKER_URL, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
                 }
+                
+                const json = await response.json();
+                if (!json || json.ok !== true || !Array.isArray(json.rows)) {
+                    throw new Error("Resposta da API inválida ou sem dados de aeroportos.");
+                }
+
+                airportData = json.rows;
+
+                // Limpa estados de TAF para aeroportos que não existem mais na resposta atual
+                const activeIcaos = new Set(airportData.map(i => String(i.icao).toUpperCase()));
+                Object.keys(tafVisibility).forEach(icao => {
+                    if (!activeIcaos.has(icao)) delete tafVisibility[icao];
+                });
+
+                const sourceInfo = json.fromCache ? "📦 Dados obtidos do Cache KV" : "⚡ Nova consulta realizada na API";
+                const timestampMsg = json.fetchedAt ? `${sourceInfo} em ${json.fetchedAt}` : `Atualizado com sucesso`;
+                document.getElementById('updateStatus').innerText = `${timestampMsg} — Total: ${airportData.length} aeroportos`;
+                renderGrid();
+
             } catch (error) {
-                console.error("Erro de conexão:", error);
-                document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
+                console.error("Falha ao atualizar dados:", error);
+                document.getElementById('updateStatus').innerText = `⚠️ Falha na conexão ou resposta inválida. Exibindo dados locais anteriores (${airportData.length} aeroportos carregados).`;
+            } finally {
+                isFetching = false;
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.textContent = "🔄 Atualizar Dados";
+                }
             }
         }
 
-        function filterGroup(group) {
+        function filterGroup(group, btnElement) {
             currentGroup = group;
-            updateActiveButtons('groupFilters', event.target);
+            updateActiveGroupButton(btnElement);
             renderGrid();
         }
 
-        function filterCategory(category) {
+        function filterCategory(category, btnElement) {
             currentCategory = category;
-            updateActiveButtons('categoryFilters', event.target);
+            updateActiveCategoryButton(btnElement);
             renderGrid();
         }
 
         function filterAirports() {
-            currentSearch = document.getElementById('searchInput').value.toLowerCase();
+            const searchInput = document.getElementById('searchInput');
+            currentSearch = searchInput ? searchInput.value.toLowerCase().trim() : '';
             renderGrid();
         }
 
         function clearAllFilters() {
-            document.getElementById('searchInput').value = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
             currentSearch = '';
 
             currentGroup = 'ALL';
             const groupContainer = document.getElementById('groupFilters');
-            groupContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            groupContainer.querySelector("button[onclick=\"filterGroup('ALL')\"]").classList.add('active');
+            if (groupContainer) {
+                groupContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                const defaultGroupBtn = groupContainer.querySelector('[data-group="ALL"]');
+                if (defaultGroupBtn) defaultGroupBtn.classList.add('active');
+            }
 
             currentCategory = 'ALL';
             const catContainer = document.getElementById('categoryFilters');
-            catContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            catContainer.querySelector("button[onclick=\"filterCategory('ALL')\"]").classList.add('active');
+            if (catContainer) {
+                catContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                const defaultCatBtn = catContainer.querySelector('[data-cat="ALL"]');
+                if (defaultCatBtn) defaultCatBtn.classList.add('active');
+            }
 
             renderGrid();
         }
 
-        function updateActiveButtons(containerId, clickedButton) {
-            const container = document.getElementById(containerId);
-            container.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            clickedButton.classList.add('active');
+        function updateActiveGroupButton(clickedBtn) {
+            if (!clickedBtn) return;
+            const container = document.getElementById('groupFilters');
+            if (container) {
+                container.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            }
+            clickedBtn.classList.add('active');
+        }
+
+        function updateActiveCategoryButton(clickedBtn) {
+            if (!clickedBtn) return;
+            const container = document.getElementById('categoryFilters');
+            if (container) {
+                container.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            }
+            clickedBtn.classList.add('active');
+        }
+
+        function toggleTaf(icao) {
+            tafVisibility[icao] = !tafVisibility[icao];
+            renderGrid();
+        }
+
+        function formatMetarAge(obsTimeISO) {
+            if (!obsTimeISO) return { text: "Horário não informado / Indisponível", isOld: false };
+            try {
+                const obsDate = new Date(obsTimeISO);
+                const now = new Date();
+                const diffMs = now - obsDate;
+                const diffMins = Math.floor(diffMs / 60000);
+
+                if (isNaN(diffMins) || diffMins < 0) return { text: "Horário inválido", isOld: false };
+                if (diffMins < 2) return { text: "Emitido agora mesmo", isOld: false };
+                if (diffMins < 60) return { text: `Emitido há ${diffMins} min`, isOld: false };
+
+                const diffHours = Math.floor(diffMins / 60);
+                const isOld = diffHours >= 2;
+                return { 
+                    text: `Emitido há ${diffHours}h ${diffMins % 60}m (${obsDate.toLocaleTimeString('pt-BR', {timeZone: 'UTC'})} UTC)`, 
+                    isOld 
+                };
+            } catch (e) {
+                return { text: "Indisponível", isOld: false };
+            }
         }
 
         function renderGrid() {
             const grid = document.getElementById('airportGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
-            let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
+            let counts = { totalGlobal: airportData.length, vfr: 0, mvfr: 0, ifr: 0, lifr: 0, na: 0 };
 
+            // Filtragem rigorosa
             const filtered = airportData.filter(item => {
+                const icao = String(item.icao || '').toUpperCase();
                 let matchGroup = true;
+
                 if (currentGroup === 'FAVS') {
-                    matchGroup = favorites.includes(item.icao);
+                    matchGroup = favorites.includes(icao);
                 } else if (currentGroup === 'AIRBASES') {
                     matchGroup = item.isAirBase === true;
                 } else if (currentGroup !== 'ALL') {
                     matchGroup = item.group === currentGroup;
                 }
 
-                let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
+                const rawCat = String(item.category || 'N/A').toUpperCase();
+                let matchCategory = currentCategory === 'ALL' || rawCat === currentCategory;
 
-                let matchSearch = !currentSearch || 
-                    item.icao.toLowerCase().includes(currentSearch) || 
-                    (item.iata && item.iata.toLowerCase().includes(currentSearch)) || 
-                    item.name.toLowerCase().includes(currentSearch) || 
-                    item.city.toLowerCase().includes(currentSearch);
+                let matchSearch = true;
+                if (currentSearch) {
+                    const sIcao = icao.includes(currentSearch);
+                    const sIata = String(item.iata || '').toLowerCase().includes(currentSearch);
+                    const sName = String(item.name || '').toLowerCase().includes(currentSearch);
+                    const sCity = String(item.city || '').toLowerCase().includes(currentSearch);
+                    matchSearch = sIcao || sIata || sName || sCity;
+                }
 
                 return matchGroup && matchCategory && matchSearch;
             });
 
-            airportData.forEach(item => {
-                counts.total++;
-                if (item.category === 'VFR') counts.vfr++;
-                else if (item.category === 'MVFR') counts.mvfr++;
-                else if (item.category === 'IFR') counts.ifr++;
-                else if (item.category === 'LIFR') counts.lifr++;
+            // Contabiliza as estatísticas estritamente baseadas nos itens filtrados (problema #1 e #3)
+            filtered.forEach(item => {
+                const cat = String(item.category || 'N/A').toUpperCase();
+                if (cat === 'VFR') counts.vfr++;
+                else if (cat === 'MVFR') counts.mvfr++;
+                else if (cat === 'IFR') counts.ifr++;
+                else if (cat === 'LIFR') counts.lifr++;
+                else counts.na++;
             });
 
-            document.getElementById('statTotal').innerText = counts.total;
-            document.getElementById('statVfr').innerText = counts.vfr;
-            document.getElementById('statMvfr').innerText = counts.mvfr;
-            document.getElementById('statIfr').innerText = counts.ifr;
-            document.getElementById('statLifr').innerText = counts.lifr;
+            // Ordena favoritos no topo
+            filtered.sort((a, b) => {
+                const aFav = favorites.includes(String(a.icao).toUpperCase()) ? 1 : 0;
+                const bFav = favorites.includes(String(b.icao).toUpperCase()) ? 1 : 0;
+                return bFav - aFav;
+            });
+
+            // Atualiza os contadores no topo
+            document.getElementById('statTotalGlobal').textContent = counts.totalGlobal;
+            document.getElementById('statTotalFiltered').textContent = filtered.length;
+            document.getElementById('statVfr').textContent = counts.vfr;
+            document.getElementById('statMvfr').textContent = counts.mvfr;
+            document.getElementById('statIfr').textContent = counts.ifr;
+            document.getElementById('statLifr').textContent = counts.lifr;
+            document.getElementById('statNa').textContent = counts.na;
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.gridColumn = '1 / -1';
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = 'var(--text-secondary)';
+                emptyMsg.style.padding = '40px';
+                emptyMsg.textContent = 'Nenhum aeroporto encontrado com os filtros e termos de pesquisa atuais.';
+                grid.appendChild(emptyMsg);
                 return;
             }
 
             filtered.forEach(item => {
-                const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
-                const isFav = favorites.includes(item.icao);
-                
+                const icao = String(item.icao || '????').toUpperCase();
+                const iata = item.iata ? String(item.iata).toUpperCase() : '';
+                const name = String(item.name || 'Aeroporto Desconhecido');
+                const city = String(item.city || 'Localidade desconhecida');
+                const country = String(item.country || 'BR');
+                const category = String(item.category || 'N/A').toUpperCase();
+                const badgeClass = `badge-${['VFR', 'MVFR', 'IFR', 'LIFR'].includes(category) ? category : 'NA'}`;
+                const isFav = favorites.includes(icao);
+
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const cardHeader = document.createElement('div');
+                cardHeader.className = 'card-header';
+
+                const titleArea = document.createElement('div');
+                titleArea.className = 'airport-title-area';
+
+                const favBtn = document.createElement('button');
+                favBtn.className = `fav-btn ${isFav ? 'favorited' : ''}`;
+                favBtn.setAttribute('aria-label', isFav ? `Remover ${icao} dos favoritos` : `Adicionar ${icao} aos favoritos`);
+                favBtn.title = isFav ? "Remover dos Favoritos" : "Adicionar aos Favoritos";
+                favBtn.textContent = isFav ? '★' : '☆';
+                favBtn.addEventListener('click', (e) => toggleFavorite(icao, e));
+
+                const titleTextDiv = document.createElement('div');
+                const titleEl = document.createElement('div');
+                titleEl.className = 'airport-title';
+                titleEl.textContent = `${icao} ${iata ? '· ' + iata : ''} — ${name}`;
+
+                const subEl = document.createElement('div');
+                subEl.className = 'airport-sub';
+                subEl.textContent = `${city} (${country})`;
+
+                titleTextDiv.appendChild(titleEl);
+                titleTextDiv.appendChild(subEl);
+                titleArea.appendChild(favBtn);
+                titleArea.appendChild(titleTextDiv);
+
+                const badgeEl = document.createElement('span');
+                badgeEl.className = `badge ${badgeClass}`;
+                badgeEl.textContent = category;
+
+                cardHeader.appendChild(titleArea);
+                cardHeader.appendChild(badgeEl);
+                card.appendChild(cardHeader);
+
+                if (item.isAirBase) {
+                    const tagMil = document.createElement('div');
+                    tagMil.className = 'tag-military';
+                    tagMil.textContent = '🛡️ Base Aérea Militar / Mista';
+                    card.appendChild(tagMil);
+                }
+
+                const infoGrid1 = document.createElement('div');
+                infoGrid1.className = 'card-info-grid';
+
+                const windItem = document.createElement('div');
+                windItem.className = 'info-item';
+                const windLabel = document.createElement('span');
+                windLabel.className = 'info-label';
+                windLabel.textContent = '💨 Vento';
+                const windVal = document.createElement('strong');
+                windVal.textContent = item.wind || '—';
+                windItem.appendChild(windLabel);
+                windItem.appendChild(windVal);
+
+                const divider1 = document.createElement('div');
+                divider1.className = 'divider';
+
+                const pressItem = document.createElement('div');
+                pressItem.className = 'info-item';
+                const pressLabel = document.createElement('span');
+                pressLabel.className = 'info-label';
+                pressLabel.textContent = '⚖️ QNH / Pressão';
+                const pressVal = document.createElement('strong');
+                pressVal.textContent = item.pressure || '—';
+                pressItem.appendChild(pressLabel);
+                pressItem.appendChild(pressVal);
+
+                infoGrid1.appendChild(windItem);
+                infoGrid1.appendChild(divider1);
+                infoGrid1.appendChild(pressItem);
+                card.appendChild(infoGrid1);
+
+                const infoGrid2 = document.createElement('div');
+                infoGrid2.className = 'card-info-grid';
+
+                const tempItem = document.createElement('div');
+                tempItem.className = 'info-item';
+                const tempLabel = document.createElement('span');
+                tempLabel.className = 'info-label';
+                tempLabel.textContent = '🌡️ Temperatura';
+                const tempVal = document.createElement('strong');
+                tempVal.textContent = (item.temperature && item.temperature.current !== null && item.temperature.current !== undefined) ? `${item.temperature.current}°C` : '—';
+                tempItem.appendChild(tempLabel);
+                tempItem.appendChild(tempVal);
+
+                const divider2 = document.createElement('div');
+                divider2.className = 'divider';
+
+                const dewItem = document.createElement('div');
+                dewItem.className = 'info-item';
+                const dewLabel = document.createElement('span');
+                dewLabel.className = 'info-label';
+                dewLabel.textContent = '💧 Ponto de Orvalho';
+                const dewVal = document.createElement('strong');
+                dewVal.textContent = (item.temperature && item.temperature.dewpoint !== null && item.temperature.dewpoint !== undefined) ? `${item.temperature.dewpoint}°C` : '—';
+                dewItem.appendChild(dewLabel);
+                dewItem.appendChild(dewVal);
+
+                infoGrid2.appendChild(tempItem);
+                infoGrid2.appendChild(divider2);
+                infoGrid2.appendChild(dewItem);
+                card.appendChild(infoGrid2);
+
+                const infraDiv = document.createElement('div');
+                infraDiv.style.fontSize = '0.8rem';
+                infraDiv.style.color = 'var(--text-secondary)';
+                infraDiv.style.background = 'rgba(15, 23, 42, 0.2)';
+                infraDiv.style.padding = '6px 10px';
+                infraDiv.style.borderRadius = '6px';
+
+                const runwaysText = (item.runways && item.runways.length > 0) ? item.runways.join(', ') : '—';
                 let freqText = "—";
                 if (item.frequencies) {
                     let fArr = [];
@@ -435,63 +724,82 @@
                     if (fArr.length > 0) freqText = fArr.join(" | ");
                 }
 
-                let runwaysText = item.runways && item.runways.length > 0 ? item.runways.join(", ") : "—";
+                const runDiv = document.createElement('div');
+                runDiv.textContent = `🛫 Pistas: ${runwaysText}`;
+                const freqDiv = document.createElement('div');
+                freqDiv.textContent = `📻 Frequências: ${freqText}`;
+                infraDiv.appendChild(runDiv);
+                infraDiv.appendChild(freqDiv);
+                card.appendChild(infraDiv);
 
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="airport-title-area">
-                            <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFavorite('${item.icao}', event)" title="Favoritar aeroporto">
-                                ${isFav ? '★' : '☆'}
-                            </button>
-                            <div>
-                                <div class="airport-title">${item.icao} ${item.iata ? '· ' + item.iata : ''} — ${item.name}</div>
-                                <div class="airport-sub">${item.city} (${item.country})</div>
-                            </div>
-                        </div>
-                        <span class="badge ${badgeClass}">${item.category}</span>
-                    </div>
+                const metarContainer = document.createElement('div');
+                const metarHeader = document.createElement('div');
+                metarHeader.className = 'section-header';
+                const metarTitle = document.createElement('span');
+                metarTitle.className = 'section-title';
+                metarTitle.textContent = 'METAR';
 
-                    <div class="card-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">💨 Vento</span>
-                            <span><strong>${item.wind}</strong></span>
-                        </div>
-                        <div class="divider"></div>
-                        <div class="info-item">
-                            <span class="info-label">⚖️ QNH / Pressão</span>
-                            <span><strong>${item.pressure}</strong></span>
-                        </div>
-                    </div>
+                const ageInfo = formatMetarAge(item.observationTime);
+                const metarAgeSpan = document.createElement('span');
+                metarAgeSpan.style.fontSize = '0.7rem';
+                metarAgeSpan.style.color = ageInfo.isOld ? '#f87171' : 'var(--text-secondary)';
+                metarAgeSpan.textContent = ageInfo.text;
 
-                    <div class="card-info-grid">
-                        <div class="info-item">
-                            <span class="info-label">🌡️ Temperatura</span>
-                            <span><strong>${item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
-                        </div>
-                        <div class="divider"></div>
-                        <div class="info-item">
-                            <span class="info-label">💧 Ponto de Orvalho</span>
-                            <span><strong>${item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
-                        </div>
-                    </div>
+                metarHeader.appendChild(metarTitle);
+                metarHeader.appendChild(metarAgeSpan);
 
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); background: rgba(15, 23, 42, 0.2); padding: 6px 10px; border-radius: 6px;">
-                        <div>🛫 <strong>Pistas:</strong> ${runwaysText}</div>
-                        <div>📻 <strong>Frequências:</strong> ${freqText}</div>
-                    </div>
+                const metarBox = document.createElement('div');
+                metarBox.className = 'metar-box';
+                metarBox.textContent = item.metar || 'Relatório METAR indisponível no momento.';
 
-                    <div>
-                        <div class="section-title">METAR</div>
-                        <div class="metar-box">${item.metar || 'Relatório METAR indisponível no momento.'}</div>
-                    </div>
+                metarContainer.appendChild(metarHeader);
+                metarContainer.appendChild(metarBox);
 
-                    <div>
-                        <div class="section-title">TAF</div>
-                        <div class="taf-box">${item.taf || 'Previsão TAF indisponível no momento.'}</div>
-                    </div>
-                `;
+                if (item.metarInterpret) {
+                    const metarInterpEl = document.createElement('div');
+                    metarInterpEl.style.fontSize = '0.75rem';
+                    metarInterpEl.style.color = '#cbd5e1';
+                    metarInterpEl.style.marginTop = '4px';
+                    metarInterpEl.textContent = `💡 ${item.metarInterpret}`;
+                    metarContainer.appendChild(metarInterpEl);
+                }
+                card.appendChild(metarContainer);
+
+                const tafContainer = document.createElement('div');
+                const tafHeader = document.createElement('div');
+                tafHeader.className = 'section-header';
+                const tafTitle = document.createElement('span');
+                tafTitle.className = 'section-title';
+                tafTitle.textContent = 'TAF';
+
+                const isExpanded = !!tafVisibility[icao];
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-btn';
+                toggleBtn.textContent = isExpanded ? 'Recolher' : 'Expandir';
+                toggleBtn.addEventListener('click', () => toggleTaf(icao));
+
+                tafHeader.appendChild(tafTitle);
+                tafHeader.appendChild(toggleBtn);
+                tafContainer.appendChild(tafHeader);
+
+                if (isExpanded) {
+                    const tafBox = document.createElement('div');
+                    tafBox.className = 'taf-box';
+                    tafBox.style.marginTop = '4px';
+                    tafBox.textContent = item.taf || 'Previsão TAF indisponível no momento.';
+                    tafContainer.appendChild(tafBox);
+
+                    if (item.tafInterpret) {
+                        const tafInterpEl = document.createElement('div');
+                        tafInterpEl.style.fontSize = '0.75rem';
+                        tafInterpEl.style.color = '#d8b4fe';
+                        tafInterpEl.style.marginTop = '4px';
+                        tafInterpEl.textContent = `💡 ${item.tafInterpret}`;
+                        tafContainer.appendChild(tafInterpEl);
+                    }
+                }
+                card.appendChild(tafContainer);
+
                 grid.appendChild(card);
             });
         }
