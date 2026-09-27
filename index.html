@@ -135,6 +135,30 @@
             align-items: flex-start;
         }
 
+        .airport-title-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            color: var(--text-secondary);
+            transition: transform 0.1s;
+        }
+
+        .fav-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .fav-btn.favorited {
+            color: #eab308;
+        }
+
         .airport-title {
             font-size: 1.1rem;
             font-weight: bold;
@@ -231,6 +255,7 @@
         <div class="filters" id="groupFilters">
             <span style="align-self: center; font-size: 0.85rem; color: var(--text-secondary); margin-right: 5px;">Região:</span>
             <button class="filter-btn active" onclick="filterGroup('ALL')">🌐 Todos</button>
+            <button class="filter-btn" onclick="filterGroup('FAVS')">⭐ Favoritos</button>
             <button class="filter-btn" onclick="filterGroup('SOUTH_AMERICA')">🟢 América do Sul / Antártida</button>
             <button class="filter-btn" onclick="filterGroup('NORTH_AMERICA')">🔵 América do Norte</button>
             <button class="filter-btn" onclick="filterGroup('EUROPE')">🇪🇺 Europa</button>
@@ -238,6 +263,7 @@
             <button class="filter-btn" onclick="filterGroup('MIDDLE_EAST')">🕌 Oriente Médio</button>
             <button class="filter-btn" onclick="filterGroup('AFRICA')">🌍 África</button>
             <button class="filter-btn" onclick="filterGroup('OCEANIA')">🇦🇺 Oceania / Austrália</button>
+            <button class="filter-btn" onclick="filterGroup('AIRBASES')">🛡️ Bases Aéreas</button>
         </div>
 
         <div class="filters" id="categoryFilters">
@@ -262,6 +288,19 @@
         let currentGroup = 'ALL';
         let currentCategory = 'ALL';
         let currentSearch = '';
+        
+        let favorites = JSON.parse(localStorage.getItem('weather_favorites') || '[]');
+
+        function toggleFavorite(icao, event) {
+            event.stopPropagation();
+            if (favorites.includes(icao)) {
+                favorites = favorites.filter(fav => fav !== icao);
+            } else {
+                favorites.push(icao);
+            }
+            localStorage.setItem('weather_favorites', JSON.stringify(favorites));
+            renderGrid();
+        }
 
         async function fetchData() {
             document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
@@ -311,7 +350,15 @@
             let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
             const filtered = airportData.filter(item => {
-                let matchGroup = currentGroup === 'ALL' || item.group === currentGroup;
+                let matchGroup = true;
+                if (currentGroup === 'FAVS') {
+                    matchGroup = favorites.includes(item.icao);
+                } else if (currentGroup === 'AIRBASES') {
+                    matchGroup = item.isAirBase === true;
+                } else if (currentGroup !== 'ALL') {
+                    matchGroup = item.group === currentGroup;
+                }
+
                 let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
                 let matchSearch = !currentSearch || 
@@ -344,6 +391,7 @@
 
             filtered.forEach(item => {
                 const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
+                const isFav = favorites.includes(item.icao);
                 
                 let freqText = "—";
                 if (item.frequencies) {
@@ -351,7 +399,7 @@
                     if (item.frequencies.tower) fArr.push(`TWR: ${item.frequencies.tower}`);
                     if (item.frequencies.ground) fArr.push(`GND: ${item.frequencies.ground}`);
                     if (item.frequencies.atis) fArr.push(`ATIS: ${item.frequencies.atis}`);
-                    if (item.frequencies.military) fArr.push(`Mil: ${item.frequencies.military}`); // 👈 Leitura da frequência militar
+                    if (item.frequencies.military) fArr.push(`Mil: ${item.frequencies.military}`);
                     if (fArr.length > 0) freqText = fArr.join(" | ");
                 }
 
@@ -361,9 +409,14 @@
                 card.className = 'card';
                 card.innerHTML = `
                     <div class="card-header">
-                        <div>
-                            <div class="airport-title">${item.icao} ${item.iata ? '· ' + item.iata : ''} — ${item.name}</div>
-                            <div class="airport-sub">${item.city} (${item.country})</div>
+                        <div class="airport-title-area">
+                            <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFavorite('${item.icao}', event)" title="Favoritar aeroporto">
+                                ${isFav ? '★' : '☆'}
+                            </button>
+                            <div>
+                                <div class="airport-title">${item.icao} ${item.iata ? '· ' + item.iata : ''} — ${item.name}</div>
+                                <div class="airport-sub">${item.city} (${item.country})</div>
+                            </div>
                         </div>
                         <span class="badge ${badgeClass}">${item.category}</span>
                     </div>
