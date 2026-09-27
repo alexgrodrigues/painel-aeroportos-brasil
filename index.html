@@ -1,361 +1,412 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Aeroportos Globais</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%2338bdf8%22><path d=%22M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z%22/></svg>">
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-    .card-bg { background-color: #1e293b; border: 1px solid #334155; }
-    .badge-vfr { background-color: #22c55e; color: #fff; }
-    .badge-mvfr { background-color: #3b82f6; color: #fff; }
-    .badge-ifr { background-color: #ef4444; color: #fff; }
-    .badge-lifr { background-color: #a855f7; color: #fff; }
-    .badge-na { background-color: #64748b; color: #fff; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principais Aeroportos da América Latina</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --vfr-color: #22c55e;
+            --mvfr-color: #3b82f6;
+            --ifr-color: #ef4444;
+            --lifr-color: #a855f7;
+            --na-color: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 30px auto;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+        }
+
+        .version {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            width: 280px;
+            font-size: 0.95rem;
+        }
+
+        button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            background-color: #3b82f6;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .filter-btn {
+            background-color: var(--card-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .stats span strong {
+            color: var(--text-primary);
+        }
+
+        .grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .airport-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .airport-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-VFR { background-color: rgba(34, 197, 94, 0.2); color: var(--vfr-color); border: 1px solid var(--vfr-color); }
+        .badge-MVFR { background-color: rgba(59, 130, 246, 0.2); color: var(--mvfr-color); border: 1px solid var(--mvfr-color); }
+        .badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
+        .badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
+        .badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
+
+        .card-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1px 1fr;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .divider {
+            background-color: var(--border-color);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .metar-box, .taf-box {
+            font-family: monospace;
+            font-size: 0.78rem;
+            background: #0b0f19;
+            padding: 8px;
+            border-radius: 6px;
+            color: #38bdf8;
+            word-break: break-all;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .taf-box {
+            color: #c084fc;
+            border-color: rgba(192, 132, 252, 0.2);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: bold;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
-<body class="min-h-screen p-4 md:p-8">
-  <div class="max-w-7xl mx-auto">
-    <header class="flex flex-col md:flex-row justify-between items-center mb-6 pb-4 border-b border-slate-700 gap-4">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-sky-400">✈️ Painel de Aeroportos Globais</h1>
-        <p class="text-xs md:text-sm text-slate-400 mt-1">Monitoramento meteorológico aeronáutico (METAR e TAF) em tempo real</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <button onclick="loadWeatherData()" id="refresh-btn" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 cursor-pointer shadow-md">
-          🔄 Atualizar Dados
-        </button>
-        <button onclick="clearFavorites()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-3 py-2 rounded-lg text-sm font-medium transition cursor-pointer">
-          🧹 Limpar Favoritos
-        </button>
-      </div>
+<body>
+
+    <header>
+        <h1>Principais Aeroportos da América Latina</h1>
+        <div class="version">VERSÃO 47</div>
+        
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, Cidade..." oninput="filterAirports()">
+            <button onclick="fetchData()">🔄 Atualizar Dados</button>
+        </div>
+
+        <div class="stats" id="statsContainer">
+            <span>📊 Total: <strong id="statTotal">0</strong></span>
+            <span>🟢 VFR: <strong id="statVfr">0</strong></span>
+            <span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
+            <span>🔴 IFR: <strong id="statIfr">0</strong></span>
+            <span>🟣 LIFR: <strong id="statLifr">0</strong></span>
+        </div>
+
+        <div class="filters" id="countryFilters">
+            <button class="filter-btn active" onclick="filterCountry('ALL')">🌐 Todos</button>
+            <button class="filter-btn" onclick="filterCountry('BR')">🇧🇷 Brasil</button>
+            <button class="filter-btn" onclick="filterCountry('AR')">🇦🇷 Argentina</button>
+            <button class="filter-btn" onclick="filterCountry('CL')">🇨🇱 Chile</button>
+            <button class="filter-btn" onclick="filterCountry('MX')">🇲🇽 México</button>
+            <button class="filter-btn" onclick="filterCountry('PA')">🇵🇦 Panamá</button>
+            <button class="filter-btn" onclick="filterCountry('CR')">🇨🇷 Costa Rica</button>
+            <button class="filter-btn" onclick="filterCountry('OTHER')">🌎 Outros</button>
+        </div>
+
+        <div class="filters" id="categoryFilters">
+            <button class="filter-btn active" onclick="filterCategory('ALL')">Todas as Condições</button>
+            <button class="filter-btn" onclick="filterCategory('VFR')">🟢 VFR (Visual)</button>
+            <button class="filter-btn" onclick="filterCategory('MVFR')">🔵 MVFR (Marginal)</button>
+            <button class="filter-btn" onclick="filterCategory('IFR')">🔴 IFR (Restrito)</button>
+            <button class="filter-btn" onclick="filterCategory('LIFR')">🟣 LIFR (Crítico)</button>
+        </div>
+
+        <div id="updateStatus" class="version">Carregando dados meteorológicos...</div>
     </header>
 
-    <div class="card-bg p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
-      <div class="relative">
-        <input type="text" id="search-input" oninput="filterAirports()" placeholder="🔍 Pesquisar por ICAO, IATA, Cidade ou Nome do Aeroporto..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500 transition">
-      </div>
+    <main class="grid" id="airportGrid">
+        <!-- Os cartões serão injetados dinamicamente via JavaScript -->
+    </main>
 
-      <!-- Filtros de Região -->
-      <div class="flex flex-wrap gap-2 items-center text-xs">
-        <span class="text-slate-400 font-semibold mr-1">Região:</span>
-        <button onclick="setGroupFilter('ALL', this)" id="filter-all" class="region-btn px-3 py-1.5 rounded-lg bg-sky-600 text-white font-medium transition cursor-pointer">🌐 Todos</button>
-        <button onclick="setGroupFilter('FAVS', this)" id="filter-favs" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">⭐ Favoritos</button>
-        <button onclick="setGroupFilter('AIRBASE', this)" id="filter-airbase" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">📍 Bases Aéreas</button>
-        <button onclick="setGroupFilter('SOUTH_AMERICA', this)" id="filter-sa" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🟢 América do Sul</button>
-        <button onclick="setGroupFilter('NORTH_AMERICA', this)" id="filter-na" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🔵 América do Norte</button>
-        <button onclick="setGroupFilter('EUROPE', this)" id="filter-eu" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🇪🇺 Europa</button>
-        <button onclick="setGroupFilter('ASIA_ME', this)" id="filter-as" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌏 Ásia / Oriente Médio</button>
-        <button onclick="setGroupFilter('AFRICA', this)" id="filter-af" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🌍 África</button>
-        <button onclick="setGroupFilter('OCEANIA', this)" id="filter-oc" class="region-btn px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">🦘 Oceania / Austrália</button>
-      </div>
+    <script>
+        // ⚠️ COLOQUE A SUA URL REAL DO CLOUDFLARE WORKER AQUI ⚠️
+        const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev/";
 
-      <div id="country-filter-bar" class="hidden flex flex-wrap gap-2 items-center text-xs pt-3 border-t border-slate-800">
-        <span class="text-sky-400 font-semibold mr-1">Filtrar por País:</span>
-        <div id="country-buttons" class="flex flex-wrap gap-2"></div>
-      </div>
+        let airportData = [];
+        let currentCountry = 'ALL';
+        let currentCategory = 'ALL';
+        let currentSearch = '';
 
-      <div id="stats-bar" class="text-xs text-slate-400 flex flex-wrap gap-4 pt-2 border-t border-slate-800">
-        <span>Carregando estatísticas...</span>
-      </div>
-    </div>
-
-    <div id="airports-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="col-span-full text-center py-12 text-slate-400">
-        Carregando dados meteorológicos do Worker...
-      </div>
-    </div>
-
-    <footer class="mt-12 pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
-      <p id="footer-info">Fonte: Aviation Weather | Painel de Aeroportos Globais</p>
-    </footer>
-  </div>
-
-  <script>
-    const WORKER_URL = "https://weathered-grass-f181.alexgrodrigues.workers.dev/";
-    let globalData = { rows: [] };
-    let currentGroupFilter = "ALL";
-    let currentCountryFilter = "ALL";
-    let isLoading = false;
-    let favorites = JSON.parse(localStorage.getItem("fav_airports") || "[]");
-
-    const COUNTRY_MAP = {
-      "BR": "🇧🇷 Brasil", "AR": "🇦🇷 Argentina", "CL": "🇨🇱 Chile", "PE": "🇵🇪 Peru",
-      "CO": "🇨🇴 Colômbia", "UY": "🇺🇾 Uruguai", "PY": "🇵🇾 Paraguai", "US": "🇺🇸 Estados Unidos",
-      "MX": "🇲🇽 México", "PT": "🇵🇹 Portugal", "ES": "🇪🇸 Espanha", "FR": "🇫🇷 França",
-      "GB": "🇬🇧 Reino Unido", "DE": "🇩🇪 Alemanha", "TR": "🇹🇷 Turquia", "GI": "🇬🇮 Gibraltar",
-      "RU": "🇷🇺 Rússia", "AE": "🇦🇪 Emirados Árabes", "JP": "🇯🇵 Japão", "CN": "🇨🇳 China",
-      "SG": "🇸🇬 Cingapura", "KR": "🇰🇷 Coreia do Sul", "ZA": "🇿🇦 África do Sul", "EG": "🇪🇬 Egito", "MA": "🇲🇦 Marrocos",
-      "AU": "🇦🇺 Austrália"
-    };
-
-    function escapeHTML(str) {
-      if (!str) return "";
-      return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-      );
-    }
-
-    function formatCountry(code) {
-      return COUNTRY_MAP[code] || code || "BR";
-    }
-
-    async function loadWeatherData() {
-      if (isLoading) return;
-      isLoading = true;
-      const refreshBtn = document.getElementById("refresh-btn");
-      refreshBtn.disabled = true;
-      refreshBtn.classList.add("opacity-50");
-
-      const container = document.getElementById("airports-container");
-      container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Atualizando dados meteorológicos...</div>`;
-      
-      try {
-        const response = await fetch(WORKER_URL);
-        if (!response.ok) throw new Error(`Erro HTTP ${response.status}`);
-        const json = await response.json();
-        
-        if (json.ok && Array.isArray(json.rows)) {
-          globalData = json;
-          renderUI();
-        } else {
-          throw new Error("Formato de resposta inválido do Worker.");
-        }
-      } catch (err) {
-        container.innerHTML = `<div class="col-span-full text-center py-12 text-red-400">Erro ao carregar dados: ${escapeHTML(err.message)}</div>`;
-      } finally {
-        isLoading = false;
-        refreshBtn.disabled = false;
-        refreshBtn.classList.remove("opacity-50");
-      }
-    }
-
-    function setGroupFilter(group, btnElement) {
-      currentGroupFilter = group;
-      currentCountryFilter = "ALL";
-
-      document.querySelectorAll(".region-btn").forEach(btn => {
-        btn.classList.remove("bg-sky-600", "text-white");
-        btn.classList.add("bg-slate-800", "text-slate-300");
-      });
-      
-      if (btnElement) {
-        btnElement.classList.remove("bg-slate-800", "text-slate-300");
-        btnElement.classList.add("bg-sky-600", "text-white");
-      }
-      
-      const countryBar = document.getElementById("country-filter-bar");
-      const countryButtonsContainer = document.getElementById("country-buttons");
-      
-      const regionalAirports = globalData.rows.filter(r => r.group === group);
-      const uniqueCountries = [...new Set(regionalAirports.map(r => r.country))];
-
-      if ((group === "SOUTH_AMERICA" || group === "EUROPE" || group === "NORTH_AMERICA" || group === "OCEANIA") && uniqueCountries.length > 1) {
-        countryBar.classList.remove("hidden");
-        let html = `<button onclick="setCountryFilter('ALL', this)" class="country-btn px-2.5 py-1 rounded bg-sky-700 text-white transition cursor-pointer">🌐 Todos</button>`;
-        uniqueCountries.forEach(code => {
-          html += `<button onclick="setCountryFilter('${code}', this)" class="country-btn px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer">${formatCountry(code)}</button>`;
-        });
-        countryButtonsContainer.innerHTML = html;
-      } else {
-        countryBar.classList.add("hidden");
-      }
-
-      filterAirports();
-    }
-
-    function setCountryFilter(countryCode, btnElement) {
-      currentCountryFilter = countryCode;
-      document.querySelectorAll(".country-btn").forEach(btn => {
-        btn.classList.remove("bg-sky-700", "text-white");
-        btn.classList.add("bg-slate-800", "text-slate-300");
-      });
-      if (btnElement) {
-        btnElement.classList.remove("bg-slate-800", "text-slate-300");
-        btnElement.classList.add("bg-sky-700", "text-white");
-      }
-      filterAirports();
-    }
-
-    function toggleFavorite(icao) {
-      if (favorites.includes(icao)) {
-        favorites = favorites.filter(f => f !== icao);
-      } else {
-        favorites.push(icao);
-      }
-      localStorage.setItem("fav_airports", JSON.stringify(favorites));
-      filterAirports();
-    }
-
-    function clearFavorites() {
-      favorites = [];
-      localStorage.removeItem("fav_airports");
-      filterAirports();
-    }
-
-    function toggleTafBox(icao) {
-      const box = document.getElementById(`taf-box-${icao}`);
-      const btn = document.getElementById(`taf-btn-${icao}`);
-      if (box.classList.contains('hidden')) {
-        box.classList.remove('hidden');
-        btn.innerText = '🔼 Ocultar Previsão TAF';
-      } else {
-        box.classList.add('hidden');
-        btn.innerText = '🔽 Ver Previsão TAF e Interpretação';
-      }
-    }
-
-    function filterAirports() {
-      const searchTerm = document.getElementById("search-input").value.toLowerCase();
-      const rows = globalData.rows || [];
-
-      const filtered = rows.filter(item => {
-        const matchesSearch = 
-          item.icao.toLowerCase().includes(searchTerm) ||
-          (item.iata && item.iata.toLowerCase().includes(searchTerm)) ||
-          item.name.toLowerCase().includes(searchTerm) ||
-          item.city.toLowerCase().includes(searchTerm);
-
-        if (!matchesSearch) return false;
-
-        if (currentGroupFilter === "FAVS") return favorites.includes(item.icao);
-        if (currentGroupFilter === "AIRBASE") return item.isAirBase === true;
-        
-        if (currentGroupFilter !== "ALL") {
-          if (item.group !== currentGroupFilter) return false;
-          if (currentCountryFilter !== "ALL" && item.country !== currentCountryFilter) return false;
+        async function fetchData() {
+            document.getElementById('updateStatus').innerText = "Buscando dados atualizados...";
+            try {
+                const response = await fetch(WORKER_URL);
+                const json = await response.json();
+                if (json.ok) {
+                    airportData = json.rows;
+                    document.getElementById('updateStatus').innerText = `Última atualização: ${json.fetchedAt} (${airportData.length} aeroportos carregados)`;
+                    renderGrid();
+                } else {
+                    document.getElementById('updateStatus').innerText = "Erro ao carregar dados do servidor.";
+                }
+            } catch (error) {
+                console.error("Erro de conexão:", error);
+                document.getElementById('updateStatus').innerText = "Falha de conexão com o Cloudflare Worker.";
+            }
         }
 
-        return true;
-      });
-
-      // ORDENAÇÃO: Garante que os aeroportos favoritos apareçam sempre no topo da listagem
-      filtered.sort((a, b) => {
-        const aFav = favorites.includes(a.icao) ? 1 : 0;
-        const bFav = favorites.includes(b.icao) ? 1 : 0;
-        return bFav - aFav;
-      });
-
-      renderCards(filtered);
-      updateStats(rows, filtered);
-    }
-
-    function updateStats(allRows, filteredRows) {
-      const statsBar = document.getElementById("stats-bar");
-      const vfr = allRows.filter(r => r.category === "VFR").length;
-      const mvfr = allRows.filter(r => r.category === "MVFR").length;
-      const ifr = allRows.filter(r => r.category === "IFR").length;
-      const lifr = allRows.filter(r => r.category === "LIFR").length;
-      const na = allRows.filter(r => r.category === "N/A" || !r.category).length;
-
-      statsBar.innerHTML = `
-        <span>📊 Exibidos: <strong>${filteredRows.length}</strong> / Total: <strong>${allRows.length}</strong></span>
-        <span class="text-green-400">🟢 VFR: ${vfr}</span>
-        <span class="text-blue-400">🔵 MVFR: ${mvfr}</span>
-        <span class="text-red-400">🔴 IFR: ${ifr}</span>
-        <span class="text-purple-400">🟣 LIFR: ${lifr}</span>
-        <span class="text-slate-400">⚪ N/A: ${na}</span>
-      `;
-      
-      let partialWarning = globalData.apiErrorsCount > 0 ? ` | ⚠️ Dados Parciais (${globalData.apiErrorsCount} falhas)` : "";
-      if (globalData.fetchedAt) {
-        document.getElementById("footer-info").innerText = `Fonte: Aviation Weather | Painel Global (v4) | Atualizado às ${globalData.fetchedAt} (${allRows.length} aeroportos)${partialWarning}`;
-      }
-    }
-
-    function renderCards(rows) {
-      const container = document.getElementById("airports-container");
-      if (rows.length === 0) {
-        container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Nenhum aeroporto encontrado com os filtros atuais.</div>`;
-        return;
-      }
-
-      container.innerHTML = rows.map(item => {
-        const isFav = favorites.includes(item.icao);
-        const catClass = item.category === "VFR" ? "badge-vfr" : item.category === "MVFR" ? "badge-mvfr" : item.category === "IFR" ? "badge-ifr" : item.category === "LIFR" ? "badge-lifr" : "badge-na";
-        const countryFormatted = formatCountry(item.country);
-        const runwaysStr = item.runways ? item.runways.map(r => escapeHTML(r)).join(" • ") : "Não informada";
-        const towerFreq = item.frequencies?.tower ? `Torre: ${escapeHTML(item.frequencies.tower)}` : "";
-        const atisFreq = item.frequencies?.atis ? `ATIS: ${escapeHTML(item.frequencies.atis)}` : "";
-        const freqStr = [towerFreq, atisFreq].filter(Boolean).join(" | ");
-
-        let staleWarning = "";
-        if (item.observationTime) {
-          const obsDate = new Date(item.observationTime);
-          const diffMinutes = Math.floor((new Date() - obsDate) / 60000);
-          if (diffMinutes > 60) {
-            staleWarning = `<div class="bg-amber-900/50 border border-amber-600 text-amber-200 text-xs px-2.5 py-1.5 rounded-lg mb-2">⚠️ <strong>Aviso:</strong> METAR defasado há cerca de ${Math.floor(diffMinutes / 60)}h ${diffMinutes % 60}min.</div>`;
-          }
+        function filterCountry(country) {
+            currentCountry = country;
+            updateActiveButtons('countryFilters', event.target);
+            renderGrid();
         }
 
-        const tempDisplay = (item.temperature?.current !== null && item.temperature?.current !== undefined) ? item.temperature.current + '°C' : '—';
+        function filterCategory(category) {
+            currentCategory = category;
+            updateActiveButtons('categoryFilters', event.target);
+            renderGrid();
+        }
 
-        return `
-          <div class="card-bg rounded-xl p-5 shadow-md flex flex-col justify-between transition hover:border-slate-500">
-            <div>
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <h3 class="font-bold text-slate-100 text-base leading-snug">${escapeHTML(item.name)}</h3>
-                  <p class="text-xs text-slate-400 mt-0.5">ICAO: <span class="text-sky-400 font-mono font-bold">${escapeHTML(item.icao)}</span> ${item.iata ? `• IATA: <span class="text-slate-200 font-mono">${escapeHTML(item.iata)}</span>` : ""} • ${escapeHTML(item.city)} (${countryFormatted})</p>
-                </div>
-                <button onclick="toggleFavorite('${escapeHTML(item.icao)}')" class="text-xl text-amber-400 hover:scale-110 transition cursor-pointer" title="Favoritar">${isFav ? "★" : "☆"}</button>
-              </div>
+        function filterAirports() {
+            currentSearch = document.getElementById('searchInput').value.toLowerCase();
+            renderGrid();
+        }
 
-              <div class="flex flex-wrap gap-2 my-3 items-center">
-                <span class="px-2.5 py-1 rounded-md text-xs font-bold ${catClass}">${escapeHTML(item.category || "N/A")}</span>
-                ${item.isAirBase ? '<span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-700">📍 Base Aérea</span>' : ''}
-              </div>
+        function updateActiveButtons(containerId, clickedButton) {
+            const container = document.getElementById(containerId);
+            container.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            clickedButton.classList.add('active');
+        }
 
-              <div class="grid grid-cols-3 gap-2 text-xs bg-slate-900/50 p-2.5 rounded-lg mb-3 border border-slate-800">
-                <div>
-                  <span class="block text-slate-500">Vento</span>
-                  <strong class="text-slate-200">${escapeHTML(item.wind)}</strong>
-                </div>
-                <div>
-                  <span class="block text-slate-500">Pressão</span>
-                  <strong class="text-slate-200">${escapeHTML(item.pressure)}</strong>
-                </div>
-                <div>
-                  <span class="block text-slate-500">Temperatura</span>
-                  <strong class="text-slate-200">${escapeHTML(tempDisplay)}</strong>
-                </div>
-              </div>
+        function renderGrid() {
+            const grid = document.getElementById('airportGrid');
+            grid.innerHTML = '';
 
-              ${staleWarning}
+            let counts = { total: 0, vfr: 0, mvfr: 0, ifr: 0, lifr: 0 };
 
-              <div class="mb-3">
-                <p class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">📡 METAR (Condição Atual)</p>
-                <div class="bg-slate-900 p-2.5 rounded-lg font-mono text-xs text-slate-300 border border-slate-800 break-all">${escapeHTML(item.metar || "METAR indisponível no momento.")}</div>
-                <p class="text-xs text-slate-400 mt-1.5 italic">${escapeHTML(item.metarInterpret)}</p>
-              </div>
+            const filtered = airportData.filter(item => {
+                let matchCountry = true;
+                if (currentCountry !== 'ALL') {
+                    if (currentCountry === 'OTHER') {
+                        matchCountry = item.group === 'OTHER';
+                    } else {
+                        matchCountry = item.country === currentCountry;
+                    }
+                }
 
-              <div class="mt-4 pt-3 border-t border-slate-800">
-                <button id="taf-btn-${escapeHTML(item.icao)}" onclick="toggleTafBox('${escapeHTML(item.icao)}')" class="w-full bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-semibold py-2 px-3 rounded-lg transition cursor-pointer flex justify-center items-center gap-1.5 border border-slate-700">
-                  🔽 Ver Previsão TAF e Interpretação
-                </button>
-                <div id="taf-box-${escapeHTML(item.icao)}" class="hidden mt-2 pt-2">
-                  <div class="bg-slate-900 p-2.5 rounded-lg font-mono text-xs text-slate-300 border border-slate-800 break-all mb-1.5">${escapeHTML(item.taf || "TAF indisponível no momento.")}</div>
-                  <p class="text-xs text-slate-400 italic whitespace-pre-line">${escapeHTML(item.tafInterpret)}</p>
-                </div>
-              </div>
-            </div>
+                let matchCategory = currentCategory === 'ALL' || item.category === currentCategory;
 
-            <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex flex-col gap-1">
-              ${freqStr ? `<div>📡 <strong>Frequências:</strong> ${freqStr}</div>` : ""}
-              <div>🛫 <strong>Pistas:</strong> ${runwaysStr}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
+                let matchSearch = !currentSearch || 
+                    item.icao.toLowerCase().includes(currentSearch) || 
+                    item.name.toLowerCase().includes(currentSearch) || 
+                    item.city.toLowerCase().includes(currentSearch);
 
-    function renderUI() {
-      filterAirports();
-    }
+                return matchCountry && matchCategory && matchSearch;
+            });
 
-    loadWeatherData();
-  </script>
+            airportData.forEach(item => {
+                counts.total++;
+                if (item.category === 'VFR') counts.vfr++;
+                else if (item.category === 'MVFR') counts.mvfr++;
+                else if (item.category === 'IFR') counts.ifr++;
+                else if (item.category === 'LIFR') counts.lifr++;
+            });
+
+            document.getElementById('statTotal').innerText = counts.total;
+            document.getElementById('statVfr').innerText = counts.vfr;
+            document.getElementById('statMvfr').innerText = counts.mvfr;
+            document.getElementById('statIfr').innerText = counts.ifr;
+            document.getElementById('statLifr').innerText = counts.lifr;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 40px;">Nenhum aeroporto encontrado com os filtros atuais.</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const badgeClass = `badge-${item.category === 'N/A' ? 'NA' : item.category}`;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <div class="airport-title">${item.icao} — ${item.name}</div>
+                            <div class="airport-sub">${item.city} (${item.country})</div>
+                        </div>
+                        <span class="badge ${badgeClass}">${item.category}</span>
+                    </div>
+
+                    <div class="card-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">💨 Vento</span>
+                            <span><strong>${item.wind}</strong></span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="info-item">
+                            <span class="info-label">⚖️ Pressão</span>
+                            <span><strong>${item.pressure}</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="card-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">🌡️ Temperatura</span>
+                            <span><strong>${item.temperature.current !== null ? item.temperature.current + '°C' : '—'}</strong></span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="info-item">
+                            <span class="info-label">💧 Ponto de Orvalho</span>
+                            <span><strong>${item.temperature.dewpoint !== null ? item.temperature.dewpoint + '°C' : '—'}</strong></span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="section-title">METAR</div>
+                        <div class="metar-box">${item.metar || 'Relatório METAR indisponível no momento.'}</div>
+                    </div>
+
+                    <div>
+                        <div class="section-title">TAF</div>
+                        <div class="taf-box">${item.taf || 'Previsão TAF indisponível no momento.'}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        fetchData();
+        setInterval(fetchData, 300000);
+    </script>
 </body>
 </html>
