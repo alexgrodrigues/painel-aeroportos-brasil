@@ -292,7 +292,7 @@
             </svg>
             Painel de Aeroportos Globais
         </h1>
-        <div class="version">VERSÃO 50 (Esquema v7)</div>
+        <div class="version">VERSÃO 52 (Esquema v7)</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
@@ -330,6 +330,7 @@
             <button class="filter-btn" data-cat="IFR" onclick="filterCategory('IFR', this)">🔴 IFR</button>
             <button class="filter-btn" data-cat="LIFR" onclick="filterCategory('LIFR', this)">🟣 LIFR</button>
             <button class="filter-btn" data-cat="NA" onclick="filterCategory('NA', this)">⚪ N/A</button>
+            <button class="filter-btn" data-cat="MISSING" onclick="filterCategory('MISSING', this)">⚠️ Ausentes</button>
             <button class="filter-btn clear-btn" onclick="clearAllFilters()">❌ Limpar Filtros</button>
         </div>
 
@@ -359,6 +360,8 @@
         };
 
         let favorites = [];
+        let airportCacheMeta = {};
+        
         try {
             const rawFavs = localStorage.getItem('weather_favorites');
             if (rawFavs) {
@@ -369,9 +372,12 @@
                         .filter(code => /^[A-Z]{4}$/.test(code));
                 }
             }
+            const rawMeta = localStorage.getItem('weather_airport_meta');
+            if (rawMeta) {
+                airportCacheMeta = JSON.parse(rawMeta);
+            }
         } catch (e) {
             console.warn("localStorage inacessível.", e);
-            favorites = [];
         }
 
         function toggleFavorite(icao, event) {
@@ -388,7 +394,7 @@
             try {
                 localStorage.setItem('weather_favorites', JSON.stringify(favorites));
             } catch (e) {
-                console.warn("Falha ao persistir favorito no localStorage", e);
+                console.warn("Falha ao persistir favorito", e);
             }
             renderGrid();
         }
@@ -430,9 +436,22 @@
                     const icao = String(item.icao || "").trim().toUpperCase();
                     if (/^[A-Z]{4}$/.test(icao)) {
                         validMap.set(icao, item);
+                        // Persistência robusta de metadados para aeroportos ausentes
+                        airportCacheMeta[icao] = {
+                            name: item.name || "Aeroporto",
+                            city: item.city || "Localidade",
+                            country: item.country || "—",
+                            group: item.group || "ALL",
+                            isAirBase: item.isAirBase || false,
+                            iata: item.iata || ""
+                        };
                     }
                 });
                 airportData = Array.from(validMap.values());
+
+                try {
+                    localStorage.setItem('weather_airport_meta', JSON.stringify(airportCacheMeta));
+                } catch(e) {}
 
                 const validIcaos = new Set(validMap.keys());
                 Object.keys(tafVisibility).forEach(icao => {
@@ -566,20 +585,24 @@
             const loadedMap = new Map(airportData.map(item => [String(item.icao).toUpperCase(), item]));
 
             let workingList = [...airportData];
-            if (currentGroup === 'FAVS') {
-                favorites.forEach(favCode => {
-                    if (!loadedMap.has(favCode)) {
-                        workingList.push({
-                            icao: favCode,
-                            name: "Aeroporto Favoritado (Temporariamente Indisponível)",
-                            city: "Aguardando nova consulta na base",
-                            country: "—",
-                            category: "MISSING",
-                            isPlaceholder: true
-                        });
-                    }
-                });
-            }
+            
+            // CORREÇÃO: Os favoritos ausentes são inseridos globalmente, garantindo funcionamento de filtros regionais e do botão de Ausentes
+            favorites.forEach(favCode => {
+                if (!loadedMap.has(favCode)) {
+                    const meta = airportCacheMeta[favCode] || {};
+                    workingList.push({
+                        icao: favCode,
+                        name: meta.name || "Aeroporto Favoritado",
+                        city: meta.city || "Localidade salva",
+                        country: meta.country || "—",
+                        group: meta.group || "ALL",
+                        isAirBase: meta.isAirBase || false,
+                        iata: meta.iata || "",
+                        category: "MISSING",
+                        isPlaceholder: true
+                    });
+                }
+            });
 
             const filtered = workingList.filter(item => {
                 const icao = String(item.icao || '').toUpperCase();
@@ -608,7 +631,6 @@
                 return matchGroup && matchCategory && matchSearch;
             });
 
-            // Contabilização estatística rigorosa e separada para ausentes
             filtered.forEach(item => {
                 if (item.isPlaceholder) {
                     counts.missing++;
@@ -655,7 +677,7 @@
                 card.className = 'card';
 
                 // ==========================================
-                // CARTÃO SEGURO PARA FAVORITOS AUSENTES (SEM XSS)
+                // CARTÃO SEGURO PARA FAVORITOS AUSENTES
                 // ==========================================
                 if (item.isPlaceholder) {
                     const cardHeader = document.createElement('div');
@@ -673,11 +695,11 @@
                     const titleTextDiv = document.createElement('div');
                     const titleEl = document.createElement('div');
                     titleEl.className = 'airport-title';
-                    titleEl.textContent = icao;
+                    titleEl.textContent = `${icao} — ${item.name}`;
 
                     const subEl = document.createElement('div');
                     subEl.className = 'airport-sub';
-                    subEl.textContent = item.name;
+                    subEl.textContent = `${item.city} (${item.country})`;
 
                     titleTextDiv.appendChild(titleEl);
                     titleTextDiv.appendChild(subEl);
@@ -696,7 +718,7 @@
                     msgDiv.style.fontSize = '0.85rem';
                     msgDiv.style.color = '#f87171';
                     msgDiv.style.padding = '8px 0';
-                    msgDiv.textContent = 'Este aeroporto está nos seus favoritos, mas não foi retornado na última consulta da API. Ele será exibido normalmente assim que estiver disponível.';
+                    msgDiv.textContent = 'Favorito temporariamente indisponível na resposta recente da API. Os dados cadastrais foram preservados do cache local.';
                     card.appendChild(msgDiv);
 
                     grid.appendChild(card);
