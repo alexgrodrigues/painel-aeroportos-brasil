@@ -16,6 +16,7 @@
             --ifr-color: #ef4444;
             --lifr-color: #a855f7;
             --na-color: #64748b;
+            --missing-color: #f87171;
         }
 
         body {
@@ -122,7 +123,7 @@
         .stats {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             font-size: 0.9rem;
             color: var(--text-secondary);
@@ -201,6 +202,7 @@
         .badge-IFR { background-color: rgba(239, 68, 68, 0.2); color: var(--ifr-color); border: 1px solid var(--ifr-color); }
         .badge-LIFR { background-color: rgba(168, 85, 247, 0.2); color: var(--lifr-color); border: 1px solid var(--lifr-color); }
         .badge-NA { background-color: rgba(100, 116, 139, 0.2); color: var(--na-color); border: 1px solid var(--na-color); }
+        .badge-MISSING { background-color: rgba(248, 113, 113, 0.2); color: var(--missing-color); border: 1px solid var(--missing-color); }
 
         .card-info-grid {
             display: grid;
@@ -290,7 +292,7 @@
             </svg>
             Painel de Aeroportos Globais
         </h1>
-        <div class="version">VERSÃO 47 (Esquema v7)</div>
+        <div class="version">VERSÃO 50 (Esquema v7)</div>
         
         <div class="controls">
             <input type="text" id="searchInput" placeholder="🔍 Pesquisar ICAO, IATA, Cidade..." oninput="filterAirports()">
@@ -298,12 +300,13 @@
         </div>
 
         <div class="stats" id="statsContainer">
-            <span>📊 Total Global: <strong id="statTotalGlobal">0</strong> | Exibidos: <strong id="statTotalFiltered">0</strong></span>
+            <span>📊 Base: <strong id="statTotalGlobal">0</strong> | Na Seleção Atual: <strong id="statTotalFiltered">0</strong></span>
             <span>🟢 VFR: <strong id="statVfr">0</strong></span>
             <span>🔵 MVFR: <strong id="statMvfr">0</strong></span>
             <span>🔴 IFR: <strong id="statIfr">0</strong></span>
             <span>🟣 LIFR: <strong id="statLifr">0</strong></span>
             <span>⚪ N/A: <strong id="statNa">0</strong></span>
+            <span>⚠️ Ausentes: <strong id="statMissing">0</strong></span>
         </div>
 
         <div class="filters" id="groupFilters">
@@ -334,7 +337,7 @@
     </header>
 
     <main class="grid" id="airportGrid">
-        <!-- Cartões renderizados via DOM seguro -->
+        <!-- Grade gerada com segurança total via DOM API -->
     </main>
 
     <script>
@@ -347,25 +350,34 @@
         let isFetching = false;
         let tafVisibility = {};
 
-        // Proteção blindada do localStorage
+        const COUNTRY_NAMES = {
+            "BR": "Brasil", "CL": "Chile", "US": "Estados Unidos", "GB": "Reino Unido",
+            "FR": "França", "DE": "Alemanha", "AR": "Argentina", "UY": "Uruguai",
+            "PY": "Paraguai", "CO": "Colômbia", "PE": "Peru", "ZA": "África do Sul",
+            "AU": "Austrália", "NZ": "Nova Zelândia", "JP": "Japão", "CN": "China",
+            "AE": "Emirados Árabes Unidos", "QA": "Catar"
+        };
+
         let favorites = [];
         try {
             const rawFavs = localStorage.getItem('weather_favorites');
             if (rawFavs) {
                 const parsed = JSON.parse(rawFavs);
                 if (Array.isArray(parsed)) {
-                    favorites = parsed.filter(item => typeof item === 'string' && item.length === 4).map(i => i.toUpperCase());
+                    favorites = parsed
+                        .map(item => String(item || "").trim().toUpperCase())
+                        .filter(code => /^[A-Z]{4}$/.test(code));
                 }
             }
         } catch (e) {
-            console.warn("localStorage indisponível ou corrompido.", e);
+            console.warn("localStorage inacessível.", e);
             favorites = [];
         }
 
         function toggleFavorite(icao, event) {
             if (event) event.stopPropagation();
             const cleanIcao = String(icao || "").trim().toUpperCase();
-            if (!cleanIcao) return;
+            if (!/^[A-Z]{4}$/.test(cleanIcao)) return;
 
             if (favorites.includes(cleanIcao)) {
                 favorites = favorites.filter(fav => fav !== cleanIcao);
@@ -376,7 +388,7 @@
             try {
                 localStorage.setItem('weather_favorites', JSON.stringify(favorites));
             } catch (e) {
-                console.warn("Falha ao salvar favorito no localStorage", e);
+                console.warn("Falha ao persistir favorito no localStorage", e);
             }
             renderGrid();
         }
@@ -388,38 +400,65 @@
             const refreshBtn = document.getElementById('refreshBtn');
             if (refreshBtn) {
                 refreshBtn.disabled = true;
-                refreshBtn.textContent = "⏳ Atualizando...";
+                refreshBtn.textContent = "⏳ Consultando...";
             }
 
-            document.getElementById('updateStatus').innerText = "Buscando dados atualizados da API...";
+            document.getElementById('updateStatus').innerText = "Consultando dados meteorológicos...";
             
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
             try {
-                const response = await fetch(WORKER_URL, { cache: "no-store" });
+                const response = await fetch(WORKER_URL, { 
+                    cache: "no-store",
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 
                 const json = await response.json();
+                
                 if (!json || json.ok !== true || !Array.isArray(json.rows)) {
-                    throw new Error("Resposta da API inválida ou sem dados de aeroportos.");
+                    throw new Error("Formato de resposta inválido do Worker.");
                 }
 
-                airportData = json.rows;
+                const validMap = new Map();
+                json.rows.forEach(item => {
+                    const icao = String(item.icao || "").trim().toUpperCase();
+                    if (/^[A-Z]{4}$/.test(icao)) {
+                        validMap.set(icao, item);
+                    }
+                });
+                airportData = Array.from(validMap.values());
 
-                // Limpa estados de TAF para aeroportos que não existem mais na resposta atual
-                const activeIcaos = new Set(airportData.map(i => String(i.icao).toUpperCase()));
+                const validIcaos = new Set(validMap.keys());
                 Object.keys(tafVisibility).forEach(icao => {
-                    if (!activeIcaos.has(icao)) delete tafVisibility[icao];
+                    if (!validIcaos.has(icao)) delete tafVisibility[icao];
                 });
 
-                const sourceInfo = json.fromCache ? "📦 Dados obtidos do Cache KV" : "⚡ Nova consulta realizada na API";
-                const timestampMsg = json.fetchedAt ? `${sourceInfo} em ${json.fetchedAt}` : `Atualizado com sucesso`;
-                document.getElementById('updateStatus').innerText = `${timestampMsg} — Total: ${airportData.length} aeroportos`;
+                let originText = "Consulta concluída";
+                if (json.cacheStatus === "HIT" || json.fromCache === true) {
+                    originText = "📦 Dados recuperados do Cache KV";
+                } else if (json.cacheStatus === "MISS" || json.fromCache === false) {
+                    originText = "⚡ Nova consulta realizada na API";
+                }
+
+                let partialInfo = "";
+                if (json.apiErrorsCount && json.apiErrorsCount > 0) {
+                    partialInfo = ` ⚠️ (Aviso: ${json.apiErrorsCount} falhas parciais em lotes)`;
+                }
+
+                const timestampMsg = json.fetchedAt ? `${originText} às ${json.fetchedAt}` : `Atualizado com sucesso`;
+                document.getElementById('updateStatus').innerText = `${timestampMsg} — ${airportData.length} aeroportos válidos.${partialInfo}`;
                 renderGrid();
 
             } catch (error) {
-                console.error("Falha ao atualizar dados:", error);
-                document.getElementById('updateStatus').innerText = `⚠️ Falha na conexão ou resposta inválida. Exibindo dados locais anteriores (${airportData.length} aeroportos carregados).`;
+                console.error("Falha na atualização:", error);
+                const errorReason = error.name === 'AbortError' ? "Tempo limite excedido (Timeout)" : "Falha de rede ou erro na API";
+                document.getElementById('updateStatus').innerText = `⚠️ ${errorReason}. Exibindo dados anteriores desta sessão (${airportData.length} aeroportos).`;
             } finally {
                 isFetching = false;
                 if (refreshBtn) {
@@ -507,7 +546,7 @@
                 if (diffMins < 60) return { text: `Emitido há ${diffMins} min`, isOld: false };
 
                 const diffHours = Math.floor(diffMins / 60);
-                const isOld = diffHours >= 2;
+                const isOld = diffHours >= 3;
                 return { 
                     text: `Emitido há ${diffHours}h ${diffMins % 60}m (${obsDate.toLocaleTimeString('pt-BR', {timeZone: 'UTC'})} UTC)`, 
                     isOld 
@@ -522,10 +561,27 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            let counts = { totalGlobal: airportData.length, vfr: 0, mvfr: 0, ifr: 0, lifr: 0, na: 0 };
+            let counts = { totalGlobal: airportData.length, vfr: 0, mvfr: 0, ifr: 0, lifr: 0, na: 0, missing: 0 };
 
-            // Filtragem rigorosa
-            const filtered = airportData.filter(item => {
+            const loadedMap = new Map(airportData.map(item => [String(item.icao).toUpperCase(), item]));
+
+            let workingList = [...airportData];
+            if (currentGroup === 'FAVS') {
+                favorites.forEach(favCode => {
+                    if (!loadedMap.has(favCode)) {
+                        workingList.push({
+                            icao: favCode,
+                            name: "Aeroporto Favoritado (Temporariamente Indisponível)",
+                            city: "Aguardando nova consulta na base",
+                            country: "—",
+                            category: "MISSING",
+                            isPlaceholder: true
+                        });
+                    }
+                });
+            }
+
+            const filtered = workingList.filter(item => {
                 const icao = String(item.icao || '').toUpperCase();
                 let matchGroup = true;
 
@@ -552,24 +608,26 @@
                 return matchGroup && matchCategory && matchSearch;
             });
 
-            // Contabiliza as estatísticas estritamente baseadas nos itens filtrados (problema #1 e #3)
+            // Contabilização estatística rigorosa e separada para ausentes
             filtered.forEach(item => {
-                const cat = String(item.category || 'N/A').toUpperCase();
-                if (cat === 'VFR') counts.vfr++;
-                else if (cat === 'MVFR') counts.mvfr++;
-                else if (cat === 'IFR') counts.ifr++;
-                else if (cat === 'LIFR') counts.lifr++;
-                else counts.na++;
+                if (item.isPlaceholder) {
+                    counts.missing++;
+                } else {
+                    const cat = String(item.category || 'N/A').toUpperCase();
+                    if (cat === 'VFR') counts.vfr++;
+                    else if (cat === 'MVFR') counts.mvfr++;
+                    else if (cat === 'IFR') counts.ifr++;
+                    else if (cat === 'LIFR') counts.lifr++;
+                    else counts.na++;
+                }
             });
 
-            // Ordena favoritos no topo
             filtered.sort((a, b) => {
                 const aFav = favorites.includes(String(a.icao).toUpperCase()) ? 1 : 0;
                 const bFav = favorites.includes(String(b.icao).toUpperCase()) ? 1 : 0;
                 return bFav - aFav;
             });
 
-            // Atualiza os contadores no topo
             document.getElementById('statTotalGlobal').textContent = counts.totalGlobal;
             document.getElementById('statTotalFiltered').textContent = filtered.length;
             document.getElementById('statVfr').textContent = counts.vfr;
@@ -577,6 +635,7 @@
             document.getElementById('statIfr').textContent = counts.ifr;
             document.getElementById('statLifr').textContent = counts.lifr;
             document.getElementById('statNa').textContent = counts.na;
+            document.getElementById('statMissing').textContent = counts.missing;
 
             if (filtered.length === 0) {
                 const emptyMsg = document.createElement('div');
@@ -591,16 +650,69 @@
 
             filtered.forEach(item => {
                 const icao = String(item.icao || '????').toUpperCase();
+                const isFav = favorites.includes(icao);
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // ==========================================
+                // CARTÃO SEGURO PARA FAVORITOS AUSENTES (SEM XSS)
+                // ==========================================
+                if (item.isPlaceholder) {
+                    const cardHeader = document.createElement('div');
+                    cardHeader.className = 'card-header';
+
+                    const titleArea = document.createElement('div');
+                    titleArea.className = 'airport-title-area';
+
+                    const favBtn = document.createElement('button');
+                    favBtn.className = 'fav-btn favorited';
+                    favBtn.title = "Remover dos Favoritos";
+                    favBtn.textContent = '★';
+                    favBtn.addEventListener('click', (e) => toggleFavorite(icao, e));
+
+                    const titleTextDiv = document.createElement('div');
+                    const titleEl = document.createElement('div');
+                    titleEl.className = 'airport-title';
+                    titleEl.textContent = icao;
+
+                    const subEl = document.createElement('div');
+                    subEl.className = 'airport-sub';
+                    subEl.textContent = item.name;
+
+                    titleTextDiv.appendChild(titleEl);
+                    titleTextDiv.appendChild(subEl);
+                    titleArea.appendChild(favBtn);
+                    titleArea.appendChild(titleTextDiv);
+
+                    const badgeEl = document.createElement('span');
+                    badgeEl.className = 'badge badge-MISSING';
+                    badgeEl.textContent = 'AUSENTE';
+
+                    cardHeader.appendChild(titleArea);
+                    cardHeader.appendChild(badgeEl);
+                    card.appendChild(cardHeader);
+
+                    const msgDiv = document.createElement('div');
+                    msgDiv.style.fontSize = '0.85rem';
+                    msgDiv.style.color = '#f87171';
+                    msgDiv.style.padding = '8px 0';
+                    msgDiv.textContent = 'Este aeroporto está nos seus favoritos, mas não foi retornado na última consulta da API. Ele será exibido normalmente assim que estiver disponível.';
+                    card.appendChild(msgDiv);
+
+                    grid.appendChild(card);
+                    return;
+                }
+
+                // ==========================================
+                // CARTÃO NORMAL SEGURO
+                // ==========================================
                 const iata = item.iata ? String(item.iata).toUpperCase() : '';
                 const name = String(item.name || 'Aeroporto Desconhecido');
                 const city = String(item.city || 'Localidade desconhecida');
-                const country = String(item.country || 'BR');
+                const countryCode = String(item.country || '').toUpperCase();
+                const countryName = COUNTRY_NAMES[countryCode] || countryCode || 'Internacional';
                 const category = String(item.category || 'N/A').toUpperCase();
                 const badgeClass = `badge-${['VFR', 'MVFR', 'IFR', 'LIFR'].includes(category) ? category : 'NA'}`;
-                const isFav = favorites.includes(icao);
-
-                const card = document.createElement('div');
-                card.className = 'card';
 
                 const cardHeader = document.createElement('div');
                 cardHeader.className = 'card-header';
@@ -622,7 +734,7 @@
 
                 const subEl = document.createElement('div');
                 subEl.className = 'airport-sub';
-                subEl.textContent = `${city} (${country})`;
+                subEl.textContent = countryCode ? `${city} — ${countryName} (${countryCode})` : `${city} — Localidade Global`;
 
                 titleTextDiv.appendChild(titleEl);
                 titleTextDiv.appendChild(subEl);
@@ -727,7 +839,7 @@
                 const runDiv = document.createElement('div');
                 runDiv.textContent = `🛫 Pistas: ${runwaysText}`;
                 const freqDiv = document.createElement('div');
-                freqDiv.textContent = `📻 Frequências: ${freqText}`;
+                freqDiv.textContent = `📻 Frequências: ${freqText} (Ref: AWC/AIP)`;
                 infraDiv.appendChild(runDiv);
                 infraDiv.appendChild(freqDiv);
                 card.appendChild(infraDiv);
